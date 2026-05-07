@@ -3,7 +3,21 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+/*======  BODY  =========*/
+body{
     font-family: Arial, Helvetica, sans-serif;
+    background: #fdfdf9;
+    color:#111 ;  
+    line-height:1.6;
+    padding-top: 90px;
+    
+}
+
+/*  SMOOTHER SCROLLING */
+html{
+    scroll-behavior: smooth;
 }
 
 /*=====NavBar Wrapper=====*/
@@ -11,8 +25,9 @@
     width: 100%;
     background: #fff;
     border-bottom: 1px solid #eaeaea;
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
     z-index: 1000;
 }
 
@@ -61,11 +76,11 @@
     color: #333;
     font-weight: 500;
     position: relative;
-    transition: color 0.2s ease;
+    transition: all 0.25s ease;
 }
 
 .nav-links li a:hover {
-    color: #000;
+    color: #0d5c2f;
 }
 
 /*underline animation*/
@@ -125,8 +140,33 @@
 /*======HERO SECTION=======*/
 .hero {
     width: 100%;
-    padding: 60px 20px;
+    padding: 100px 20px;
+    min-height: 85vh;
+
+    display: flex;
+    align-items: center;
     background: #fff;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::before {
+    content: "";
+
+    position: absolute;
+    width: 500px;
+    height: 500px;
+
+    background: rgba(13, 92, 47,0.08);
+
+    border-radius: 50%;
+
+    top: -150px;
+    right: -100px;
+
+    filter: blur(80px);
+
+    z-index: 0;
 }
 
 .hero-container {
@@ -137,6 +177,8 @@
     align-items: center;
     justify-content: space-between;
     gap: 40px;
+    position: relative;
+    z-index: 2;
 }
 
 /*LEFT SIDE*/
@@ -166,7 +208,7 @@
 }
 
 /*BUTTONS*/
-.hero-button {
+.hero-buttons {
     display: flex;
     gap: 12px;
 }
@@ -184,10 +226,22 @@
     color: #fff;
 }
 
+.primary:hover {
+    background: #084421;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 18px rgba(13, 92, 47,0.25);
+}
+
 /*secondary button*/
 .secondary {
     background: transparent;
     border: 1px solid #111;
+}
+
+.secondary:hover {
+    background: #0d5c2f;
+    color: #fff;
+    transform: translateY(-3px);
 }
 
 
@@ -200,8 +254,9 @@
 }
 
 .hero-right img {
-    width: 280px;
+    width: 420px;
     max-width: 100%;
+    animation: float 4s ease-in-out infinite;
 }
 
 /*===== STATS SECTION ======*/
@@ -209,7 +264,6 @@
     width: 100%;
     padding: 60px 20px;
     background: #fafafa;
- 
 }
 
 .stats-container {
@@ -225,8 +279,14 @@
 /* each stat block*/
 .stat {
     flex: 1;
-    padding: 0 20px;
+    padding: 20px;
+    transition: transform 0.25s ease;
 }
+
+.stat:hover {
+    transform: translateY(-6px);
+}
+
 
 /*  Add Divider between Stats*/
 .stat:not(:last-child) {
@@ -290,3 +350,94 @@
 .footer-links a:hover {
     color: #000;
 }
+
+.fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 1s ease;
+}
+
+.fade-in.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/*================ Responsive Design============= */
+@media (max-width: 768px) {
+
+    /*  NAVBAR  */
+    .nav-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .nav-link {
+        gap: 18px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .search {
+        width: 100%;
+        max-width: 250px;
+    }
+
+    /*  HERO SECTION*/
+    .hero-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .hero-left h1 {
+        font-size: 32px;
+    }
+
+    .hero-description {
+        margin: 0 auto 25px auto;
+    }
+
+    .hero-buttons {
+        justify-content: center;
+    }
+
+    .hero-right{
+        width: 220px;
+    }
+
+    /*  STATS  */
+    .stats-container {
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .stat:not(:last-child) {
+        border-right: none;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 20px;
+    }
+
+    /*  FOOTER */
+    .footer-container {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px)
+    }
+
+    50% {
+        transform: translateY(-12px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+
+
+}
+
