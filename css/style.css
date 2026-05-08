@@ -23,24 +23,45 @@ html{
 /*=====NavBar Wrapper=====*/
 .navbar {
     width: 100%;
-    background: #fff;
-    border-bottom: 1px solid #eaeaea;
+  
     position: fixed;
     top: 0;
     left: 0;
+
     z-index: 1000;
+
+    background: rgba(255, 255, 255, 0.78);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+
+    transition: all 0.3s  ease;
 }
 
 
 /*=====Inner Container=====*/
 .nav-container {
     max-width: 1200px;
-    margin:0 auto;
-    padding: 18px 24px;
+
+    margin: 14px auto;
+
+    padding: 16px 28px;
 
     display: flex;
     align-items: center;
     justify-content: space-between;
+
+    background: rgb(255, 255, 255, 0.65);
+
+    border: 1px solid rgba(255,255,255,0.3);
+
+    border-radius: 18px;
+
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+
+    transition: all 0.3s ease;
 }
 
 /*=====LEFT : LOGO ======*/
@@ -51,15 +72,25 @@ html{
 } 
 
 .logo img {
-    width: 38px;
-    height: 38px;
-    object-fit: contain;
+    width: 42px;
+    height: 42px;
+
+    object-fit: cover;
+
+    border-radius: 10px;
+
+    transition: transform 0.3s ease;
+}
+
+.logo:hover img{
+    transform: rotate(-4deg) scale(1.06);
 }
 
 .logo span {
-    font-size: 18px;
-    font-weight: 600;
-    letter-spacing: 1px;
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+
     color: #111;
 }
 
@@ -72,32 +103,55 @@ html{
 
 .nav-links li a {
     text-decoration: none;
-    font-size: 15px;
-    color: #333;
-    font-weight: 500;
-    position: relative;
-    transition: all 0.25s ease;
+
+   font-size: 15px;
+   font-weight: 600;
+
+   color: #444;
+
+   position: relative;
+
+   padding: 8px 2px;
+   
+   transition: all 0.2s ease;
 }
 
 .nav-links li a:hover {
     color: #0d5c2f;
+    transform: translateY(-1px);
 }
 
 /*underline animation*/
 .nav-links li a::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: -6px;
-    width: 0%;
-    height: 2px;
-    background: #000;
-    transition: width 0.25s ease;
+ content: "";
+
+ position: absolute;
+
+ left: 50%;
+ bottom: -4px;
+
+ width: 0%;
+ height: 2px;
+
+ background: #0d5c2f;
+
+ transition: all 0.3s ease;
+
+ transform: translateX(-50%);
+
 }
 
 .nav-links li a:hover::after {
     width: 100%;
 }
+
+.nav-links li a.active {
+    color: #0d5c2f;
+}
+
+.nav-links li a.active::after {
+    width: 100%;
+}   
 
 
 /*Right Side*/
@@ -109,32 +163,54 @@ html{
 
 /*search input*/
 .search {
-    padding: 7px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    outline: none;
-    font-size: 14px;
+   padding: 10px 14px;
+
+   border: 1px solid rgba(0,0,0,0.08);
+
+   background: rgba(255,255,255,0.7);
+
+   border-radius: 12px;
+
+   outline: none;
+
+   font-size: 14px;
+
+   transition: all 0.25s ease;
 }
 
 .search:focus {
-    border-color: #999;
+    border-color: #0d5c2f;
+
+    box-shadow: 0 0 0 4px rgba(13,92,47,0.08);
 }
 
 
 /*  Login Button*/
 .login-btn {
-    padding: 7px 14px;
-    border: 1px solid #111;
-    background: transparent;
-    color: #111;
+    padding: 10px 18px;
+
+    border: none;
+
+    background: #0d5c2f;
+    color: #fff;
+
     font-size: 14px;
+    font-weight: 600;
+
+    border-radius: 12px;
+
     cursor: pointer;
-    transition: all 0.2s ease;
+
+    transition: all 0.3s ease;
 }
 
 .login-btn:hover {
-    background: #111;
-    color: #fff;
+    transform: translateY(-2px);
+    
+    background: #084421;
+
+    box-shadow: 0 10px 20px rgba(13,92,47,0.25);
+
 }
 
 /*======HERO SECTION=======*/
@@ -368,18 +444,31 @@ html{
     /*  NAVBAR  */
     .nav-container {
         flex-direction: column;
-        gap: 20px;
+        align-items: center;
+        gap: 18px;
+
+        padding: 20px;
     }
 
-    .nav-link {
-        gap: 18px;
+    .nav-links {
         flex-wrap: wrap;
         justify-content: center;
+        gap: 18px;
+    }
+
+    .nav-right {
+        width: 100%;
+
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+
+        flex-wrap: wrap;
     }
 
     .search {
         width: 100%;
-        max-width: 250px;
+        max-width: 260px;
     }
 
     /*  HERO SECTION*/
@@ -400,7 +489,7 @@ html{
         justify-content: center;
     }
 
-    .hero-right{
+    .hero-right img{
         width: 220px;
     }
 
