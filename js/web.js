@@ -1,62 +1,57 @@
 document.addEventListener("DOMContentLoaded", function () {
-
     fetch("components/navbar.html")
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById("navbar").innerHTML = data;
+            // Set body padding to match the real navbar height
+const setNavOffset = () => {
+    const nav = document.querySelector(".navbar");
+    if (nav) {
+        document.body.style.paddingTop = nav.offsetHeight + "px";
+    }
+};
 
-    .then(response => response.text ())
+setNavOffset();
+window.addEventListener("resize", setNavOffset);
 
-    .then(data => {
+            // Default empty path to index.html so the home link highlights
+            let currentPage = window.location.pathname.split("/").pop();
+            if (!currentPage) currentPage = "index.html";
 
-        document.getElementById("navbar").innerHTML = data;
+            document.querySelectorAll(".nav-links a").forEach(link => {
+                if (link.getAttribute("href") === currentPage) {
+                    link.classList.add("active");
+                }
 
-        const currentPage = window.location.pathname.split("/").pop();
-
-        const navLinks = document.querySelectorAll(".nav-links a");
-
-        navLinks.forEach((link) => {
-
-            const linkPage = link.getAttribute("href");
-
-            if (linkPage === currentPage) {
-                link.classList.add("active");
-            }
-        });
-
-    })
-    .catch(error => console.error("Error loading navbar", error));
+            });
+        })
+        .catch(error => console.error("Error loading navbar:", error));
 });
 
+// Fade-in on scroll
 const fadeElements = document.querySelectorAll(".fade-in");
-
-const observer = new IntersectionObserver((entries) => {
-
-    entries.forEach((entry) => {
-        
+const observer = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
         if (entry.isIntersecting) {
             entry.target.classList.add("show");
+            obs.unobserve(entry.target); // stop watching once shown
         }
-
     });
-});
+}, { threshold: 0.15 });
 
-fadeElements.forEach((element) => {
-    observer.observe(element);
-});
+fadeElements.forEach(el => observer.observe(el));
+
+// Navbar shrink on scroll — cache the reference
+const navbar = document.querySelector(".nav-container");
 
 window.addEventListener("scroll", function () {
-    
-    const navbar = document.querySelector(".nav-container");
-
     if (!navbar) return;
 
     if (window.scrollY > 40) {
-
         navbar.style.padding = "12px 24px";
         navbar.style.borderRadius = "14px";
-
     } else {
-
         navbar.style.padding = "16px 28px";
         navbar.style.borderRadius = "18px";
     }
-
-    });
+});
