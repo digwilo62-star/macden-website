@@ -587,6 +587,146 @@ html{
         transform: translateY(0px);
     }
 
+}
 
+/*==== PRODUCTS =======*/
+.page-header {
+    width: 100%;
+    padding: 80px  20px 40px;
+    background: #fff;
+    text-align: center;
+}
+
+/* Inner container - centers content, limits width*/
+.page-header-container {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+/*small uppercase label sitting above the title */
+.page-tag {
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+/*Main page heading */
+.page-title {
+    font-size: 36px;
+    line-height: 1.2;
+    color: #111;
+    margin-bottom: 15px;
+}
+
+/* paragraph beneath the title */
+.page-subtitle {
+    font-size: 15px;
+    color: #555;
+    line-height: 1.6;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+/*Inline links inside running text - subtle underline on hover */
+.inline-link {
+    color: #0d5c2f;
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+.inline-link:hover {
+    border-bottom-color: #0d5c2f;
+}
+
+/*----Mobile adjustment for the page header-----------*/
+@media (max-width: 768px) {
+
+.page-header {
+    padding: 60px 16px 30px;
+    }
+
+    .page-title {
+        font-size: 28px;
+    }
+
+    .page-subtitle {
+        font-size: 14px;
+    }
+
+}
+
+/*---------- CATEGORY FILTER CHIP---------------*/
+/*----Horizontal row of pill buttons that filter the ---------------*/
+/*---- product grid. Active chip is filled green;others----------------------*/
+/*---- are outlined and turn green on hover.----------------------*/
+
+.filter-section {
+    width: 100%;
+    padding: 100%;
+    background: #fff;
+}
+
+/* Inner container - centers and lets chips wrap */
+.filter-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+}
+
+/* Individual chip button */
+.filter-chip {
+    padding: 8px 18px;
+    background: #fff;
+    color: #444;
+    border: 1px solid #ddd;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Hover state for inactive chips - border + text turn green*/
+.filter-chip:hover {
+    border-color: #0d5c2f;
+    color: #0d5c2f;
+}
+
+/* Keyboard focus ring - shows only on Tab navigation */
+.filter-chip:focus-visible {
+    outline: 2px solid #0d5c2f;
+    outline-offset: 2px;
+}
+
+/* Active chip - currently selected category*/
+.filter-chip.active {
+    background: #0d5c2f;
+    color: #fff;
+    border-color: #0d5c2f;
+}
+
+.filter-chip.active:hover {
+    background: #084421;
+    border-color: #084421;
+    color: #fff;
+}
+
+/*--- Mobile adjustments for filter chips------------*/
+@media (max-width: 768px) {
+    .filter-section {
+        padding: 0 12px 24px;
+    }
+
+    .filter-chip {
+        padding: 7px 14px;
+        font-size: 12px;
+    }
 }
 

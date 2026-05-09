@@ -11,9 +11,66 @@
     <div id="navbar"></div>
 
      <!--Page content-->
-    <h1>
-      
-    </h1>
+        <section class="page-header fade-in">
+            <div class="page-header-container">
+
+                <!-- small upper case label above the title-->
+            <p class="page-tag">CATALOGUE</p>
+            
+            <!-- Main page heading-->
+             <h1 class="page-title">Browse our full product range</h1>
+
+            <!-- subtitle within links to sign in or request buyer access-->
+            <p class="page-subtitle">
+              Live regional pricing is reserved for verified buyers.
+            <a href="login.html" class="inline-link">Sign in</a> or
+            <a href="request-access.html" class="inline-link">request access</a>
+            to view prices    
+            </p>  
+
+            </div>
+
+        </section>
+
+        <!------ CATEGORY FILTER---------->
+        <!----Pill button that filter the product grid by-------->
+        <!----- category. The "ALL" Chip is active by default----------->
+        <!---- Each button carries a data-category attribute that------------>
+        <!--- matches the category key in our product data.------------->
+        <!--- The filter logic gets wired up in js later.------------->
+        <section class="filter-section">
+           <div class="filter-container">
+
+        <button type="button" class="filter-chip active" data-category="all">
+            All
+        </button>
+
+        <button type="button" class="filter-chip" data-category="wines">
+            wines
+        </button>
+
+        <button type="button" class="filter-chip" data-category="spirits">
+            Spirits
+        </button>
+
+        <button type="button" class="filter-chip" data-category="bitters">
+            Bitters
+        </button>
+
+        <button type="button" class="filter-chip" data-category="malt-drinks">
+            Malt Drinks
+        </button>
+
+        <button type="button" class="filter-chip" data-category="rtd-energy">
+            RTD &amp; Energy
+        </button>
+
+           </div> 
+        </section>
+
+
+
+
     <script src="js/web.js"></script>
 </body>
 </html>
