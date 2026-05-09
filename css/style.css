@@ -665,7 +665,7 @@ html{
 
 .filter-section {
     width: 100%;
-    padding: 100%;
+    padding: 0 20px 30px;
     background: #fff;
 }
 
@@ -730,3 +730,136 @@ html{
     }
 }
 
+/*---------------------------------------------------
+===============================================
+ - PRODUCT GRID
+ Responsive grid of product card. The cards
+ themselves are injected by products.js at runtime. 
+ ==============================================
+ 
+ Outer section - same horizontal padding as others 
+ */
+.products-section {
+    width: 100%;
+    padding: 20px 20px 60px;
+    background: #fff;
+}
+
+/* Inner container - centers and limits width */
+.products-section-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* The grid itself - auto-filtering responsive columns*/
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+/*==============================================
+SINGLE PRODUCT CARD
+Each card: thin top accent, body with category,
+product name, size, and a sign-in-for-price link.
+===============================================*/
+
+.product-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.25s ease;
+}
+
+/* Thin green strip at the top of each card*/
+.product-card-accent {
+    height: 4px;
+    background: #0d5c2f;
+}
+
+/* Card body - all text content lives here*/
+.product-card-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    flex-grow:1;
+}
+
+.product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+    border-color: #ddd;
+}
+
+/* Small upper category label at the top*/
+.product-category-label {
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: #666;
+    font-weight: 700;
+    margin-bottom:8px;
+}
+
+/* Product name - main text inside the card */
+.product-name{
+    font-size: 14px;
+    font-weight: 700;
+    color: #111;
+    line-height: 1.3;
+    margin-bottom: 6px;
+}
+
+/* "Sign in for price" link at the bottom of the card */
+.product-price-link {
+    font-size: 12px;
+    color: #0d5c2f;
+    font-weight: 700;
+    text-decoration: none;
+    margin-top: auto;      /*pushes link the bottom*/
+    transition: color 0.2s ease; 
+}
+
+.product-price-link:hover {
+    color: #084421;
+}
+
+.products-loading,
+.products-empty {
+    text-align: center;
+    color: #666;
+    font-size: 14px;
+    padding: 40px 20px;
+}
+
+.product-size {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 12px;
+}
+
+
+
+/*------- Mobile adjustment for the grid------------*/
+@media (max-width: 768px) {
+    .products-section {
+        padding: 10px 12px 40px;
+    }
+
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+    }
+
+    .product-card-body{
+        padding: 12px;
+    }
+
+    .product-name {
+        font-size: 13px;
+    }
+
+
+}
