@@ -1,9 +1,53 @@
 /*Reset*/
+
+
+
 *{
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
+
+/* ============= HOME PAGE - LOCK TO VIEWPORT ============= */
+/* Applies only when body has class="home-page" (index only). */
+/* Other pages keep their normal scrolling behaviour.         */
+
+.home-page {
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Hero fills whatever vertical space is left after the navbar */
+.home-page .hero {
+    flex: 1;
+    min-height: 0;          /* override the original 85vh */
+    padding: 40px 20px;     /* reduced from 100px */
+}
+
+/* Footer sits at the bottom; cancel its negative margin */
+.home-page .footer {
+    flex-shrink: 0;
+    margin-top: 0;
+}
+
+/* Mobile: viewport too short for everything to fit, */
+/* so restore normal scrolling on small screens.    */
+@media (max-width: 768px) {
+    .home-page {
+        height: auto;
+        overflow: visible;
+        display: block;
+    }
+
+    .home-page .hero {
+        flex: none;
+        padding: 60px 20px;
+    }
+}
+
+
 
 /*======  BODY  =========*/
 body{
@@ -191,7 +235,7 @@ html{
 
     border: none;
 
-    background: #0d5c2f;
+    background: #111;
     color: #fff;
 
     font-size: 14px;
@@ -207,7 +251,7 @@ html{
 .login-btn:hover {
     transform: translateY(-2px);
     
-    background: #084421;
+    background: #0d5c2f;
 
     box-shadow: 0 10px 20px rgba(13,92,47,0.25);
 
@@ -306,7 +350,7 @@ html{
 }
 
 .primary:hover {
-    background: #084421;
+    background: #0d5c2f;
     transform: translateY(-3px);
     box-shadow: 0 10px 18px rgba(13, 92, 47,0.25);
 }
@@ -314,7 +358,8 @@ html{
 /*secondary button*/
 .secondary {
     background: transparent;
-    border: 1px solid #111;
+    color: #111;
+    border: 1.5px solid #111;
 }
 
 .secondary:hover {
@@ -414,7 +459,7 @@ html{
     padding: 25px 20px;
     background: #fff;
     border-top: 1px solid #eaeaea;
-    margin-top: 60px;
+    margin-top: -20px;
 }
 
 /* Container */
@@ -862,4 +907,255 @@ product name, size, and a sign-in-for-price link.
     }
 
 
+}
+
+
+/* =========================================
+ABOUT PAGE
+========================================= */
+
+.about-hero {
+    padding: 120px 20px 70px;
+    text-align: center;
+}
+
+.section-label {
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: #8a8a8a;
+    margin-bottom: 20px;
+}
+
+.about-title {
+    font-size: 52px;
+    font-weight: 700;
+    color: #111111;
+    margin-bottom: 24px;
+    line-height: 1.1;
+}
+
+.about-text {
+    max-width: 760px;
+    margin: 0 auto;
+    font-size: 18px;
+    line-height: 1.8;
+    color: #555555;
+}
+
+
+/* =========================================
+GLOBAL SECTION SPACING
+========================================= */
+
+.about-section,
+.values-section {
+    padding: 40px 20px 80px;
+}
+
+
+/* =========================================
+ABOUT HERO
+========================================= */
+
+.about-hero {
+    padding: 140px 20px 70px;
+}
+
+.about-hero-content {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.section-eyebrow {
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #8b8b8b;
+    margin-bottom: 18px;
+}
+
+.section-heading {
+    font-size: 56px;
+    line-height: 1.1;
+    font-weight: 700;
+    color: #101010;
+    margin-bottom: 24px;
+}
+
+.section-description {
+    max-width: 760px;
+    margin: 0 auto;
+    font-size: 18px;
+    line-height: 1.9;
+    color: #5f5f5f;
+}
+
+
+/*====== ABOUT PAGE=====*/
+/* Main content section wrapper */
+.about-section {
+    width: 100%;
+    padding: 60px 20px;
+    background: #fff;
+}
+
+/* Main content section wrapper */
+.about-section {
+    width: 100%;
+    padding: 60px 20px;
+    background: #fff;
+}
+
+/* Grey background variant for vision section */
+.about-section--grey {
+    background: #fafafa;
+}
+
+/* Inner container - centers and limits width */
+.about-container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* Section headings */
+.about-heading {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0d5c2f;
+    margin-bottom: 20px;
+}
+
+/* Centered heading variant for values section */
+.about-heading--center {
+    text-align: center;
+}
+
+/* Body paragraphs */
+.about-text {
+    font-size: 15px;
+    color: #444;
+    line-height: 1.8;
+    margin-bottom: 16px;
+}
+
+/* Pull quote - vision section */
+.about-pull {
+    font-size: 16px;
+    font-style: italic;
+    color: #444;
+    line-height: 1.8;
+    border-left: 3px solid #8b1d1d;
+    padding-left: 20px;
+    margin: 0;
+}
+
+/* Values grid - 4 columns */
+.values-grid {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 16px;
+    margin-top: 10px;
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Single Value card */
+.value-card {
+    padding: 24px 16px;
+    background: #ffff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    text-align: center;
+}
+
+/* Green top border variant */
+.value-card--green {
+    border-top: 3px solid #0d5c2f;
+}
+
+/* Red top border variant */
+.value-card--red {
+    border-top: 3px solid #8b1d1d;
+}
+
+/* Value card title */
+.value-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 8px;
+}
+
+/* Value card description */
+.value-text {
+    font-size: 12px;
+    color: #666;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* CTA section - dark green background */
+.about-cta {
+    width: 100%;
+    padding: 70px 20px;
+    background: #0d5c2f;
+    text-align: center;
+}
+
+.about-cta .hero-buttons {
+    justify-content: center;
+}
+
+/* CTA subtitle */
+.about-cta-sub {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 28px;
+}
+
+/* Override buttons inside green CTA section */
+.about-cta .primary {
+    background: #111;
+    color: #fff;
+}
+
+.about-cta .secondary {
+    border-color: rgba(255, 255, 255, 0.6);
+    color: #fff;
+}
+
+.about-cta .secondary:hover {
+    background: #fff;
+    color: #0d5c2f;
+    border-color: #fff;
+}
+
+/* Mobile adjustment */
+@media (max-width: 768px) {
+    .about-section {
+        padding: 40px 16px;
+    }
+
+    .about-heading {
+        font-size: 20px;
+    }
+
+    .values-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .about-cta {
+        padding: 50px 16px;
+    }
+
+
+}
+
+/* Small mobile*/
+@media (max-width: 480px) {
+    .values-grid {
+        grid-template-columns: 1fr;
+    }
 }

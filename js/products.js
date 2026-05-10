@@ -80,7 +80,8 @@ const products = [
 //========= MALT DRINKS ================
 {
     id: "p009",
-    name: "malt-drinks",
+    name: "Maltina RGB",
+    category: "malt-drinks",
     unit: "Crt"
 },
 
@@ -94,7 +95,7 @@ const products = [
 //======== RTD & ENERGY ================
 {
     id: "p011",
-    name: "smirnoff Ice 30cl RGB",
+    name: "Smirnoff Ice 30cl RGB",
     category: "rtd-energy",
     unit: "Crt",
 },
