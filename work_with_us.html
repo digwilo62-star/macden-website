@@ -11,7 +11,99 @@
     <div id="navbar"></div>
 
      <!--Page content-->
-    <h1>
+    <section class="page-header fade-in">
+        <div class="page-header-container">
+          <p class="page-tag">WORK WITH US</p>
+          <h1 class="page-title">Let's build something together.</h1>
+        <p class="page-subtitle">
+            Whether you're a business looking to stock at scale or a professional ready to grow with us - there's a place for you at MACDEN
+        </p>     
+        </div>
+    </section>
+
+    <!----  PARTNERSHIP SECTION  ---->
+    <section class="wwu-section fade-in">
+    <div class="wwu-container">
+    <p class="wwu-text">
+        MACDEN works with retailers, hotels, supermarkets, hospitality groups, and regional wholesalers who need reliable bulk supply. If your operation runs on volume, we're built for you.
+    </p>
+    <p class="wwu-text">
+        Fill in the form below, select partnership, and our team will be in touch within 24 hours.
+    </p>
+    </div>
+    </section>
+
+    <!-----  CAREERS SECTION  ------->
+    <section class="wwu-section wwu-section--grey fade-in">
+    <div class="wwu-container">
+    <p class="wwu-tag">JOIN THE TEAM</p>
+    <h2 class="wwu-heading">Open roles</h2>
+    <p class="wwu-text">
+       we're growing and we're looking for sharp, dependable people to grow with us. 
+    </p>
+
+    <div class="roles-grid">
+
+        <div class="role-card" onclick="selectRole('sales')">
+            <h3 class="role-title">Sales</h3>
+         <p class="role-text">
+            Drive new business, mange buyer relationships, and grow our trade network across Nigeria.
+         </p>
+         <span class="role-cta">Express interest &rarr;</span>
+        </div>
+
+       <div class="role-card" onclick="selectRole('purchasing')">
+    <h3 class="role-title">Purchasing</h3>
+    <p class="role-text">
+        source products, manage supplier relationships, and keep our catalogue competitive.
+    </p>
+    <span class="role-cta">Express interest &rarr;</span>
+       </div> 
+    <div class="role-card" onclick="selectRole('Logistics')">
+        <h3 class="role-title">Logistics</h3>
+        <p class="role-text">
+            Coordinate deliveries, manage dispatch, and ensure orders reach buyers on time.
+        </p>
+     <span class="role-cta">Express interest &rarr;</span>
+    </div>
+
+
+    </div>
+
+    </div>
+    </section>
+
+    <!-----  FORM SECTION  ---->
+    <section class="wwu-section fade-in" id="ww-form-section">
+    <div class="wwu-container">
+     <p class="wwu-tag">GET IN TOUCH</p>
+     <h2 class="wwu-heading">Tell us about yourself</h2>
+     
+     <form class="wwu-form" id="wwu-form">
+
+       <!-----  Full name -----> 
+  <div class="form-group">
+    <label class="form-label">Full name</label>
+    <input type="text" class="form-input"
+    placeholder="your full name" required/>
+  </div>
+
+
+  <!---- Phone  ------>
+<div class="form-group">
+<label class="form-label">I am interested in</label>
+<select class="form-input" id="interest-select"
+onchange="handleInterest()" required>
+<option value="">Select one</option>
+<option value="part"
+
+</select>
+</div>
+
+     </form>
+
+    </div>   
+    </section>
       
     </h1>
     <script src="js/web.js"></script>
