@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - MACDEN </title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="register-page hide-login-btn">
+
+    <!---- Nav loads here --->
+    <div id="navbar"></div>
+
+    <!--- REGISTER SECTION  ---->
+    <section class="register-section">
+      
+      <div class="register-card">
+
+        <!---  Logo ---->
+        <div class="login-logo">
+          <img src="images/logo.jpeg" alt="MACDEN logo" />
+        </div>
+
+       <!--- Heading ---> 
+       <h1 class="login-heading">Create your account.</h1>
+       <p class="login-sub">
+         Sign up to access live pricing and download your personalised product list.
+       </p>
+
+       <!--  Form ---->
+       <form class="login-form">
+
+        <div class="form-group">
+          <label class="form-label">Full name</label>
+          <input type="text" class="form-input"
+          placeholder="Your full name" required />
+        </div>
+           
+           
+                   <div class="form-group">
+                      <label class="form-label">Company name </label>
+                      <input type="text" class="form-input"
+                      placeholder="Your business name" required />
+                   </div>
+
+        <div class="form-group">
+           <label class="form-label"> Email address </label>
+          <input type="email" class="form-input"
+          placeholder="your@email.com" required /> 
+        </div>
+
+        <div class="form-group">
+           <label class="form-label"> Phone number </label> 
+           <input type="tel" class="form-input"
+           placeholder="+234 000 000 0000" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Your region</label>
+          <select class="form-input" required >
+            <option value="lagos">Select your state</option>
+            <option value="anambra">Anambra</option>
+            <option value="imo">Imo</option>
+            <option value="abia">Abia</option>
+            <option value="rivers">Rivers</option>
+            <option value="delta">Delta</option>
+            <option value="enugu">Enugu</option>
+            <option value="ogun">Ogun</option>
+          </select> 
+        </div>
+
+        <div class="form-group">
+           <label class="form-label">Password</label>
+           <input type="password" class="form-input" 
+           placeholder="Create a password" required /> 
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Confirm password</label>
+          <input type="password" class="form-input"
+          placeholder="Repeat your password" required />  
+        </div>
+
+        <button type="submit" class="btn primary login-submit">
+            Create account
+        </button>
+
+       </form>
+
+       <!---  Footer links ----->
+       <div class="login-links">
+        Already have an account?
+        <a href="login.html" class="inline-link">Sign in</a>
+       </div>
+
+      </div>  
+
+    </section>
+
+    <script src="js/web.js"></script>
+    
+</body>
+</html>

@@ -24,6 +24,8 @@
     <!----  PARTNERSHIP SECTION  ---->
     <section class="wwu-section fade-in">
     <div class="wwu-container">
+     <p class="wwu-tag">FOR BUSINESS</p> 
+      <h2 class="wwu-heading">Become a trade partner </h2>    
     <p class="wwu-text">
         MACDEN works with retailers, hotels, supermarkets, hospitality groups, and regional wholesalers who need reliable bulk supply. If your operation runs on volume, we're built for you.
     </p>
@@ -47,7 +49,7 @@
         <div class="role-card" onclick="selectRole('sales')">
             <h3 class="role-title">Sales</h3>
          <p class="role-text">
-            Drive new business, mange buyer relationships, and grow our trade network across Nigeria.
+            Drive new business, manage buyer relationships, and grow our trade network across Nigeria.
          </p>
          <span class="role-cta">Express interest &rarr;</span>
         </div>
@@ -59,6 +61,15 @@
     </p>
     <span class="role-cta">Express interest &rarr;</span>
        </div> 
+
+      <div class="role-card" onclick="selectRole('Accounting')">
+        <h3 class="role-title">Accounting</h3>
+        <p class="role-text">
+          Handle financial records, reporting, and keep the operation financially healthy. 
+        </p>
+        <span class="role-cta">Express interest &rarr;</span>
+      </div>
+    
     <div class="role-card" onclick="selectRole('Logistics')">
         <h3 class="role-title">Logistics</h3>
         <p class="role-text">
@@ -89,23 +100,78 @@
   </div>
 
 
-  <!---- Phone  ------>
+  <!-- Email -->
+<div class="form-group">
+    <label class="form-label">Email address</label>
+    <input type="email" class="form-input"
+    placeholder="your@email.com" required />
+</div>
+
+<!--- Phone ---->
+<div class="form-group">
+   <label class="form-label">Phone number </label>
+   <input type="tel" class="form-input" 
+   placeholder="+234 000 000 0000" required /> 
+</div>
+
+  <!----  Interest dropdown ------>
 <div class="form-group">
 <label class="form-label">I am interested in</label>
 <select class="form-input" id="interest-select"
 onchange="handleInterest()" required>
 <option value="">Select one</option>
-<option value="part"
+<option value="partnership">Partnership</option>
+<option value="sales">Sales roles</option>
+<option value="purchasing">Purchasing role</option>
+<option value="accounting">Accounting roles</option>
+<option value="logistics">Logistics roles</option>
 
 </select>
 </div>
 
-     </form>
+<!---- Company name -partnership only ------->
+<div class="form-group" id="company-group"
+style="display: none;">
+<label class="form-label">Company name </label>
+<input type="text" class="form-input"
+placeholder="Your company name" />
+</div>
 
+<!-- Cv upload - careers only -->
+<div class="form-group" id="cv-group"
+     style="display: none;">
+    <label class="form-label">Upload your CV</label>
+    <input type="file" class="form-input form-file"
+       accept=".pdf,.doc,.docx" />
+    <p class="form-hint">PDF or Word document. Max 5MB.</p>
+    </div>
+
+
+    <!-----Message -->
+<div class="form-group">
+    <label class="form-label">Message</label>
+    <textarea class="form-input form-textarea" 
+    placeholder="Tell us a bit about your self or your business..." rows="5"></textarea>
+</div>
+
+<!---  Submit ----->
+<button type="submit" class="btn primary wwu-submit">
+    send message 
+</button>
+
+     </form>
     </div>   
     </section>
       
-    </h1>
+  <!--  FOOTER  ---->
+
+   <div id="footer">
+
+
+
+
+
     <script src="js/web.js"></script>
+    <sript src="js/work_with_us.js"></sript>
 </body>
 </html>

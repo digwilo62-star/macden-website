@@ -28,6 +28,13 @@ window.addEventListener("resize", setNavOffset);
         .catch(error => console.error("Error loading navbar:", error));
 });
 
+//footer
+fetch('components/footer.html')
+.then(r => r.text())
+.then(html => {
+    document.getElementById('footer').innerHTML = html;
+});
+
 // Fade-in on scroll
 const fadeElements = document.querySelectorAll(".fade-in");
 const observer = new IntersectionObserver((entries, obs) => {

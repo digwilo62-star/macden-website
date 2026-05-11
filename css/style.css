@@ -459,7 +459,6 @@ html{
     padding: 25px 20px;
     background: #fff;
     border-top: 1px solid #eaeaea;
-    margin-top: -20px;
 }
 
 /* Container */
@@ -478,7 +477,7 @@ html{
     color: #555;
 }
 
-/* Links */
+/* Right Links */
 .footer-links {
     list-style: none;
     display: flex;
@@ -1158,4 +1157,446 @@ ABOUT HERO
     .values-grid {
         grid-template-columns: 1fr;
     }
+}
+
+
+/*====  WORK WITH US =======*/
+/* Select Wrapper */
+.wwu-section {
+    width: 100%;
+    padding: 60px 20px;
+    background: #fff;
+}
+
+/* Grey background variant */
+.wwu-selection--grey {
+    background: #fafafa;
+}
+
+/* Inner container */
+.wwu-container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* Small uppercase tag above headings */
+.wwu-tag {
+    font-size: 11px;
+    letter-spacing: 1.6px;
+    color: #8b1d1d;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+/* Section heading */
+.wwu-heading {
+    font-size:  22px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 16px;
+}
+
+/* Body text */
+.wwu-text {
+    font-size: 15px;
+    color: #444;
+    line-height: 1.8;
+    margin-bottom: 14px;
+    max-width: 640px;
+}
+
+
+/*====ROLE CARDS ====*/
+
+/*Four column grid */
+.roles-grid {
+    display: grid;
+    grid-template-columns: repeat (4, minmax (0, 1fr));
+    gap: 16px;
+    margin-top: 32px;
+}
+
+/* Single role card */
+.role-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-top: 3px solid #0d5c2f;
+    border-radius: 12px;
+    padding: 24px 18px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+/* Role title*/
+.role-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 10px;
+}
+
+/* Role description */
+.role-cta {
+    font-size: 12px;
+    font-weight: 700;
+    color: #0d5c2f;
+}
+
+/*====FORM ====*/  
+
+/* Form Wrapper */
+.wwu-form {
+    max-width: 600px;
+    margin-top: 32px;
+}
+
+/*Each field group */
+.form-group {
+    margin-bottom: 20px;
+}
+
+/*Form Label*/
+.form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #111;
+    margin-bottom: 6px;
+}
+
+/* Input, select, textarea */
+.form-input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    color: #111;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    outline: none;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+    appearance:  auto;
+    -webkit-appearance: auto;
+}
+
+.form-input:focus {
+    border-color: #0d5c2f;
+    box-shadow: 0 0 0 4px rgba(13, 92, 47, 0.08);
+}
+
+/* Textarea specific */
+.form-textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* File input */
+.form-file {
+    padding: 10px 14px;
+    cursor: pointer;
+}
+
+/* Submit button - full width */
+.wwu-submit {
+    width: 100%;
+    padding: 14px;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+/*==== MOBILE =====*/
+@media (max-width: 768px) {
+    .wwu-section {
+        padding: 40px 16px;
+    }
+
+    .roles-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .wwu-form {
+        max-width: 100%;
+    }
+
+}
+
+@media (max-width: 480px) {
+    .roles-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/*========== CONTACT PAGE ============ 
+ Outer section
+*/
+.contact-section {
+    width: 100%;
+    padding: 60px 20px;
+    background: #fff;
+}
+
+/* Two column Layout */
+.contact-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    gap: 80px;
+    align-items: flex-start;
+}
+
+/*====== LEFT SIDE - INFO  ============*/
+
+.contact-info-heading {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 32px;
+}
+
+
+/*  Each contact detail block */
+.contact-item {
+    margin-bottom: 28px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid #eee;
+}
+
+.contact-item:last-of-type {
+    border-bottom: none;
+}
+
+/* Small label above each detail */
+.contact-item-label {
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: #999;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+/* The actual value - email, phone etc*/
+.contact-item-value {
+    font-size: 15px;
+    color: #111;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.contact-item-value:hover {
+    color: #0d5c2f;
+}
+
+/* Note at the bottom of info side */
+.contact-note {
+    margin-top: 32px;
+    padding: 16px;
+    background: #fafafa;
+    border-radius: 10px;
+    border-left: 3px solid #0d5c2f;
+}
+
+.conact-note p {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.7;
+    margin: 0;
+}
+
+
+/*===== RIGHT SIDE - FORM====*/
+.contact-form-wrap {
+    flex: 1.4;
+}
+
+.contact-form {
+    width: 100%;
+
+}
+
+/* Submit button full width */
+.contact-submit {
+    width: 100%;
+    padding: 14px;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+/*==== MOBILE ====*/
+@media (max-width: 768px) {
+    .contact-section {
+        padding: 40px 16px;
+    }
+
+    /*==== MOBILE ====*/
+    .contact-section {
+        padding: 40px 16px;
+    }
+
+    .contact-container {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .contact-info {
+        width: 100%;
+    }
+
+    .contact-form-wrap {
+        width: 100%;
+    }
+
+}
+
+/*==== LOGIN PAGE ====*/
+/* Lock the login page to view port
+    No scroll, contenr centered*/
+.login-page {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    
+}
+
+/* Section fills remaining space 
+   and centers the card*/
+.login-section {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: #fafafa;
+}
+
+/* The white card in the center */
+.login-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 16px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+}
+
+/* Logo image inside card*/
+.login-logo {
+    margin-bottom: 24px;
+}
+
+.login-logo img {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 14px;
+}
+
+/* Main heading */
+.login-heading {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111;
+    margin-bottom: 8px;
+}
+
+/* Subtitle below heading */
+.login-sub {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 28px;
+}
+
+/* Form inside card */
+.login-form {
+    text-align: left;
+}
+
+/* Submit button full width */
+.login-submit {
+    width: 100%;
+    padding: 13px;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+/* Link below form */
+.login-links {
+    margin-top: 20px;
+    font-size: 13px;
+    color: #888;
+}
+
+/* Dot separator between links */
+.login-divider {
+    margin: 0 8px;
+    color: #ccc;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .login-card {
+        padding: 28px 20px;
+    }
+
+    .login-heading {
+        font-size: 20px;
+    }
+}
+
+/* Hide login button on home and login pages */ 
+.hide-login-btn .login-btn {
+    display: none;
+}
+
+
+/*====== REGISTER PAGE ======== */
+/*  Page  layout - scrollable unlike login 
+because form is longer */
+.register-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Section centers the card */
+.register-section {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 20px 60px;
+    background: #fafafa;
+}
+
+/* The white card */
+.register-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 16px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 460px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .register-card {
+        padding: 28px 20px;
+    }
+
+    .register-section {
+        padding: 24px 16px 40px;
+    }
+
 }
