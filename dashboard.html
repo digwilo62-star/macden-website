@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - MACDEN</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dashboard-page">
+
+    <!--- TOP BAR -->
+    <header class="dash-topbar">
+      <div class="dash-topbar-left">
+       <button class="dash-home-btn"
+       onclick="window.location='index.html'">
+             &larr; Home
+            </button> 
+       <div class="dash-logo">
+        <img src="images/logo.jpeg" alt="MACDEN" />
+        <span>MACDEN</span>
+       </div>     
+      </div>  
+      <div class="dash-topbar-right">
+       <div class="dash-user-pill">
+        <div class="dash-user-avatar">
+               A</div>
+       <span class="dash-user-name">Adebayo</span> 
+      </div>
+      <button class="dash-logout-btn"
+         onclick="window.location='login.html'">
+        Logout
+        </button>       
+        </div>
+
+    </header>
+    
+
+  <!--- PAGE HEADER -->
+<section class="dash-header">
+    <div class="dash-header-left">
+    <h1 class="dash-title">Today's prices.</h1>
+    <p class="dash-subtitle">
+        Browse, filter, and select products.
+        Download your list anytime.
+    </p>
+    </div>
+
+    <div class="dash-header-right">
+        <button class="btn primary dash-download-btn"
+        id="download-full-btn">
+        Download Full list (PDF) 
+        </button>
+    </div>
+</section>
+
+
+<!--- SEARCH BAR  ---->
+<section class="dash-filter-section">
+    <div class="dash-filter-wrap">
+    <button class="dash-chip active"
+    data-categoy="all">All</button>
+    
+    <button class="dash-chip "
+    data-categoy="wines">Wines</button>
+    
+    <button class="dash-chip "
+    data-categoy="spirits">Spirits</button>
+    
+    <button class="dash-chip "
+    data-categoy="bitters">Bitters</button>
+    
+    <button class="dash-chip "
+    data-categoy="beer-stout">Beer & Stout</button>
+    
+    <button class="dash-chip "
+    data-categoy="malt-drinks">Malt Drinks</button>
+    
+    <button class="dash-chip "
+    data-categoy="rtd-energy">RTD Energy</button>
+    
+    </div>
+</section>
+
+<!-- PRODUCT GRID  -->
+ <section class="dash-products-section">
+    <div class="dash-products-wrap">
+     <p id="dash-loading " class="dash-loading">
+        Load products....
+     </p>   
+     <p id="dash-empty" class="dash-empty"
+     hidden>
+    No products found.
+   </p>
+   <div id="dash-grid" class="dash-grid"></div>
+    </div>
+ </section>
+
+
+ <!--- SECTION BAR  --->
+ <div class="dash-section-bar" id="dash-section-bar">
+    <p class="dash-section-count">
+       <span id="dash-section-count">0</span>
+       products selected 
+    </p>
+    <div class="dash-selection-actions">
+       <button class="dash-clear-btn"
+         id="dash-clear-btn">
+        Clear
+    </button>
+    <button class="btn primary"
+    id="download-selection-btn">
+    Download Section (PDF)
+ </button>
+    </div>
+ </div>
+
+
+<script src="js/products.js"></script>
+<script src="js/dashboard.js"></script>
+
+
+</body>
+</html>
