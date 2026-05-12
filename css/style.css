@@ -1647,7 +1647,13 @@ Green checkmark circle shown on success*/
 .dash-topbar-left {
     display: flex;
      align-items: center;
-     gap: 10px;
+     gap: 16px;
+}
+
+.dash-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 /* Home button */
@@ -1655,6 +1661,386 @@ Green checkmark circle shown on success*/
     padding: 7px 14px;
     background: #f5f5f5;
     color: #444;
-    border: 1px ;
+    border: 1px solid #eee ;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+
+.dash-home-btn:hover {
+    background: #111;
+    color: #fff;
+    border-color: #111;
+}
+
+
+/* Logo in topbar */
+.dash-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dash-logo img {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+
+.dash-logo span {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    color: #111;
+}
+
+/* User pill */
+.dash-user-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px 5px 5px;
+    background: 5px 12px 5px 5px;
+    background: #f5f5f5;
+    border-radius: 1px solid #eee;
+}
+
+.dash-user-avatar {
+    width: 24px;
+    height: 24px;
+    background: #111;
+    color: #fff;
+    border-radius: 50% ;
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.dash-user-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #111;
+}
+
+/* Logout button */
+.dash-logout-btn {
+    padding: 7px 14px ;
+    background: transparent;
+    color: #444;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.dash-logout-btn:hover {
+    background: #111;
+    color: #fff;
+    border-color: #111;
+}
+
+/*=== PAGE HEADER ===*/
+.dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 36px 32px 20px;
+    background: #fff;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.dash-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #111;
+    margin-bottom: 4px;
+}
+
+.dash-subtitle {
+    font-size: 13px;
+    color: #666;
+}
+
+.dash-download-btn {
+    white-space: norwrap;
+    padding: 11px 18px;
+    font-size: 13px;
 
 }
+
+.dash-download-btn {
+    white-space: nowrap;
+    padding: 11px 18px;
+    font-size: 13px;
+}
+
+/*==== SEARCH BAR ===*/
+.dash-search-section {
+    padding: 20px 32px 0;
+    background: #fff;
+}
+
+.dash-search-wrap {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-family: inherit;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    outline: none;
+    background: #fafafa;
+    color: #111;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+}
+
+.dash-search-input:focus {
+    border-color: #111;
+    background: #fff;
+}
+
+/*===== FILTER CHIPS =====*/
+.dash-filter-section {
+    padding: 16px 32px;
+    background: #fff;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+
+.dash-filter-wrap {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+
+}
+
+.dash-chip {
+    padding: 7px 16px;
+    background: #fff;
+    color: #444;
+    border: 1px solid #ddd;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dash-chip.active {
+    background: #111;
+    color: #fff;
+    border-color: #111;
+}
+
+/*=====  PRODUCT GRID ========*/
+.dash-products-section {
+    padding: 24px 32px 120px;
+}
+
+.dash-loading,
+    .dash-empty{
+        text-align: center;
+        color: #999;
+        font-size: 14px;
+        padding: 60px 20px;
+    }
+
+.dash-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px,1fr));
+    gap: 16px;
+}
+
+/*===== PRODUCT CARD =====*/
+.dash-card{
+    background: #fff;
+    border: 1px solid #eee ;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+/* Selected state */
+.dash-card--selected {
+    border: 2px solid #111;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.dash-card:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+
+/* Green top accent  */
+.dash-card-accent {
+    height: 3px;
+    background: #0d5c2f;
+}
+
+.dash-card-body {
+    padding: 14px;
+}
+
+/* Category label */
+.dash-card-category {
+    font-size: 9px;
+    letter-spacing: 1.2px;
+    color: #8b1d1d;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+/* Footer - price left buttom right*/
+.dash-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-top: 12px;
+    border-top: 1px dashed #eee;
+}
+
+/* Price */
+.dash-card-price {
+    font-size: 13px;
+    font-weight: 800;
+    color: #111;
+}
+
+/* Select button */
+.dash-select-btn {
+    padding: 6px 12px;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+/* Selected button state */
+.dash-select-btn--active {
+    background: #fff;
+    color: #111;
+    border: 1.5px solid #111;
+}
+
+.dash-select-btn--active:hover {
+    background: #111;
+    color: #fff;
+}
+
+/*===== SELECTION BAR ======*/
+.dash-selection-bar {
+    position: fixed;
+    bottom: -100px;
+    left: 0;
+    width: 100%;
+    background: #111;
+    color: #fff;
+    padding: 16px 32px ;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: bottom 0.3s ease;
+    z-index: 200;
+    box-sizing: border-box;
+}
+
+/* Slide up when visible */
+.dash-selection-bar--visible {
+    bottom: 0;
+}
+
+.dash-selection-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Clear button */
+.dash-clear-btn{
+    padding: 8px 16px;
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgb(255,255,255,0.4);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: all 0.2s ease ;
+
+}
+
+.dash-clear-btn:hover {
+    background: rgba(225, 225, 225, 0.1);
+}
+
+/* Download selection button */
+.dash-selection-actions .primary {
+    padding: 8px 16px;
+    font-size: 12px;
+}
+
+.dash-selection-action .primary:hover {
+    background: #0d5c2f;
+}
+
+/*==== MOBILE ===*/
+@media (max-width: 768px) {
+    .dash-topbar {
+        padding: 12px 16px;
+    }
+
+    .dash-logo span {
+        display: none;
+    }
+
+    .dash-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 24px 16px 16px;
+    }
+
+    .dash-download-btn {
+        width: 100%;
+    }
+
+    .dash-search-section {
+        padding: 16px 16px 0;
+    }
+
+    .dash-filter-section {
+        padding: 12px 16px;
+    }
+
+    .dash-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+    }
+
+    .dash-selection-bar {
+        padding: 14px 16px;
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+
+    .dash-selection-actions {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
