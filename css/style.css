@@ -2044,3 +2044,331 @@ Green checkmark circle shown on success*/
     }
 }
 
+/*====== ADMIN PAGE ======
+
+Page background */
+
+.admin-page {
+    background: #fafafa;
+    min-height: 100vh;
+    padding-top:0 ;
+}
+
+/*==== Top Bar ====*/
+.admin-topbar {
+    width: 100%;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    padding: 14px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: border-box;
+}
+
+.admin-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.admin-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Admin badge*/
+.admin-badge {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    color: #8b1d1d;
+    background: rgba(139, 29, 29, 0.8);
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+/*=== PAGE HEADER ====*/
+.admin-header {
+    padding: 32px 32px 0;
+    background: #fff;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.admin-subtitle {
+    font-size: 13px;
+    color: #666;
+    padding-bottom: 24px;
+}
+
+
+/*===== TABS ======*/
+.admin-tabs {
+    display: flex;
+    gap: 0;
+    background: #fff;
+    border-bottom:  1px solid #eee;
+    padding: 0 32px;
+}
+
+.admin-tab {
+    padding: 14px 20px;
+    background: transparent;
+    color: #666;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.admin-tab.active {
+    color: #111;
+    border-bottom: 2px solid #111;
+}
+
+/*==== TOOLBAR ====*/
+.admin-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.admin-search {
+    padding: 10px 14px;
+    font-size: 13px;
+    font-family: inherit;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    outline: 280px;
+    outline: none;
+    width: 280px;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+
+.admin-search:focus {
+    border-color: #111;
+}
+
+.admit-add-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+/*==== TABLE ====*/
+.admin-table-wrap {
+    width: 100%;
+    overflow-x:auto ;
+    border: 1px solid #eee;
+    border-radius: 12px;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.admin-table thead {
+    background: #fafafa;
+    border-bottom: 1px solid #eee;
+}
+
+.admin-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    color: #888;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.admin-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f5f5f5;
+    color: #111;
+    vertical-align: middle;
+}
+
+
+.admin-table tr:hover td {
+    background: #fafafa;
+}
+
+/* Product name column */
+.admin-td-name {
+    font-weight: 600;
+    max-width: 280px;
+}
+
+/* Empty state row */
+.admin-empty {
+    text-align: center;
+    color: #999;
+    padding: 40px 16px;
+}
+
+/*====== TABLE BUTTONS =====*/
+.admin-edit-btn {
+    padding: 6px 14px;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.admin-edit-btn:hover {
+    background: #0d5c2f;
+}
+
+.admin-save-btn {
+    padding: 6px 14px;
+    background: #0d5c2f;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    margin-right: 6px;
+    transition: 6px;
+    transition: all 0.2s ease;
+}
+
+.admin-save-btn:hover {
+    background: #084421;
+}
+
+.admin-cancel-btn {
+    padding: 6px 14px;
+    background: transparent;
+    color: #444;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.admin-cancel-btn:hover {
+    background: #f5f5f5;
+}
+
+.admin-delete-btn {
+    padding: 6px 14px;
+    background: transparent;
+    color: #8b1d1d;
+    border: 1px solid #8b1d1d;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transform: all 0.2s ease;
+}
+
+.admin-delete-btn:hover {
+    background: #8b1d1d;
+    color: #fff;
+}
+
+/* Inline pricing input */
+.admin-price-input {
+    width: 120px;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-family: inherit;
+    border: 1px solid #0d5c2f;
+    border-radius: 8px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+/*===== ADD PRODUCT FORM =====*/
+.admin-add-form {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.admin-form-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 16px;
+}
+
+.admin-form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.admin-form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/*======= MOBILE =======*/
+@media (max-width: 768px) {
+    .admin-topbar {
+        padding: 12px 16px ;
+    }
+
+    .admin-header {
+        padding: 24px 16px 0;
+    }
+
+    .admin-tabs {
+        padding: 0 16px ;
+    }
+
+    .admin-section {
+        padding: 16px ;
+    }
+
+    .admin-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .admin-search{
+        width: 100%;
+    }
+
+    .admin-form-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .admin-td-name {
+        max-width: 160px;
+    }
+} 
+
+@media (max-width: 480px) {
+    .admin-form-grid {
+        grid-template-columns: 1fr;
+    }
+}

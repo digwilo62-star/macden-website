@@ -63,13 +63,15 @@ Products
 
 
 <div class="admin-toolbar">
-    <input type="text"
+    <input type="text" 
     id="price-search"
-    placeholder="search products..."/>
-    <p class="admit-hint">
+    class="admin-search"
+    placeholder="Search products...."/>
+    <p class="admin-hint">
         Click Edit on any row to update its price.
     </p>
 </div>
+
 
 <div class="admin-table-wrap">
     <table class="admin-table" id="price-table">
@@ -135,46 +137,47 @@ style="display: none;">
     </div>
 
     <div class="form-group">
-     <label class="form-label">Price (₦)</label>
-     <input type="number" class="form-input"
-     id="new-price"
-     placeholder="e.g 12500"/>
-    </div>
+        <label class="form-label">Unit</label>
+        <select class="form-input" id="new-unit">
+    <option value="Tray">Tray</option>
+    <option value="Crt">Crate</option>
+    <option value="Carton">Carton</option>
+        </select>
     </div>
 
-
-    <div class="admin-form-actions">
-        <button class="btn secondary"
-        onclick="hideAddForm()">
-        Cancel
-    </button>
-    <button class="btn primary"
-    onclick="addNewProduct()">
-    Add product
-    </button>
+    <div class="form-group">
+        <label class="form-label">Price (#)</label>
+        <input type="number" class="form-input"
+        id="new-price"
+        placeholder="e.g 12500" />
     </div>
+    </div>
+   <div class="admin-form-actions">
+    <button class="btn secondary"
+    onclick="hideAdd()">
+        Add product
+    </button>
+   </div>
 </div>
 
 <div class="admin-table-wrap">
     <table class="admin-table" id="product-table">
         <thead>
             <tr>
-
-             <th>Product</th>   
-             <th>Category</th>   
-             <th>Unit</th>   
-             <th>Price</th>   
-             <th>Action</th>   
-             
+                <th>Product</th>
+                <th>Category</th>
+                <th>Unit</th>
+                <th>Price</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody id="product-tbody">
-
         </tbody>
     </table>
 </div>
 
-</section>
+
+
 
 
 <script src="js/products.js"></script>

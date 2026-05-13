@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Panel - MACDEN</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="admin-page">
+
+
+    <div id="navbar" style="display: none;"></div>
+    <div id="footer" style="display: none;"></div>
+
+
+    <!-- TOP BAR -->
+<header class="admin-topbar">
+   <div class="admin-topbar-left">
+    <button class="dash-home-btn"
+    onclick="window.location='index.html'">
+       &larr; Back to site
+    </button>
+<div class="dash-logo">
+    <img src="images/logo.jpeg" alt="MACDEN" />
+    <span class="admin-badge">OWNER</span>
+</div>
+<div class="admin-topbar-right">
+   <div class="dash-user-pill">
+    <div class="dash-user-avatar">O</div>
+    <span class="dash-user-name">Owner</span>
+   </div>
+   <button class="dash-logout-btn"
+   onclick="window.location='login.html'">
+    Logout    
+    </button>
+</div>
+</header>
+
+<!--- PAGE HEADER --->
+<section class="admin-header">
+    <h1 class="admin-title">Control panel</h1>
+    <p class="admin-subtitle">
+        Monitor all price changes made by your sales manager accross all branches.
+    </p>
+</section>
+
+<!--- KPI CARDDS --->
+<section class="cp-kpi-section">
+    <div class="cp-kpi-grid">
+
+        <div class="cp-kpi-card">
+            <p class="cp-kpi-label">Total Products</p>
+            <h2 class="cp-kpi-number" id="kpi-products">0</h2>
+            <p class="cp-kpi-sub">in catalogue</p>
+        </div>
+
+        <div class="cp-kpi-card">
+            <p class="cp-kpi-lable">Price Updates</p>
+            <h2 class="cp-kpi-number cp-kpi-number--sm"
+            id="kpi-last">-</h2>
+            <p class="cp-kpi-sub">most recent change</p>
+        </div>
+
+        <div class="cp-kpi-card">
+            <p class="cp-kpi-label">Sales Manager</p>
+            <h2 class="cp-kpi-number" id="kpi-managers">0</h2>
+            <p class="cp-kpi-sub">active this week</p>
+        </div>
+    </div>
+</section>
+
+
+<!---- MAIN CONTENT --->
+    <section class="cp-main-section">
+        <div class="cp-main-grid">
+            
+         <!--- LEFT - Activity feed ----->   
+          <div class="cp-feed-wrap">
+            <h2 class="cp-section-title">Recent activity</h2>
+            <div class="cp-feed" id="cp-feed"></div>
+          </div>  
+        
+
+
+         <!--- RIGHT - Summary ----> 
+          <div class="cp-summary-wrap">
+            <h2 class="cp-section-title">This week</h2>
+            <div class="cp-summary-card">
+            <p class="cp-summary-label">
+                Highest price change
+            </p>    
+            <p class="cp-summary-value"
+            id="summary-highest">-</p>
+            </div>
+            <div class="cp-summary-row">
+                <p class="cp-summary-label">
+                    Most active manager
+                </p>
+                <p class="cp-summary-value"
+                id="summary-manager">-</p>
+            </div>
+            <div class="cp-summary-row">
+                <p class="cp-summary-label">
+                    Most updated category
+                </p>
+               <p class="cp-summary-value"
+               id="summary-category">-</p> 
+            </div>
+            <div class="cp-summary-row">
+               <p class="cp-summary-label">
+                Total value change
+               </p> 
+               <p class="cp-summary-value"
+               id="summary-value">-</p>
+            </div>
+          </div>
+        </div>
+
+        </div>
+    </section>
+
+
+    <!--  PRICE CHANGE LOG TABLE  ---->
+<section class="cp-log-section">
+    <div class="cp-log-header">
+        <h2 class="cp-section-title">Price change log</h2>
+        <input type="text"
+        id="log-search"
+        class="admin-search"
+        placeholder="search by product or manager .... "/>
+    </div>
+
+
+<div class="admit-table-wrap">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Date & Time</th>
+                <th>Manager</th>
+                <th>Branch</th>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Old Price</th>
+                <th>New Price</th>
+                <th>Change</th>
+            </tr>
+        </thead>
+        <tbody id="log-tbody"></tbody>
+    </table>
+</div>
+</section>
+
+
+
+
+
+
+<script src="js/products.js"></script>
+<script src="js/control_panel.js"></script>
+
+    
+</body>
+</html>
