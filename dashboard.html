@@ -21,6 +21,7 @@
                 <img src="images/logo.jpeg" alt="MACDEN" />
                 <span>MACDEN</span>
             </div>
+            <span class="admin-badge">BUYER</span>
         </div>
         <div class="dash-topbar-right">
             <div class="dash-user-pill">
@@ -79,6 +80,7 @@
             <button class="dash-chip"
                 data-category="rtd-energy">RTD & Energy</button>
         </div>
+        <p class="dash-product-count" id="dash-product-count"></p>
     </section>
 
     <!-- PRODUCT GRID -->
@@ -87,8 +89,7 @@
             <p id="dash-loading" class="dash-loading">
                 Loading products...
             </p>
-            <p id="dash-empty" class="dash-empty"
-                hidden>
+            <p id="dash-empty" class="dash-empty" hidden>
                 No products found.
             </p>
             <div id="dash-grid" class="dash-grid"></div>
@@ -111,6 +112,19 @@
                 Download Selection (PDF)
             </button>
         </div>
+    </div>
+
+    <!-- FLOATING CHAT BUTTON -->
+    <div class="dash-chat-fab" id="dash-chat-fab"
+        onclick="window.open('https://wa.me/2348000000000', '_blank')">
+        <svg width="24" height="24" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5
+                a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z">
+            </path>
+        </svg>
     </div>
 
     <div id="footer" style="display:none;"></div>

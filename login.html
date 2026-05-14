@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Login — MACDEN</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+
     <body class="login-page hide-login-btn">
         <!---- Nav loadshere -->
         <div id="navbar"></div>
@@ -28,30 +28,31 @@
            </p>
 
            <!--- FORM --->
-           <form class="login-form">
+    <!-- QUICK ACCESS - Stage 1 Testing -->
+<div class="login-quick">
 
-            <div class="form-group">
-               <label class="form-label">Email address</label> 
-               <input  type="email" class="form-input"
-               placeholder="your@email.com" required />
-            </div>
+    <p class="login-quick-label">Access as:</p>
 
-            <div class="form-group">
-             <label class="form-label">Password</label>
-             <input type="password" class="form-input"
-             placeholder="Your password" required />
-            </div>
+    <button class="btn primary login-submit"
+        onclick="window.location='dashboard.html'">
+        Buyer Dashboard
+    </button>
 
-            <button type="submit" class="btn primary login-submit">
-                Sign in
-            </button>
+    <button class="login-quick-btn"
+        onclick="window.location='admin.html'">
+        Sales Admin
+    </button>
 
-           </form>
+    <button class="login-quick-btn"
+        onclick="window.location='control_panel.html'">
+        Owner Control Panel
+    </button>
 
+</div>
            <!-- Footer Link -->
             <div class="login-links">
                <a href="forgot_password.html" class="inline-link">Forgot password</a>
-               <span class="login-diver">.</span>
+               <span class="login-divider">·</span>
                <a href="register.html" class="inline-link">
                 Create an account
                </a>

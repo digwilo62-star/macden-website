@@ -3,185 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - MACDEN</title>
+    <title>Admin — MACDEN</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="admin-page">
 
     <div id="navbar" style="display:none;"></div>
     <div id="footer" style="display:none;"></div>
-    
-  <!-- TOP BAR -->
-<header class="admin-topbar">
-    <div class="admin-topbar-left">
-        <buttom class="dash-home-btn" 
-        onclick="window.location='index.html'">
-        &larr; Back to site
-        </buttom>
-        <div class="dash-logo">
-         <img src="images/logo.jpeg " alt="MACDEN"/>
-         <span>MACDEN</span>   
+
+    <!-- TOP BAR -->
+    <header class="admin-topbar">
+        <div class="admin-topbar-left">
+            <button class="dash-home-btn"
+                onclick="window.location='index.html'">
+                &larr; Back to site
+            </button>
+            <div class="dash-logo">
+                <img src="images/logo.jpeg" alt="MACDEN" />
+                <span>MACDEN</span>
+            </div>
+            <span class="admin-badge">ADMIN</span>
         </div>
-        <span class="admin-badge">ADMIN</span>
+        <div class="admin-topbar-right">
+            <div class="dash-user-pill">
+                <div class="dash-user-avatar">A</div>
+                <span class="dash-user-name">Admin</span>
+            </div>
+            <button class="dash-logout-btn"
+                onclick="window.location='login.html'">
+                Logout
+            </button>
+        </div>
+    </header>
+
+    <!-- PAGE HEADER -->
+    <section class="admin-header">
+        <h1 class="admin-title">Sales Management</h1>
+        <p class="admin-subtitle">
+            Update prices and manage your product catalogue.
+        </p>
+    </section>
+
+    <!-- TABS -->
+    <div class="admin-tabs">
+        <button class="admin-tab active"
+            id="tab-prices"
+            onclick="switchTab('prices')">
+            Price List
+        </button>
+        <button class="admin-tab"
+            id="tab-products"
+            onclick="switchTab('products')">
+            Products
+        </button>
     </div>
 
-    <div class="admin-topbar-right">
-       <div class="dash-user-pill">
-        <div class="dash-user-avatar">A</div>
-        <span class="dash-user-name">Admin</span>
-       </div> 
-       <button class="dash-logout-btn"
-       onclick="window.location='login.html'">
-        Logout           
-    </button>
-    </div>
-</header>
-<!-- PAGE HEADER -->
- <section class="admin-header">
-    <h1 class="admin-title">Sales Management</h1>
-    <p class="admin-subtitle">
-        Update prices and manage your product catalogue.
-    </p>
- </section>
+    <!-- PRICE LIST TAB -->
+    <section class="admin-section" id="panel-prices">
 
- <!--- TABS -->
- <div class="admin-tabs">
-    <button class="admin-tab active"
-    id="tab-prices"
-    onclick="switchTab('prices')">
-   Price List
-</button>
-<button class="admin-tab"
-id="tab-products"
-onclick="switchTab('products')">
-Products
-</button>
- </div>
-
- <!-- PRICE LIST TAB -->
-<section class="admin-section" id="panel-prices">
-
-
-<div class="admin-toolbar">
-    <input type="text" 
-    id="price-search"
-    class="admin-search"
-    placeholder="Search products...."/>
-    <p class="admin-hint">
-        Click Edit on any row to update its price.
-    </p>
-</div>
-
-
-<div class="admin-table-wrap">
-    <table class="admin-table" id="price-table">
-        <thead>
-            <tr>
-
-                <th>Product</th>
-                <th>Category</th>
-                <th>Unit</th>
-                <th>Current Price</th>
-                <th>Action</th>
-
-            </tr>
-        </thead>
-
-    <tbody id="price-tbody">
-    </tbody>
-    </table>
-</div>
-
-</section>
-
-<!-- PRODUCT TAB -->
-<section class="admin-section" id="panel-products"
-style="display: none;">
-
-<div class="admin-toolbar">
-    <input type="text"
-    id="product-search"
-    class="admin-search"
-    placeholder="Search products..." />
-    <button class="btn primary adin-add-btn"
-    onclick="showAddForm()">
-    + Add new product
-</button>
-</div>
-
-
-<!--- Add new product form --->
-<div class="admin-add-form" id="admin-add-form"
-style="display: none;">
-    <h3 class="admin-form-title">New product</h3>
-    <div class="admin-form-grid">
-        <div class="form-group">
-            <label class="form-label">Product name </label>
-            <input type="text" class="form-input"
-            id="new-name"
-            placeholder="e.g. Guiness Stout RGB" />
-
+        <div class="admin-toolbar">
+            <input type="text"
+                id="price-search"
+                class="admin-search"
+                placeholder="Search products..." />
+            <p class="admin-hint">
+                Click Edit on any row to update its price.
+            </p>
         </div>
 
-    <div class="form-group">
-       <label class="form-label">Category</label>
-       <select class="form-input" id="new-category">
-        <option value="">Select category</option>
-        <option value="wines">Wines</option>
-        <option value="spirits">Spirits</option>
-        <option value="bitters">Bitters</option>
-        <option value="beer-stout">Beer & Stout</option>
-        <option value="malt-drinks">Malt Drinks</option>
-        <option value="rtd-energy">RTD & Energy</option>
-       </select> 
-    </div>
+        <div class="admin-table-wrap">
+            <table class="admin-table" id="price-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Unit</th>
+                        <th>Current Price</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="price-tbody"></tbody>
+            </table>
+        </div>
 
-    <div class="form-group">
-        <label class="form-label">Unit</label>
-        <select class="form-input" id="new-unit">
-    <option value="Tray">Tray</option>
-    <option value="Crt">Crate</option>
-    <option value="Carton">Carton</option>
-        </select>
-    </div>
+    </section>
 
-    <div class="form-group">
-        <label class="form-label">Price (#)</label>
-        <input type="number" class="form-input"
-        id="new-price"
-        placeholder="e.g 12500" />
-    </div>
-    </div>
-   <div class="admin-form-actions">
-    <button class="btn secondary"
-    onclick="hideAdd()">
-        Add product
-    </button>
-   </div>
-</div>
+    <!-- PRODUCTS TAB -->
+    <section class="admin-section" id="panel-products"
+        style="display:none;">
 
-<div class="admin-table-wrap">
-    <table class="admin-table" id="product-table">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Category</th>
-                <th>Unit</th>
-                <th>Price</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="product-tbody">
-        </tbody>
-    </table>
-</div>
+        <div class="admin-toolbar">
+            <input type="text"
+                id="product-search"
+                class="admin-search"
+                placeholder="Search products..." />
+            <button class="btn primary admin-add-btn"
+                onclick="showAddForm()">
+                + Add new product
+            </button>
+        </div>
 
+        <!-- Add new product form -->
+        <div class="admin-add-form" id="admin-add-form"
+            style="display:none;">
+            <h3 class="admin-form-title">New product</h3>
+            <div class="admin-form-grid">
 
+                <div class="form-group">
+                    <label class="form-label">Product name</label>
+                    <input type="text" class="form-input"
+                        id="new-name"
+                        placeholder="e.g. Guinness Stout RGB" />
+                </div>
 
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select class="form-input" id="new-category">
+                        <option value="">Select category</option>
+                        <option value="wines">Wines</option>
+                        <option value="spirits">Spirits</option>
+                        <option value="bitters">Bitters</option>
+                        <option value="beer-stout">Beer & Stout</option>
+                        <option value="malt-drinks">Malt Drinks</option>
+                        <option value="rtd-energy">RTD & Energy</option>
+                    </select>
+                </div>
 
+                <div class="form-group">
+                    <label class="form-label">Unit</label>
+                    <select class="form-input" id="new-unit">
+                        <option value="Tray">Tray</option>
+                        <option value="Crt">Crate</option>
+                        <option value="Carton">Carton</option>
+                    </select>
+                </div>
 
-<script src="js/products.js"></script>
-<script src="js/admin.js"></script>
+                <div class="form-group">
+                    <label class="form-label">Price (₦)</label>
+                    <input type="number" class="form-input"
+                        id="new-price"
+                        placeholder="e.g. 12500" />
+                </div>
+
+            </div>
+            <div class="admin-form-actions">
+                <button class="btn secondary"
+                    onclick="hideAddForm()">
+                    Cancel
+                </button>
+                <button class="btn primary"
+                    onclick="addNewProduct()">
+                    Add product
+                </button>
+            </div>
+        </div>
+
+        <div class="admin-table-wrap">
+            <table class="admin-table" id="product-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Category</th>
+                        <th>Unit</th>
+                        <th>Price</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="product-tbody"></tbody>
+            </table>
+        </div>
+
+    </section>
+
+    <script src="js/products.js"></script>
+    <script src="js/admin.js"></script>
 
 </body>
 </html>

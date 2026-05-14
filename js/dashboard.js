@@ -3,7 +3,7 @@ DASHBOARD - MAIN LOGIC
 ==========================================*/
 
 let selectedProducts = [];
-let currentFiltered = [];
+let currentFiltered  = [];
 
 const dashCategoryLabels = {
     "wines"      : "WINES",
@@ -23,20 +23,22 @@ const samplePrices = {
     "rtd-energy" : "₦26,000 / Tray"
 };
 
+/*-------- Build a single card --------*/
 function buildDashCard(product) {
 
     const categoryLabel = dashCategoryLabels[product.category]
         || product.category.toUpperCase();
 
-    const price = samplePrices[product.category] || "Price on request";
+    const price = samplePrices[product.category]
+        || "Price on request";
 
     const isSelected = selectedProducts.some(function (p) {
         return p.id === product.id;
     });
 
     const selectedClass = isSelected ? "dash-card--selected" : "";
-    const btnText = isSelected ? "&#10003; Selected" : "+ Select";
-    const btnClass = isSelected
+    const btnText       = isSelected ? "&#10003; Selected" : "+ Select";
+    const btnClass      = isSelected
         ? "dash-select-btn dash-select-btn--active"
         : "dash-select-btn";
 
@@ -59,23 +61,28 @@ function buildDashCard(product) {
     `;
 }
 
+/*-------- Render products --------*/
 function renderDashProducts(list) {
 
     const grid    = document.getElementById("dash-grid");
     const loading = document.getElementById("dash-loading");
     const empty   = document.getElementById("dash-empty");
+    const count   = document.getElementById("dash-product-count");
 
     loading.hidden = true;
 
     if (list.length === 0) {
         grid.innerHTML = "";
         empty.hidden   = false;
+        count.textContent = "";
     } else {
-        empty.hidden   = true;
-        grid.innerHTML = list.map(buildDashCard).join("");
+        empty.hidden      = true;
+        grid.innerHTML    = list.map(buildDashCard).join("");
+        count.textContent = "Showing " + list.length + " products";
     }
 }
 
+/*-------- Toggle selection --------*/
 function toggleSelect(productId) {
 
     const product = products.find(function (p) {
@@ -98,6 +105,7 @@ function toggleSelect(productId) {
     updateSelectionBar();
 }
 
+/*-------- Update selection bar --------*/
 function updateSelectionBar() {
 
     const bar   = document.getElementById("dash-selection-bar");
@@ -112,10 +120,12 @@ function updateSelectionBar() {
     }
 }
 
+/*-------- Apply filters --------*/
 function applyFilters() {
 
     const activeChip = document.querySelector(".dash-chip.active");
-    const category   = activeChip ? activeChip.dataset.category : "all";
+    const category   = activeChip
+        ? activeChip.dataset.category : "all";
     const search     = document.getElementById("dash-search")
         .value.toLowerCase().trim();
 
@@ -137,6 +147,7 @@ function applyFilters() {
     renderDashProducts(currentFiltered);
 }
 
+/*-------- Wire up filter chips --------*/
 document.querySelectorAll(".dash-chip").forEach(function (chip) {
     chip.addEventListener("click", function () {
         document.querySelectorAll(".dash-chip").forEach(function (c) {
@@ -147,11 +158,13 @@ document.querySelectorAll(".dash-chip").forEach(function (chip) {
     });
 });
 
+/*-------- Wire up search --------*/
 document.getElementById("dash-search")
     .addEventListener("input", function () {
         applyFilters();
     });
 
+/*-------- Wire up clear button --------*/
 document.getElementById("dash-clear-btn")
     .addEventListener("click", function () {
         selectedProducts = [];
@@ -159,6 +172,32 @@ document.getElementById("dash-clear-btn")
         updateSelectionBar();
     });
 
+/*-------- Wire up download full list --------*/
+document.getElementById("download-full-btn")
+    .addEventListener("click", function () {
+        alert(
+            "Full price list PDF will be generated " +
+            "once the system is connected to the server. " +
+            "Coming in Stage 3."
+        );
+    });
+
+/*-------- Wire up download selection --------*/
+document.getElementById("download-selection-btn")
+    .addEventListener("click", function () {
+        if (selectedProducts.length === 0) {
+            alert("No products selected.");
+            return;
+        }
+        alert(
+            "Selection PDF for " + selectedProducts.length +
+            " product(s) will be generated once the " +
+            "system is connected to the server. " +
+            "Coming in Stage 3."
+        );
+    });
+
+/*-------- Initial render --------*/
 document.addEventListener("DOMContentLoaded", function () {
     currentFiltered = products;
     renderDashProducts(currentFiltered);

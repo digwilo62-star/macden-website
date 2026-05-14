@@ -3,92 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MACDEN</title>
+    <title>MACDEN — Nigerian Beverage Distribution</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="home-page hide-login-btn">
-    <!--nav will load here-->
+
+    <!-- NAVBAR -->
     <div id="navbar"></div>
 
-    <!--Page content-->
-    <section class="hero fade-in">
+    <!-- HERO SECTION -->
+    <section class="hero-split">
 
-        <div class="hero-container">
+        <!-- LEFT SIDE -->
+        <div class="hero-split-left">
 
-            <!--LEFT SIDE-->
-            <div class="hero-left">
+            <div class="hero-logo-block">
+                <img src="images/logo.jpeg"
+                    alt="MACDEN Logo"
+                    class="hero-logo-img" />
+            </div>
 
-            <p class="hero-tag">NIGERIA BEVERAGE DISTRIBUTION</p>
-         
+            <h1 class="hero-split-title">
+                Nigeria's bulk beverage supply, done right.
+            </h1>
 
-             <h1>
-        Nigeria's beverage supply, done right.
-         </h1>
+            <p class="hero-split-sub">
+                Supplying wines, spirits, beer, malt, and RTD
+                products in bulk to retailers, hotels, and
+                wholesale buyers across Nigeria.
+            </p>
 
-          <p class="hero-description">
-             MACDEN supplies wines, spirits, beer, malt, and RTD products in bulk to retailers, hotels, and buyers across Nigeria. Built for consistency.
-</p>
-        
+            <div class="hero-split-buttons">
+                <button class="btn primary"
+                    onclick="window.location='login.html'">
+                    Login for best prices
+                </button>
+                <button class="btn secondary"
+                    onclick="window.location='work_with_us.html'">
+                    Work with us
+                </button>
+            </div>
 
-        <div class="hero-buttons">
-            <button class="btn primary" onclick="window.location='login.html'">Login for best prices</button>
-            <button class="btn secondary" onclick="window.location='work_with_us.html'">Work with us</button>
         </div>
-        </div>
 
-        <!--RIGHT SIDE-->
-        <div class="hero-right">
-        <img src="images/logo.jpeg" alt="Macden Logo">    
-        </div>
+        <!-- RIGHT SIDE - CAROUSEL -->
+        <div class="hero-split-right">
+
+            <div class="gallery-carousel">
+
+                <!-- Carousel track -->
+                <div class="carousel-track" id="carousel-track">
+                    <!-- Cards injected by gallery.js -->
+                </div>
+
+                <!-- Arrows -->
+                <button class="carousel-arrow carousel-arrow--left"
+                    id="carousel-prev">
+                    &#8592;
+                </button>
+                <button class="carousel-arrow carousel-arrow--right"
+                    id="carousel-next">
+                    &#8594;
+                </button>
+
+                <!-- Dots -->
+                <div class="carousel-dots" id="carousel-dots"></div>
+
+            </div>
 
         </div>
 
     </section>
 
-    <!-- <section class="stats fade-in">
-
-    <div class="stats-container">
-
-    <div class="stat">
-        <h2>14+</h2>
-
-        <p class="stat-title">Distribution Region</p>
-
-        <span>Strategic beverage distribution coverage across high-demand commercial territories.</span>
-
+    <!-- LIGHTBOX -->
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-overlay" id="lightbox-overlay"></div>
+        <div class="lightbox-modal">
+            <button class="lightbox-close"
+                id="lightbox-close">
+                &#10005;
+            </button>
+            <div class="lightbox-img-wrap">
+                <img src="" alt=""
+                    class="lightbox-img"
+                    id="lightbox-img" />
+            </div>
+            <div class="lightbox-caption"
+                id="lightbox-caption"></div>
+            <div class="lightbox-nav">
+                <button class="lightbox-btn"
+                    id="lightbox-prev">
+                    &#8592; Prev
+                </button>
+                <span class="lightbox-counter"
+                    id="lightbox-counter"></span>
+                <button class="lightbox-btn"
+                    id="lightbox-next">
+                    Next &#8594;
+                </button>
+            </div>
+        </div>
     </div>
 
-    <div class="stat">
-        <h2>2.5M</h2>
+    <!-- GLASS FOOTER -->
+    <footer class="glass-footer">
+        <div class="glass-footer-container">
+            <p class="glass-footer-brand">
+                &copy; 2026 MACDEN &mdash;
+                Nigerian Beverage Distribution
+            </p>
+            <ul class="glass-footer-links">
+                <li><a href="#">Terms</a></li>
+                <li><a href="#">Privacy</a></li>
+                <li><a href="#">Cookies</a></li>
+            </ul>
+        </div>
+    </footer>
 
-        <p class="stat-title">
-            storage Capacity</p>
-
-        <span>High-volume warehousing and palletized freight handling infrastructure.</span>
-        
-    </div>
-
-    <div class="stat">
-        <h2>15</h2>
-
-        <p class="stat-title">years operation</p>
-
-        <span>
-            proven procurement network with long-term supplier retail partnerships.
-        </span>
-    </div>
-
-    </div>
-
-    </section> -->
-
-
-          <!--  FOOTER --->
-        <div id="footer">
-
-    
-
-
+    <script src="js/gallery.js"></script>
     <script src="js/web.js"></script>
+
 </body>
 </html>

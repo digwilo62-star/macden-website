@@ -3,114 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MACDEN</title>
+    <title>Products — MACDEN</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!--nav will load here -->
+
     <div id="navbar"></div>
 
-     <!--Page content-->
-        <section class="page-header fade-in">
-            <div class="page-header-container">
-
-                <!-- small upper case label above the title-->
+    <!-- PAGE HEADER -->
+    <section class="page-header">
+        <div class="page-header-container">
             <p class="page-tag">CATALOGUE</p>
-            
-            <!-- Main page heading-->
-             <h1 class="page-title">Browse our full product range</h1>
-
-            <!-- subtitle within links to sign in or request buyer access-->
+            <h1 class="page-title">
+                Browse our full product range
+            </h1>
             <p class="page-subtitle">
-              Live regional pricing is reserved for verified buyers.
-            <a href="login.html" class="inline-link">Sign in</a> or
-            <a href="request-access.html" class="inline-link">create account</a>
-            to view prices.    
-            </p>  
+                Sign in to unlock live regional pricing
+                for your area.
+            </p>
+        </div>
+    </section>
 
+    <!-- SEARCH + FILTER BAR -->
+    <section class="products-controls">
+        <div class="products-controls-container">
+
+            <!-- Search -->
+            <div class="products-search-wrap">
+                <svg class="products-search-icon"
+                    viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21"
+                        x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text"
+                    id="products-search"
+                    class="products-search-input"
+                    placeholder="Search products..." />
+                <button class="products-search-clear"
+                    id="search-clear-btn"
+                    style="display:none;">
+                    &#10005;
+                </button>
             </div>
 
-        </section>
+            <!-- Filter chips -->
+            <div class="filter-container" id="filter-container">
+                <button type="button"
+                    class="filter-chip active"
+                    data-category="all">
+                    All
+                </button>
+                <button type="button"
+                    class="filter-chip"
+                    data-category="wines">
+                    Wines
+                </button>
+                <button type="button"
+                    class="filter-chip"
+                    data-category="spirits">
+                    Spirits
+                </button>
+                <button type="button"
+                    class="filter-chip"
+                    data-category="bitters">
+                    Bitters
+                </button>
+                <button type="button"
+                    class="filter-chip"
+                    data-category="beer-stout">
+                    Beer & Stout
+                </button>
+                <button type="button"
+                    class="filter-chip"
+                    data-category="malt-drinks">
+                    Malt Drinks
+                </button>
+                <button type="button"
+                    class="filter-chip"
+                    data-category="rtd-energy">
+                    RTD & Energy
+                </button>
+            </div>
 
-        <!------ CATEGORY FILTER---------->
-        <!----Pill button that filter the product grid by-------->
-        <!----- category. The "ALL" Chip is active by default----------->
-        <!---- Each button carries a data-category attribute that------------>
-        <!--- matches the category key in our product data.------------->
-        <!--- The filter logic gets wired up in js later.------------->
-        <section class="filter-section">
-           <div class="filter-container">
+            <!-- Product count -->
+            <p class="products-count"
+                id="products-count"></p>
 
-        <button type="button" class="filter-chip active" data-category="all">
-            All
-        </button>
+        </div>
+    </section>
 
-        <button type="button" class="filter-chip" data-category="wines">
-            Wines
-        </button>
+    <!-- PRODUCT GRID -->
+    <section class="products-section">
+        <div class="products-section-container">
 
-        <button type="button" class="filter-chip" data-category="spirits">
-            Spirits
-        </button>
-
-        <button type="button" class="filter-chip" data-category="bitters">
-            Bitters
-        </button>
-
-        <button type="button" class="filter-chip" data-category="beer-stout">
-            Beer &amp; Stout
-        </button>
-
-        <button type="button" class="filter-chip" data-category="malt-drinks">
-            Malt Drinks
-        </button>
-
-        <button type="button" class="filter-chip" data-category="rtd-energy">
-            RTD &amp; Energy
-        </button>
-
-           </div> 
-        </section>
-
-        <!-------------------------------------------
-        
-        <--PRODUCT GRID
-        <--The grid that holds all product cards.
-        <--
-        <-- States this section can be in :
-        <-- 1. Loading - shown until products.js
-        <-- 2. Filled - cards rendered into #products-grid
-        <-- 3. Empty - shown if a filter has zero matches
-        <============================================== -->
-        
-        <section class="products-section">
-            <div class="products-section-container">
-
-                <!-- Loading states - visible until js replaces it -->
-                 <p id="products-loading" class="products-loading">
-                    Loading products... 
-                 </p>
-
-                <!-- Grid population by products.js with card markup--> 
-                <div id="products-grid" class="products-grid">
-                    <!-- Product cards inserted here by javaScript-->
-                </div>
-
-        <!--- Empty state- shown when a filter has no matches -------->
-            <p id="products-empty" class="products-empty" hidden>
-                No products match your filter .
+            <p id="products-loading"
+                class="products-loading">
+                Loading products...
             </p>
 
+            <div id="products-grid"
+                class="products-grid"></div>
+
+            <!-- Empty state -->
+            <div id="products-empty"
+                class="products-empty-state"
+                hidden>
+                <p class="products-empty-title">
+                    No products found.
+                </p>
+                <p class="products-empty-sub">
+                    Try a different search term
+                    or clear the filter.
+                </p>
+                <button class="btn primary"
+                    id="empty-clear-btn">
+                    Clear search
+                </button>
             </div>
-        </section>
 
-        <!-- FOOTER -->
-        <div id="footer"></div>
+        </div>
+    </section>
 
+    <!-- STICKY CTA STRIP -->
+    <div class="products-cta-strip">
+        <div class="products-cta-inner">
+            <p class="products-cta-text">
+                <span class="products-cta-lock">
+                    &#128274;
+                </span>
+                Prices are available to
+                registered buyers only.
+            </p>
+            <div class="products-cta-buttons">
+                <button class="btn primary products-cta-btn"
+                    onclick="window.location='login.html'">
+                    Login
+                </button>
+                <button class="products-cta-outline"
+                    onclick="window.location='register.html'">
+                    Create free account
+                </button>
+            </div>
+        </div>
+    </div>
 
+    <!-- FOOTER -->
+    <div id="footer"></div>
 
-        <script src="js/products.js"></script>
-        <script src="js/products-page.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/products-page.js"></script>
     <script src="js/web.js"></script>
+
 </body>
 </html>

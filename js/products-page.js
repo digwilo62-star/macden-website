@@ -1,151 +1,184 @@
 /*=========================================
-PRODUCTS PAGE - RENDERING LOGIC
+PRODUCTS PAGE - RENDERING + FILTER + SEARCH
 
-Read the global products array (from products.js)
-and renders each product a card inside the 
-#products-grid element.
+Reads the global products array (products.js)
+and renders cards into #products-grid.
 
-This files does NOT contain the data itself - that 
-lives in product.js. keeping data and logic separate 
-makes either one easy to change without touching 
-the other 
-=======================================*/
+Features:
+- Live search as user types
+- Category filter chips
+- Product count display
+- Empty state with clear button
+==========================================*/
 
-
-/*--------- Category display labels--------------------
-Map the lowercase category keys (used in the data 
-and on the filter chips) to their friendly display 
-label for the category badge inside each card.*/ 
-
+/*-------- Category display labels --------*/
 const categoryLabels = {
-    "wines" : "Wines",
-    "spirits" : "Spirits",
-    "bitters": "Bitters",
+    "wines"      : "Wines",
+    "spirits"    : "Spirits",
+    "bitters"    : "Bitters",
     "beer-stout" : "Beer & Stout",
-    "malt-drinks" : "Malt Drinks",
-    "rtd-energy" :"RTD & Energy "
+    "malt-drinks": "Malt Drinks",
+    "rtd-energy" : "RTD & Energy"
 };
 
-/*------- Build a single product card--------------------
-Takes one product object and returns the HTML
-string for that product's card.
-
-The backtick syntax ('...') is a template literal
-it lets us drop variable values straight into the 
-string with ${...}*/
-
+/*-------- Build a single product card --------*/
 function buildProductCard(product) {
-    //Look up the friendly category label.
-    //If the key isn't i our map, fall back to the raw key
-    // so we never end up with a blank category badge.
-    const categoryDisplay = categoryLabels[product.category] || product.category;
 
-    return `   <div class="product-card">
-     <div class="product-card-accent"></div>
-     <div class="product-card-body">
-       <p class="product-category-label">${categoryDisplay}</p>
-       <h3 class="product-name">${product.name}</h3>
-       <a href="login.html" class="product-price-link">Sign in for price</a> 
-        </div>   
-    </div>
- `;
- 
+    const categoryDisplay = categoryLabels[product.category]
+        || product.category;
 
+    return `
+        <div class="product-card">
+            <div class="product-card-accent"></div>
+            <div class="product-card-body">
+                <p class="product-category-label">
+                    ${categoryDisplay}
+                </p>
+                <h3 class="product-name">
+                    ${product.name}
+                </h3>
+                <p class="product-unit">
+                    ${product.unit}
+                </p>
+                <a href="login.html"
+                    class="product-lock-btn">
+                    &#128274; Sign in for price
+                </a>
+            </div>
+        </div>
+    `;
 }
 
+/*-------- Update product count label --------*/
+function updateCount(list, category, search) {
 
-/*----- Render all products into the grid------------------
-Builds card markup for every product in the list,
-joins them into a single HTML string, and injects
-that string into the grid container. Then hides
-the loading messages.*/
+    const count = document.getElementById("products-count");
+    const total = list.length;
 
-function renderProducts(productList) {
+    if (search !== "") {
+        count.textContent = total === 0
+            ? "No results for \"" + search + "\""
+            : total + " result" +
+              (total === 1 ? "" : "s") +
+              " for \"" + search + "\"";
+    } else if (category !== "all") {
+        const label = categoryLabels[category] || category;
+        count.textContent = "Showing " + total +
+            " " + label + " product" +
+            (total === 1 ? "" : "s");
+    } else {
+        count.textContent = "Showing all " +
+            total + " products";
+    }
+}
 
-    //Find the grid and loading elements in the DOM
-    const grid = document.getElementById("products-grid");
+/*-------- Render products into the grid --------*/
+function renderProducts(list, category, search) {
+
+    const grid    = document.getElementById("products-grid");
     const loading = document.getElementById("products-loading");
+    const empty   = document.getElementById("products-empty");
 
-    //Build HTML for each card, then join into one big string.
-    //.map() runs buildProductCard() on every item and returns 
-    // a new array; .join ("") flattens that array into a string.
-    const cardsHTML = productList.map(buildProductCard).join("");
+    loading.hidden = true;
 
-    // Inject the cards into the grid
-    grid.innerHTML = cardsHTML;
+    if (list.length === 0) {
+        grid.innerHTML = "";
+        empty.hidden   = false;
+    } else {
+        empty.hidden   = true;
+        grid.innerHTML = list.map(buildProductCard).join("");
+    }
 
-    //HIde the "loading products...." message
-    loading.hidden=true;
+    updateCount(list, category || "all", search || "");
 }
 
+/*-------- Apply both filters together --------*/
+function applyFilters() {
 
-/*-------Run once the page is ready-------
-DOMcontentLoaded fires when the HTML is fully 
-parsed. By thst point , #products-grid and 
-#products-loading exist in the DOM, so we can
-safely find and modify them.*/
+    const activeChip = document.querySelector(
+        ".filter-chip.active"
+    );
+    const category = activeChip
+        ? activeChip.dataset.category : "all";
 
-document.addEventListener("DOMContentLoaded", function () {
-    renderProducts(products);
-    setupFilters();
-});
+    const searchInput = document.getElementById(
+        "products-search"
+    );
+    const search = searchInput
+        ? searchInput.value.toLowerCase().trim() : "";
 
+    // Show or hide clear button
+    const clearBtn = document.getElementById("search-clear-btn");
+    if (clearBtn) {
+        clearBtn.style.display = search !== "" ? "block" : "none";
+    }
 
-/*========================================================
---------SET UP CATEGORY FILTER ---------
-Wire up the filter chips at the top of the page. 
-Each chip has a data-category attribute (e.g "all", "wines", "spirits"). when a chip is clicked:
-1.) Mark this as active (others go inactive )
-2.) Filter the products array by that category 
-3.) Re-enter the grid with the filter list
-4.) show/hide the empty-state message
-=======================================================*/
+    let filtered = products;
 
-function setupFilters() {
-    //Grab every filter chip on the page
-    const chips = document.querySelectorAll(".filter-chip");
+    // Category filter
+    if (category !== "all") {
+        filtered = filtered.filter(function (p) {
+            return p.category === category;
+        });
+    }
 
-    //Grab the empty-state message (shown when no matches)
-    const empty = document.getElementById("products-empty");
+    // Search filter
+    if (search !== "") {
+        filtered = filtered.filter(function (p) {
+            return p.name.toLowerCase().includes(search);
+        });
+    }
 
-    //Loop over each chip and attach a click listener
-    chips.forEach(function (chip) {
-        chip.addEventListener("click" ,function () {
+    renderProducts(filtered, category, search);
+}
 
-            //step 1: deaactiate every chip, then activate the clicked one
-            chips.forEach(function (c) {
-                c.classList.remove("active");
-            });
+/*-------- Wire up filter chips --------*/
+document.querySelectorAll(".filter-chip")
+    .forEach(function (chip) {
+        chip.addEventListener("click", function () {
+            document.querySelectorAll(".filter-chip")
+                .forEach(function (c) {
+                    c.classList.remove("active");
+                });
             chip.classList.add("active");
-
-            //steo 2: read the chip's data-category attribute
-            const category = chip.dataset.category;
-
-            // step 3: filter the products list.
-            // "all" shows everything; anything else keeps only matches matches.
-            let filtered;
-            if (category === "all") {
-                filtered = products;
-            }
-           else {
-            filtered = products.filter(function (p) {
-                return p.category === category;
-            });
-               }
-
-            // step 4: re-render the empty-state message
-           renderProducts(filtered);
-
-            // step 5: toggle the empty-state message.
-            // only runs if the empty element exist in the HTML.
-            if (empty) {
-                empty.hidden = filtered.length > 0;
-            }
-        
-
+            applyFilters();
         });
     });
 
-
+/*-------- Wire up search input --------*/
+const searchInput = document.getElementById("products-search");
+if (searchInput) {
+    searchInput.addEventListener("input", function () {
+        applyFilters();
+    });
 }
 
+/*-------- Wire up search clear button --------*/
+const searchClearBtn = document.getElementById("search-clear-btn");
+if (searchClearBtn) {
+    searchClearBtn.addEventListener("click", function () {
+        document.getElementById("products-search").value = "";
+        applyFilters();
+    });
+}
+
+/*-------- Wire up empty state clear button --------*/
+const emptyClearBtn = document.getElementById("empty-clear-btn");
+if (emptyClearBtn) {
+    emptyClearBtn.addEventListener("click", function () {
+        document.getElementById("products-search").value = "";
+        document.querySelectorAll(".filter-chip")
+            .forEach(function (c) {
+                c.classList.remove("active");
+            });
+        document.querySelector(
+            ".filter-chip[data-category='all']"
+        ).classList.add("active");
+        applyFilters();
+    });
+}
+
+/*-------- Initial render --------*/
+document.addEventListener("DOMContentLoaded", function () {
+    applyFilters();
+});
