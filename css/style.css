@@ -55,8 +55,7 @@ body{
     background: #fdfdf9;
     color:#111 ;  
     line-height:1.6;
-    padding-top: 90px;
-    
+    padding-top: 0;
 }
 
 /*  SMOOTHER SCROLLING */
@@ -64,125 +63,147 @@ html{
     scroll-behavior: smooth;
 }
 
-/*=====NavBar Wrapper=====*/
+/*================================================
+NAVBAR — COMPLETE STYLES
+
+Sections:
+1.  Navbar wrapper
+2.  Nav container (glass pill)
+3.  Logo
+4.  Nav links (desktop)
+5.  Nav right (login button)
+6.  Login button
+7.  Active link state
+8.  Underline animation
+9.  Mobile top bar adjustments
+10. Bottom navigation bar
+11. Bottom nav items
+12. Bottom nav active state
+13. Body padding adjustments
+14. Responsive
+================================================*/
+
+
+/*------------------------------------------------
+1. NAVBAR WRAPPER
+Fixed to top. Full width. Glass background.
+Sits above everything via z-index.
+------------------------------------------------*/
+
 .navbar {
     width: 100%;
-  
     position: fixed;
     top: 0;
     left: 0;
-
     z-index: 1000;
-
     background: rgba(255, 255, 255, 0.78);
-
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-
-    transition: all 0.3s  ease;
-}
-
-
-/*=====Inner Container=====*/
-.nav-container {
-    max-width: 1200px;
-
-    margin: 14px auto;
-
-    padding: 16px 28px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    background: rgba(255, 255, 255, 0.65);
-
-    border: 1px solid rgba(255,255,255,0.3);
-
-    border-radius: 18px;
-
-    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
 }
 
-/*=====LEFT : LOGO ======*/
-.logo{
+
+/*------------------------------------------------
+2. NAV CONTAINER
+Inner glass pill — centers content, limits width.
+Logo left, links center, login right.
+------------------------------------------------*/
+
+.nav-container {
+    max-width: 1200px;
+    margin: 8px auto;
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 18px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+
+/*------------------------------------------------
+3. LOGO
+Left side. Image + brand name inline.
+Hover rotates logo slightly.
+------------------------------------------------*/
+
+.logo {
     display: flex;
     align-items: center;
     gap: 10px;
-} 
+    text-decoration: none;
+}
 
 .logo img {
-    width: 42px;
-    height: 42px;
-
+    width: 36px;
+    height: 36px;
     object-fit: cover;
-
-    border-radius: 10px;
-
+    border-radius: 8px;
     transition: transform 0.3s ease;
 }
 
-.logo:hover img{
+.logo:hover img {
     transform: rotate(-4deg) scale(1.06);
 }
 
 .logo span {
-    font-size: 19px;
+    font-size: 17px;
     font-weight: 700;
-    letter-spacing: 1.5px;
-
+    letter-spacing: 1.2px;
     color: #111;
 }
 
-/*===== CENTER: NAV LINKS=====*/
+
+/*------------------------------------------------
+4. NAV LINKS
+Center. Horizontal list of page links.
+Hidden on mobile — replaced by bottom nav.
+------------------------------------------------*/
+
 .nav-links {
     list-style: none;
     display: flex;
-    gap: 32px;
+    gap: 28px;
+    margin: 0;
+    padding: 0;
 }
 
 .nav-links li a {
     text-decoration: none;
-
-   font-size: 15px;
-   font-weight: 600;
-
-   color: #444;
-
-   position: relative;
-
-   padding: 8px 2px;
-   
-   transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+    position: relative;
+    padding: 8px 2px;
+    transition: color 0.2s ease;
 }
 
 .nav-links li a:hover {
-    color: #222;
-    transform: translateY(-1px);
+    color: #111;
 }
 
-/*underline animation*/
+
+/*------------------------------------------------
+5. UNDERLINE ANIMATION
+Green underline slides in from center on hover.
+Active page link has permanent underline.
+Green is used ONLY here — brand identity marker.
+------------------------------------------------*/
+
 .nav-links li a::after {
- content: "";
-
- position: absolute;
-
- left: 50%;
- bottom: -4px;
-
- width: 0%;
- height: 2px;
-
- background: #0d5c2f;
-
- transition: all 0.3s ease;
-
- transform: translateX(-50%);
-
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -2px;
+    width: 0%;
+    height: 2px;
+    background: #0d5c2f;
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
 }
 
 .nav-links li a:not(.active):hover::after {
@@ -195,64 +216,258 @@ html{
 
 .nav-links li a.active::after {
     width: 100%;
-}   
+}
 
 
-/*Right Side*/
+/*------------------------------------------------
+6. NAV RIGHT
+Right side wrapper.
+Contains login button.
+------------------------------------------------*/
+
 .nav-right {
     display: flex;
     align-items: center;
     gap: 12px;
-}
-
-/*search input*/
-.search {
-   padding: 10px 14px;
-
-   border: 1px solid rgba(0,0,0,0.08);
-
-   background: rgba(255,255,255,0.7);
-
-   border-radius: 12px;
-
-   outline: none;
-
-   font-size: 14px;
-
-   transition: all 0.25s ease;
-}
-
-.search:focus {
-    border-color: #0d5c2f;
-
-    box-shadow: 0 0 0 4px rgba(13,92,47,0.08);
+    flex-shrink: 0;
 }
 
 
-/*  Login Button*/
+/*------------------------------------------------
+7. LOGIN BUTTON
+Black pill button — right side of navbar.
+Hidden on pages with .hide-login-btn on body.
+Minimum 44px height for proper tap target.
+------------------------------------------------*/
+
 .login-btn {
-    padding: 10px 18px;
-
+    padding: 10px 20px;
+    min-height: 44px;
     border: none;
-
-    background: #111;
+    background: #1a1a1a;
     color: #fff;
-
     font-size: 14px;
     font-weight: 600;
-
-    border-radius: 12px;
-
+    border-radius: 10px;
     cursor: pointer;
-
-    transition: all 0.3s ease;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
 .login-btn:hover {
     background: #444;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+}
 
+/* Hide login button on specific pages */
+.hide-login-btn .login-btn {
+    display: none;
+}
+
+
+/*------------------------------------------------
+8. BOTTOM NAVIGATION BAR
+Mobile only — hidden on desktop.
+Fixed to bottom of screen.
+60px tall — full tap target height.
+5 items — Home, Products, About, Work, Contact.
+Does not appear on dashboard/admin/cp pages
+because those pages set #navbar display:none.
+------------------------------------------------*/
+
+.bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: #fff;
+    border-top: 1px solid #eee;
+    z-index: 999;
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+    box-sizing: border-box;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: space-around;
+    overflow: hidden;
+}
+
+
+/*------------------------------------------------
+9. BOTTOM NAV ITEMS
+Each item is a full-height link.
+Icon on top, label below.
+Entire area is tappable — 60px tall.
+------------------------------------------------*/
+
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    flex: 1 ;
+    min-width: 0;
+    height: 100%;
+    text-decoration: none;
+    color: #aaa;
+    transition: color 0.2s ease;
+    position: relative;
+    padding: 0;
+    overflow: hidden;
+}
+
+.bottom-nav-item:hover {
+    color: #555;
+}
+
+
+/*------------------------------------------------
+10. BOTTOM NAV ACTIVE STATE
+Dark color + small indicator bar above icon.
+Set by web.js based on current page URL.
+------------------------------------------------*/
+
+.bottom-nav-item.active {
+    color: #1a1a1a;
+}
+
+/* Active indicator — small bar above icon */
+.bottom-nav-item.active::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 3px;
+    background: #1a1a1a;
+    border-radius: 0 0 3px 3px;
+}
+
+
+/*------------------------------------------------
+11. BOTTOM NAV ICON + LABEL
+Icon: SVG, 22px.
+Label: 10px, weight 600.
+Both properly sized for mobile readability.
+------------------------------------------------*/
+
+.bottom-nav-icon {
+    font-size: 20px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.bottom-nav-emoji {
+    font-size: 20px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.bottom-nav-label {
+    font-size: 10px;
+    font-weight: 600;
+    font-family: inherit;
+    letter-spacing: 0;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+
+/*------------------------------------------------
+12. BODY PADDING
+Body gets paddingTop set dynamically by web.js
+to match the actual navbar height.
+On mobile — also needs bottom padding to clear
+the fixed bottom nav (60px).
+------------------------------------------------*/
+
+body {
+    padding-bottom: 0; /* desktop — no bottom nav */
+}
+
+
+/*------------------------------------------------
+13. RESPONSIVE
+------------------------------------------------*/
+
+@media (max-width: 768px) {
+
+    /* Nav container — slimmer on mobile */
+    .nav-container {
+        margin: 6px 12px;
+        padding: 10px 16px;
+        border-radius: 14px;
+    }
+
+    /* Logo text — slightly smaller */
+    .logo span {
+        font-size: 15px;
+        letter-spacing: 1px;
+    }
+
+    .logo img {
+        width: 32px;
+        height: 32px;
+    }
+
+    /* Nav links — hidden on mobile */
+    /* Replaced by bottom navigation bar */
+    .nav-links {
+        display: none;
+    }
+
+    /* Show bottom nav on mobile */
+.bottom-nav {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        justify-content: space-around;
+    }
+
+    /* Body bottom padding clears bottom nav */
+    body {
+        padding-bottom: 60px;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .nav-container {
+        margin: 6px 10px;
+        padding: 8px 14px;
+    }
+
+    .logo span {
+        font-size: 14px;
+    }
+
+    .logo img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .login-btn {
+        padding: 7px 14px;
+        font-size: 12px;
+        min-height: 36px;
+        border-radius: 8px;
+    }
+
+    .bottom-nav-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .bottom-nav-label {
+        font-size: 9px;
+    }
 }
 
 /*======HERO SECTION=======*/
@@ -511,89 +726,10 @@ html{
     .hero-right img { width: 340px; }
 }
 
-/* ============ MOBILE (≤ 768px) ============ */
-@media (max-width: 768px) {
-    body { padding-top: 170px; } /* fallback; JS will refine */
 
-    /* Compact navbar instead of fully stacked */
-    .nav-container {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 12px;
-        padding: 12px 16px;
-        margin: 8px 10px;
-    }
-
-    .logo span { font-size: 17px; }
-
-    .nav-links {
-        order: 3;                /* push links to a second row */
-        width: 100%;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 16px;
-    }
-
-    .nav-right {
-        gap: 8px;
-        flex-wrap: nowrap;
-    }
-
-    .search {
-        flex: 1;
-        max-width: 180px;
-        padding: 8px 12px;
-        font-size: 13px;
-    }
-
-    .login-btn { padding: 8px 14px; font-size: 13px; }
-
-    /* HERO */
-    .hero { padding: 60px 20px; min-height: auto; }
-
-    .hero-container {
-        flex-direction: column;
-        text-align: center;
-        gap: 30px;
-    }
-
-    .hero-tag {
-        font-size: 11px;
-        letter-spacing: 1.2px;
-    }
-
-    .hero-left h1 { font-size: 30px; }
-
-    .hero-description { margin: 0 auto 25px auto; }
-
-    .hero-buttons { justify-content: center; flex-wrap: wrap; }
-
-    .hero-right img { width: 240px; }
-
-    /* STATS */
-    .stats-container { flex-direction: column; gap: 30px; }
-
-    .stat:not(:last-child) {
-        border-right: none;
-        border-bottom: 1px solid #ddd;
-        padding-bottom: 20px;
-    }
-
-    /* FOOTER */
-    .footer-container { flex-direction: column; gap: 15px; text-align: center; }
-}
 
 /* ============ SMALL MOBILE (≤ 480px) ============ */
 @media (max-width: 480px) {
-    body { padding-top: 190px; }
-
-    .logo img { width: 36px; height: 36px; }
-    .logo span { font-size: 15px; }
-
-    .nav-links { gap: 12px; }
-    .nav-links li a { font-size: 13px; }
-
-    .search { display: none; } /* search hidden on tiny screens to save space */
 
     .hero { padding: 40px 16px; }
 
@@ -3111,9 +3247,9 @@ Page background */
     }
 
     .hero-logo-img {
-        width: 52px;
-        height: 52px;
-        border-radius: 10px;
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
     }
 
     .hero-split-title {
@@ -4133,7 +4269,7 @@ Contains: icon, input, clear button.
     border-bottom: 1px solid #eee;
     padding: 14px 20px;
     position: sticky;
-    top: 80px; /* sits directly below the fixed navbar */
+    top: 0;
     z-index: 90;
     box-sizing: border-box;
 }
@@ -4837,7 +4973,7 @@ Contains: lock icon + text + two buttons.
     max-width: 680px;
     background: #1a1a1a;
     border-radius: 16px;
-    z-index: 200;
+    z-index: 1000;
     box-shadow:
         0 12px 40px rgba(0, 0, 0, 0.25),
         0 2px 8px rgba(0, 0, 0, 0.15);
@@ -5001,9 +5137,10 @@ Contains: lock icon + text + two buttons.
         display: flex;
     }
 
-    /* CTA pill — compact on mobile */
+
+   /* CTA pill sits above bottom nav on mobile */
     .prod-cta-pill {
-        bottom: 16px;
+        bottom: 72px;
         width: calc(100% - 24px);
         border-radius: 14px;
     }
