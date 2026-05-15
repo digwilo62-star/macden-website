@@ -2,125 +2,269 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0">
     <title>Products — MACDEN</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
+    <!-- ============================================
+         NAVBAR
+         Loaded dynamically by web.js
+         ============================================ -->
     <div id="navbar"></div>
 
-    <!-- PAGE HEADER -->
-    <section class="page-header">
-        <div class="page-header-container">
-            <p class="page-tag">CATALOGUE</p>
-            <h1 class="page-title">
-                Browse our full product range
+    <!-- ============================================
+         PAGE HEADER
+         Introductory section at top of page.
+         Centered text, tag + title + subtitle.
+         ============================================ -->
+    <section class="prod-page-header">
+        <div class="prod-page-header-inner">
+            <p class="prod-page-tag">CATALOGUE</p>
+            <h1 class="prod-page-title">
+                Browse our full product range.
             </h1>
-            <p class="page-subtitle">
-                Sign in to unlock live regional pricing
-                for your area.
+            <p class="prod-page-subtitle">
+                Sign in to unlock live regional
+                pricing for your area.
             </p>
         </div>
     </section>
 
-    <!-- SEARCH + FILTER BAR -->
-    <section class="products-controls">
-        <div class="products-controls-container">
+    <!-- ============================================
+         STICKY SEARCH BAR
+         Only the search bar sticks on scroll.
+         Filter chips scroll away naturally.
+         Contains: search icon, input, clear button.
+         ============================================ -->
+    <div class="prod-search-bar">
+        <div class="prod-search-inner">
 
-            <!-- Search -->
-            <div class="products-search-wrap">
-                <svg class="products-search-icon"
-                    viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21"
-                        x2="16.65" y2="16.65"></line>
-                </svg>
-                <input type="text"
-                    id="products-search"
-                    class="products-search-input"
-                    placeholder="Search products..." />
-                <button class="products-search-clear"
-                    id="search-clear-btn"
-                    style="display:none;">
-                    &#10005;
-                </button>
-            </div>
+            <!-- Search icon (SVG) -->
+            <svg class="prod-search-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21"
+                    x2="16.65" y2="16.65"></line>
+            </svg>
 
-            <!-- Filter chips -->
-            <div class="filter-container" id="filter-container">
-                <button type="button"
-                    class="filter-chip active"
-                    data-category="all">
-                    All
-                </button>
-                <button type="button"
-                    class="filter-chip"
-                    data-category="wines">
-                    Wines
-                </button>
-                <button type="button"
-                    class="filter-chip"
-                    data-category="spirits">
-                    Spirits
-                </button>
-                <button type="button"
-                    class="filter-chip"
-                    data-category="bitters">
-                    Bitters
-                </button>
-                <button type="button"
-                    class="filter-chip"
-                    data-category="beer-stout">
-                    Beer & Stout
-                </button>
-                <button type="button"
-                    class="filter-chip"
-                    data-category="malt-drinks">
-                    Malt Drinks
-                </button>
-                <button type="button"
-                    class="filter-chip"
-                    data-category="rtd-energy">
-                    RTD & Energy
-                </button>
-            </div>
+            <!-- Search input -->
+            <input
+                type="text"
+                id="prod-search"
+                class="prod-search-input"
+                placeholder="Search products..."
+                autocomplete="off" />
 
-            <!-- Product count -->
-            <p class="products-count"
-                id="products-count"></p>
+            <!-- Clear button — hidden until user types -->
+            <button
+                class="prod-search-clear"
+                id="prod-search-clear"
+                style="display:none;"
+                aria-label="Clear search">
+                &#10005;
+            </button>
+
+        </div>
+    </div>
+
+    <!-- ============================================
+         CATEGORY JUMP BUTTONS
+         6 large buttons — one per category.
+         Desktop: all 6 in one row.
+         Mobile: 3x2 grid.
+         Clicking jumps to that category instantly.
+         Counts injected by products-page.js.
+         ============================================ -->
+    <section class="prod-jump-section">
+        <div class="prod-jump-grid">
+
+            <button class="prod-jump-btn"
+                data-category="wines">
+                <span class="prod-jump-icon">🍷</span>
+                <span class="prod-jump-label">Wines</span>
+                <span class="prod-jump-count"
+                    id="jump-count-wines"></span>
+            </button>
+
+            <button class="prod-jump-btn"
+                data-category="spirits">
+                <span class="prod-jump-icon">🥃</span>
+                <span class="prod-jump-label">Spirits</span>
+                <span class="prod-jump-count"
+                    id="jump-count-spirits"></span>
+            </button>
+
+            <button class="prod-jump-btn"
+                data-category="bitters">
+                <span class="prod-jump-icon">🌿</span>
+                <span class="prod-jump-label">Bitters</span>
+                <span class="prod-jump-count"
+                    id="jump-count-bitters"></span>
+            </button>
+
+            <button class="prod-jump-btn"
+                data-category="beer-stout">
+                <span class="prod-jump-icon">🍺</span>
+                <span class="prod-jump-label">Beer</span>
+                <span class="prod-jump-count"
+                    id="jump-count-beer-stout"></span>
+            </button>
+
+            <button class="prod-jump-btn"
+                data-category="malt-drinks">
+                <span class="prod-jump-icon">🟤</span>
+                <span class="prod-jump-label">Malt</span>
+                <span class="prod-jump-count"
+                    id="jump-count-malt-drinks"></span>
+            </button>
+
+            <button class="prod-jump-btn"
+                data-category="rtd-energy">
+                <span class="prod-jump-icon">⚡</span>
+                <span class="prod-jump-label">RTD</span>
+                <span class="prod-jump-count"
+                    id="jump-count-rtd-energy"></span>
+            </button>
 
         </div>
     </section>
 
-    <!-- PRODUCT GRID -->
-    <section class="products-section">
-        <div class="products-section-container">
+    <!-- ============================================
+         FILTER CHIPS BAR
+         Horizontal scrollable row of category chips.
+         Single line — no wrapping.
+         Each chip shows category name + count.
+         Active chip is filled dark.
+         Product count text below chips.
+         ============================================ -->
+    <div class="prod-filter-bar">
+        <div class="prod-filter-inner">
 
-            <p id="products-loading"
-                class="products-loading">
+            <!-- Chips row — scrollable -->
+            <div class="prod-chips-wrap">
+
+                <button class="prod-chip active"
+                    data-category="all">
+                    All
+                    <span class="prod-chip-count"
+                        id="chip-count-all"></span>
+                </button>
+
+                <button class="prod-chip"
+                    data-category="wines">
+                    Wines
+                    <span class="prod-chip-count"
+                        id="chip-count-wines"></span>
+                </button>
+
+                <button class="prod-chip"
+                    data-category="spirits">
+                    Spirits
+                    <span class="prod-chip-count"
+                        id="chip-count-spirits"></span>
+                </button>
+
+                <button class="prod-chip"
+                    data-category="bitters">
+                    Bitters
+                    <span class="prod-chip-count"
+                        id="chip-count-bitters"></span>
+                </button>
+
+                <button class="prod-chip"
+                    data-category="beer-stout">
+                    Beer & Stout
+                    <span class="prod-chip-count"
+                        id="chip-count-beer-stout"></span>
+                </button>
+
+                <button class="prod-chip"
+                    data-category="malt-drinks">
+                    Malt Drinks
+                    <span class="prod-chip-count"
+                        id="chip-count-malt-drinks"></span>
+                </button>
+
+                <button class="prod-chip"
+                    data-category="rtd-energy">
+                    RTD & Energy
+                    <span class="prod-chip-count"
+                        id="chip-count-rtd-energy"></span>
+                </button>
+
+            </div>
+
+            <!-- Product count text -->
+            <p class="prod-count" id="prod-count"></p>
+
+        </div>
+    </div>
+
+    <!-- ============================================
+         RECENTLY VIEWED STRIP
+         Mobile only — hidden by default.
+         Appears after the first product card is tapped.
+         Horizontal scroll strip of recently viewed items.
+         Stored in sessionStorage — no backend needed.
+         ============================================ -->
+    <div class="prod-recent-wrap"
+        id="prod-recent-wrap"
+        style="display:none;">
+        <div class="prod-recent-inner">
+            <p class="prod-recent-label">
+                Recently viewed
+            </p>
+            <div class="prod-recent-strip"
+                id="prod-recent-strip">
+                <!-- Items injected by products-page.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         PRODUCT GRID SECTION
+         Main content area.
+         Grid: 4 columns desktop, 2 columns mobile.
+         Cards injected by products-page.js.
+         Loading state shown until JS runs.
+         Empty state shown when no results found.
+         ============================================ -->
+    <section class="prod-section">
+        <div class="prod-section-inner">
+
+            <!-- Loading state -->
+            <p class="prod-loading"
+                id="prod-loading">
                 Loading products...
             </p>
 
-            <div id="products-grid"
-                class="products-grid"></div>
+            <!-- Product grid -->
+            <div class="prod-grid"
+                id="prod-grid">
+                <!-- Cards injected by products-page.js -->
+            </div>
 
-            <!-- Empty state -->
-            <div id="products-empty"
-                class="products-empty-state"
+            <!-- Empty state — hidden by default -->
+            <div class="prod-empty-state"
+                id="prod-empty"
                 hidden>
-                <p class="products-empty-title">
+                <p class="prod-empty-title">
                     No products found.
                 </p>
-                <p class="products-empty-sub">
+                <p class="prod-empty-sub">
                     Try a different search term
                     or clear the filter.
                 </p>
                 <button class="btn primary"
-                    id="empty-clear-btn">
+                    id="prod-empty-clear">
                     Clear search
                 </button>
             </div>
@@ -128,32 +272,132 @@
         </div>
     </section>
 
-    <!-- STICKY CTA STRIP -->
-    <div class="products-cta-strip">
-        <div class="products-cta-inner">
-            <p class="products-cta-text">
-                <span class="products-cta-lock">
-                    &#128274;
-                </span>
-                Prices are available to
-                registered buyers only.
+    <!-- ============================================
+         FILTER FAB
+         Mobile only — hidden on desktop.
+         Fixed bottom right corner.
+         Tapping opens the bottom sheet filter panel.
+         ============================================ -->
+    <button class="prod-filter-fab"
+        id="prod-filter-fab"
+        aria-label="Open filter">
+        <svg width="18" height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6"></line>
+            <line x1="8" y1="12" x2="20" y2="12"></line>
+            <line x1="12" y1="18" x2="20" y2="18"></line>
+        </svg>
+        <span>Filter</span>
+    </button>
+
+    <!-- ============================================
+         FILTER BOTTOM SHEET
+         Mobile only — slides up from bottom.
+         Dark overlay behind sheet.
+         Contains all category chips + apply button.
+         Closed by: X button, overlay tap, apply tap.
+         ============================================ -->
+    <div class="prod-sheet-overlay"
+        id="prod-sheet-overlay"></div>
+
+    <div class="prod-sheet" id="prod-sheet">
+
+        <!-- Sheet header -->
+        <div class="prod-sheet-header">
+            <p class="prod-sheet-title">
+                Filter products
             </p>
-            <div class="products-cta-buttons">
-                <button class="btn primary products-cta-btn"
+            <button class="prod-sheet-close"
+                id="prod-sheet-close">
+                &#10005;
+            </button>
+        </div>
+
+        <!-- Sheet chips -->
+        <div class="prod-sheet-chips">
+
+            <button class="prod-sheet-chip active"
+                data-category="all">
+                All
+            </button>
+            <button class="prod-sheet-chip"
+                data-category="wines">
+                Wines
+            </button>
+            <button class="prod-sheet-chip"
+                data-category="spirits">
+                Spirits
+            </button>
+            <button class="prod-sheet-chip"
+                data-category="bitters">
+                Bitters
+            </button>
+            <button class="prod-sheet-chip"
+                data-category="beer-stout">
+                Beer & Stout
+            </button>
+            <button class="prod-sheet-chip"
+                data-category="malt-drinks">
+                Malt Drinks
+            </button>
+            <button class="prod-sheet-chip"
+                data-category="rtd-energy">
+                RTD & Energy
+            </button>
+
+        </div>
+
+        <!-- Apply button -->
+        <button class="prod-sheet-apply"
+            id="prod-sheet-apply">
+            Apply filter
+        </button>
+
+    </div>
+
+    <!-- ============================================
+         FLOATING CTA PILL
+         Fixed bottom center — always visible.
+         Encourages buyers to login or register.
+         Sits above the footer.
+         ============================================ -->
+    <div class="prod-cta-pill">
+        <div class="prod-cta-pill-inner">
+            <p class="prod-cta-text">
+                <span class="prod-cta-lock">🔒</span>
+                Prices for registered buyers only.
+            </p>
+            <div class="prod-cta-pill-buttons">
+                <button class="prod-cta-login"
                     onclick="window.location='login.html'">
                     Login
                 </button>
-                <button class="products-cta-outline"
+                <button class="prod-cta-register"
                     onclick="window.location='register.html'">
-                    Create free account
+                    Create account
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- FOOTER -->
+    <!-- ============================================
+         FOOTER
+         Loaded dynamically by web.js
+         ============================================ -->
     <div id="footer"></div>
 
+    <!-- ============================================
+         SCRIPTS
+         Load order matters:
+         1. products.js — product data array
+         2. products-page.js — rendering logic
+         3. web.js — navbar/footer loader
+         ============================================ -->
     <script src="js/products.js"></script>
     <script src="js/products-page.js"></script>
     <script src="js/web.js"></script>

@@ -249,11 +249,9 @@ html{
 }
 
 .login-btn:hover {
+    background: #444;
     transform: translateY(-2px);
-    
-    background: #0d5c2f;
-
-    box-shadow: 0 10px 20px rgba(13,92,47,0.25);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
 
 }
 
@@ -345,14 +343,14 @@ html{
 
 /*primary button*/
 .primary {
-    background: #111;
+   background: #1a1a1a;
     color: #fff;
 }
 
 .primary:hover {
-    background: #0d5c2f;
-    transform: translateY(-3px);
-    box-shadow: 0 10px 18px rgba(13, 92, 47,0.25);
+    background: #444;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
 }
 
 /*secondary button*/
@@ -363,9 +361,9 @@ html{
 }
 
 .secondary:hover {
-    background: #0d5c2f;
+    background: #444;
     color: #fff;
-    transform: translateY(-3px);
+    transform: translateY(-2px);
 }
 
 
@@ -674,7 +672,7 @@ html{
 
 /*Inline links inside running text - subtle underline on hover */
 .inline-link {
-    color: #0d5c2f;
+   color: #333;
     font-weight: 600;
     text-decoration: none;
     border-bottom: 1px solid transparent;
@@ -739,8 +737,8 @@ html{
 
 /* Hover state for inactive chips - border + text turn green*/
 .filter-chip:hover {
-    border-color: #0d5c2f;
-    color: #0d5c2f;
+    border-color: #444;
+    color: #444;
 }
 
 /* Keyboard focus ring - shows only on Tab navigation */
@@ -751,15 +749,15 @@ html{
 
 /* Active chip - currently selected category*/
 .filter-chip.active {
-    background: #0d5c2f;
+    background: #333;
     color: #fff;
-    border-color: #0d5c2f;
+    border-color: #333;
 }
 
 .filter-chip.active:hover {
-    background: #084421;
-    border-color: #084421;
-    color: #fff;
+    background: #444;
+    border-color: #444;
+    color: #fff
 }
 
 /*--- Mobile adjustments for filter chips------------*/
@@ -820,7 +818,7 @@ product name, size, and a sign-in-for-price link.
 /* Thin green strip at the top of each card*/
 .product-card-accent {
     height: 4px;
-    background: #0d5c2f;
+    background: #1a1a1a;
 }
 
 /* Card body - all text content lives here*/
@@ -839,9 +837,9 @@ product name, size, and a sign-in-for-price link.
 
 /* Small upper category label at the top*/
 .product-category-label {
-    font-size: 10px;
-    letter-spacing: 1px;
-    color: #666;
+     font-size: 10px;
+    letter-spacing: 1.2px;
+    color: #555;
     font-weight: 700;
     margin-bottom:8px;
 }
@@ -1282,8 +1280,8 @@ ABOUT HERO
 }
 
 .form-input:focus {
-    border-color: #0d5c2f;
-    box-shadow: 0 0 0 4px rgba(13, 92, 47, 0.08);
+    border-color: #333;
+    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.06);
 }
 
 /* Textarea specific */
@@ -1856,9 +1854,9 @@ Green checkmark circle shown on success*/
 }
 
 .dash-chip.active {
-    background: #111;
+    background: #333;
     color: #fff;
-    border-color: #111;
+    border-color: #333;
 }
 
 /* Product count */
@@ -1909,7 +1907,7 @@ Green checkmark circle shown on success*/
 /* Green top accent */
 .dash-card-accent {
     height: 3px;
-    background: #0d5c2f;
+    background: #1a1a1a;
 }
 
 .dash-card-body {
@@ -3180,402 +3178,6 @@ Page background */
 
 /*==== PRODUCTS PAGE REDESIGN ======*/
 
-/*---- Controls bar (search + chips) ----*/
-.products-controls {
-    width: 100%;
-    background: #fff;
-    border-bottom: 1px solid #eee;
-    padding: 20px 20px 0;
-}
-
-.products-controls-container {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-/*---- Search bar ----*/
-.products-search-wrap {
-    position: relative;
-    margin-bottom: 16px;
-}
-
-.products-search-icon {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 16px;
-    height: 16px;
-    color: #999;
-    pointer-events: none;
-}
-
-.products-search-input {
-    width: 100%;
-    padding: 12px 40px 12px 42px;
-    font-size: 14px;
-    font-family: inherit;
-    border: 1.5px solid #eee;
-    border-radius: 10px;
-    outline: none;
-    background: #fafafa;
-    color: #111;
-    box-sizing: border-box;
-    transition: all 0.2s ease;
-}
-
-.products-search-input:focus {
-    border-color: #111;
-    background: #fff;
-    box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.04);
-}
-
-.products-search-clear {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: #eee;
-    border: none;
-    border-radius: 50%;
-    width: 22px;
-    height: 22px;
-    font-size: 11px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #555;
-    transition: all 0.2s ease;
-}
-
-.products-search-clear:hover {
-    background: #111;
-    color: #fff;
-}
-
-/*---- Filter chips row ----*/
-.filter-container {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-}
-
-/*---- Product count ----*/
-.products-count {
-    font-size: 12px;
-    color: #999;
-    padding-bottom: 14px;
-    margin: 0;
-}
-
-/*---- Product grid section ----*/
-.products-section {
-    width: 100%;
-    padding: 24px 20px 120px;
-    background: #fff;
-}
-
-.products-section-container {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.products-grid {
-    display: grid;
-    grid-template-columns: repeat(
-        auto-fill, minmax(220px, 1fr)
-    );
-    gap: 16px;
-}
-
-/*---- Product card ----*/
-.product-card {
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 12px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    transition: all 0.2s ease;
-}
-
-.product-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
-    border-color: #ddd;
-}
-
-.product-card-accent {
-    height: 4px;
-    background: #0d5c2f;
-}
-
-.product-card-body {
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.product-category-label {
-    font-size: 10px;
-    letter-spacing: 1.2px;
-    color: #8b1d1d;
-    font-weight: 700;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-}
-
-.product-name {
-    font-size: 14px;
-    font-weight: 700;
-    color: #111;
-    line-height: 1.4;
-    margin-bottom: 6px;
-    flex-grow: 1;
-}
-
-.product-unit {
-    font-size: 12px;
-    color: #888;
-    margin-bottom: 14px;
-}
-
-/*---- Lock button on card ----*/
-.product-lock-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 9px 14px;
-    background: #111;
-    color: #fff;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 700;
-    text-decoration: none;
-    text-align: center;
-    transition: all 0.2s ease;
-    margin-top: auto;
-}
-
-.product-lock-btn:hover {
-    background: #0d5c2f;
-    transform: translateY(-1px);
-}
-
-/*---- Empty state ----*/
-.products-empty-state {
-    text-align: center;
-    padding: 60px 20px;
-}
-
-.products-empty-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: #111;
-    margin-bottom: 8px;
-}
-
-.products-empty-sub {
-    font-size: 14px;
-    color: #888;
-    margin-bottom: 24px;
-}
-
-.products-empty-state .btn {
-    padding: 10px 24px;
-    font-size: 13px;
-}
-
-/*---- Sticky CTA strip ----*/
-.products-cta-strip {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 48px);
-    max-width: 700px;
-    background: #111;
-    border-radius: 16px;
-    z-index: 200;
-    box-shadow:
-        0 12px 40px rgba(0, 0, 0, 0.3),
-        0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.products-cta-inner {
-    padding: 10px 10px 10px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-}
-
-.products-cta-text {
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.8);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0;
-    white-space: nowrap;
-    flex: 1;
-}
-
-.products-cta-lock {
-    font-size: 14px;
-    flex-shrink: 0;
-}
-
-.products-cta-buttons {
-    display: flex;
-    gap: 8px;
-    flex-shrink: 0;
-}
-
-.products-cta-btn {
-    padding: 10px 20px;
-    font-size: 13px;
-    font-weight: 700;
-    font-family: inherit;
-    background: #8b1d1d;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-.products-cta-btn:hover {
-    background: #0d5c2f;
-    transform: translateY(-1px);
-}
-
-.products-cta-outline {
-    padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-    border: 1.5px solid rgba(255, 255, 255, 0.25);
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: inherit;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-.products-cta-outline:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.5);
-}
-
-/*---- Loading state ----*/
-.products-loading {
-    text-align: center;
-    color: #999;
-    font-size: 14px;
-    padding: 60px 20px;
-}
-
-/*---- Mobile ----*/
-@media (max-width: 768px) {
-
-    .products-controls {
-        padding: 16px 16px 0;
-    }
-
-    .products-section {
-        padding: 16px 12px 120px;
-    }
-
-    .products-grid {
-        grid-template-columns: repeat(
-            auto-fill, minmax(160px, 1fr)
-        );
-        gap: 12px;
-    }
-
-    .product-card-body {
-        padding: 12px;
-    }
-
-    .product-name {
-        font-size: 13px;
-    }
-
-    .products-cta-inner {
-        flex-direction: column;
-        text-align: center;
-        padding: 12px 16px;
-        gap: 10px;
-    }
-
-    .products-cta-buttons {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .products-cta-btn,
-    .products-cta-outline {
-        flex: 1;
-        text-align: center;
-    }
-}
-
-@media (max-width: 480px) {
-    
-    .filter-container {
-        gap: 6px;
-    }
-
-    .filter-chip {
-        padding: 6px 12px;
-        font-size: 12px;
-    }
-}
-
-/*---- Mobile CTA ----*/
-@media (max-width: 600px) {
-
-    .products-cta-strip {
-        bottom: 16px;
-        width: calc(100% - 24px);
-        border-radius: 14px;
-    }
-
-    .products-cta-inner {
-        padding: 10px;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .products-cta-text {
-        font-size: 12px;
-        justify-content: center;
-        white-space: normal;
-        text-align: center;
-    }
-
-    .products-cta-buttons {
-        width: 100%;
-    }
-
-    .products-cta-btn,
-    .products-cta-outline {
-        flex: 1;
-        text-align: center;
-        padding: 10px 12px;
-        font-size: 13px;
-    }
-}
-
 
 /*================================================
 ABOUT PAGE — FULL REDESIGN
@@ -3807,11 +3409,9 @@ ABOUT PAGE — FULL REDESIGN
 }
 
 .ab-pillar:hover {
-    background: #0d5c2f;
+    background: #333;
     color: #fff;
-    border-color: #0d5c2f;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(13, 92, 47, 0.18);
+    border-color: #333;
 }
 
 /*---- Backbone section ----*/
@@ -4448,5 +4048,1045 @@ ABOUT PAGE — FULL REDESIGN
     .ab-final-btn-outline {
         font-size: 13px;
         padding: 13px 16px;
+    }
+}
+
+
+/*================================================
+PRODUCTS PAGE — COMPLETE STYLES
+
+Sections:
+1.  Page header
+2.  Sticky search bar
+3.  Category jump buttons
+4.  Filter chips bar
+5.  Recently viewed strip
+6.  Product grid section
+7.  Product card
+8.  Blurred price teaser
+9.  Empty state
+10. Filter FAB (mobile)
+11. Bottom sheet (mobile)
+12. Floating CTA pill
+13. Responsive — tablet 768px
+14. Responsive — mobile 480px
+================================================*/
+
+
+/*------------------------------------------------
+1. PAGE HEADER
+Centered intro section at top of products page.
+Contains: tag label, main title, subtitle.
+------------------------------------------------*/
+
+.prod-page-header {
+    width: 100%;
+    padding: 32px 20px 24px;
+    background: #fff;
+    text-align: center;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.prod-page-header-inner {
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+/* Small uppercase tag above title */
+.prod-page-tag {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #999;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+/* Main page title */
+.prod-page-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: #111;
+    line-height: 1.2;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+}
+
+/* Subtitle below title */
+.prod-page-subtitle {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.7;
+}
+
+
+/*------------------------------------------------
+2. STICKY SEARCH BAR
+Only the search bar sticks to the top on scroll.
+Filter chips scroll away naturally.
+Contains: icon, input, clear button.
+------------------------------------------------*/
+
+.prod-search-bar {
+    width: 100%;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    padding: 14px 20px;
+    position: sticky;
+    top: 80px; /* sits directly below the fixed navbar */
+    z-index: 90;
+    box-sizing: border-box;
+}
+
+/* Inner container — limits max width */
+.prod-search-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Search icon — positioned inside input */
+.prod-search-icon {
+    position: absolute;
+    left: 14px;
+    width: 16px;
+    height: 16px;
+    color: #aaa;
+    pointer-events: none;
+    flex-shrink: 0;
+}
+
+/* Search input field */
+.prod-search-input {
+    width: 100%;
+    padding: 11px 44px 11px 42px;
+    font-size: 14px;
+    font-family: inherit;
+    border: 1.5px solid #eee;
+    border-radius: 10px;
+    outline: none;
+    background: #fafafa;
+    color: #111;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+}
+
+.prod-search-input:focus {
+    border-color: #333;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Clear button — shows only when user has typed */
+.prod-search-clear {
+    position: absolute;
+    right: 12px;
+    width: 22px;
+    height: 22px;
+    background: #e8e8e8;
+    border: none;
+    border-radius: 50%;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    transition: all 0.2s ease;
+}
+
+.prod-search-clear:hover {
+    background: #333;
+    color: #fff;
+}
+
+
+/*------------------------------------------------
+3. CATEGORY JUMP BUTTONS
+Large shortcut buttons — one per category.
+Desktop: all 6 in one row.
+Mobile: 3 columns × 2 rows grid.
+Clicking sets that category filter active
+and scrolls to the product grid.
+------------------------------------------------*/
+
+.prod-jump-section {
+    width: 100%;
+    padding: 20px 20px;
+    background: #fafafa;
+    border-bottom: 1px solid #eee;
+}
+
+/* 6-column grid on desktop */
+.prod-jump-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+}
+
+/* Single jump button */
+.prod-jump-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 16px 10px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s ease;
+}
+
+.prod-jump-btn:hover {
+    background: #f5f5f5;
+    border-color: #ddd;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Active state — when that category is selected */
+.prod-jump-btn.active {
+    background: #333;
+    border-color: #333;
+}
+
+.prod-jump-btn.active .prod-jump-label,
+.prod-jump-btn.active .prod-jump-count {
+    color: #fff;
+}
+
+/* Emoji icon */
+.prod-jump-icon {
+    font-size: 22px;
+    line-height: 1;
+}
+
+/* Category name */
+.prod-jump-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #111;
+    letter-spacing: 0.3px;
+}
+
+/* Product count in brackets */
+.prod-jump-count {
+    font-size: 11px;
+    color: #999;
+    font-weight: 500;
+}
+
+
+/*------------------------------------------------
+4. FILTER CHIPS BAR
+Single horizontal scrollable row of chips.
+No wrapping — chips never go to second line.
+Each chip shows category name + product count.
+Active chip is dark filled.
+Product count text sits below the chips row.
+------------------------------------------------*/
+
+.prod-filter-bar {
+    width: 100%;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    padding: 12px 20px 0;
+}
+
+/* Inner container */
+.prod-filter-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Chips horizontal scroll container */
+.prod-chips-wrap {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 12px;
+    /* Hide scrollbar visually but keep scroll */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.prod-chips-wrap::-webkit-scrollbar {
+    display: none;
+}
+
+/* Single chip */
+.prod-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 7px 16px;
+    background: #fff;
+    color: #444;
+    border: 1px solid #ddd;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.prod-chip:hover {
+    border-color: #444;
+    color: #111;
+}
+
+/* Active chip — currently selected category */
+.prod-chip.active {
+    background: #333;
+    color: #fff;
+    border-color: #333;
+}
+
+.prod-chip.active:hover {
+    background: #444;
+    border-color: #444;
+}
+
+/* Count in brackets inside chip */
+.prod-chip-count {
+    font-size: 11px;
+    font-weight: 500;
+    opacity: 0.7;
+}
+
+/* Product count text below chips */
+.prod-count {
+    font-size: 12px;
+    color: #aaa;
+    padding-bottom: 12px;
+    margin: 0;
+}
+
+
+/*------------------------------------------------
+5. RECENTLY VIEWED STRIP
+Mobile only — hidden on desktop.
+Appears after buyer taps first product card.
+Horizontal scrollable strip of recent items.
+Data stored in sessionStorage.
+------------------------------------------------*/
+
+.prod-recent-wrap {
+    width: 100%;
+    background: #fafafa;
+    border-bottom: 1px solid #eee;
+    padding: 12px 20px;
+    display: none; /* shown by JS when items exist */
+}
+
+.prod-recent-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* "Recently viewed" label */
+.prod-recent-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #aaa;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+/* Horizontal scroll strip */
+.prod-recent-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.prod-recent-strip::-webkit-scrollbar {
+    display: none;
+}
+
+/* Single recent item pill */
+.prod-recent-item {
+    flex-shrink: 0;
+    padding: 7px 14px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.prod-recent-item:hover {
+    background: #f5f5f5;
+    border-color: #ddd;
+}
+
+/* Product name inside pill */
+.prod-recent-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #111;
+    white-space: nowrap;
+    margin: 0;
+}
+
+
+/*------------------------------------------------
+6. PRODUCT GRID SECTION
+Main content area containing the product grid.
+4 columns on desktop.
+2 columns on mobile.
+Has extra bottom padding to clear the CTA pill.
+------------------------------------------------*/
+
+.prod-section {
+    width: 100%;
+    padding: 24px 20px 100px;
+    background: #fff;
+}
+
+/* Inner container */
+.prod-section-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Grid — 4 columns on desktop */
+.prod-grid {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fill, minmax(220px, 1fr)
+    );
+    gap: 16px;
+}
+
+/* Loading text */
+.prod-loading {
+    text-align: center;
+    color: #bbb;
+    font-size: 14px;
+    padding: 60px 20px;
+}
+
+
+/*------------------------------------------------
+7. PRODUCT CARD
+Each card has:
+- Thin dark top accent strip
+- Category label (small, uppercase, gray)
+- Product name (bold)
+- Unit (small, muted)
+- Blurred price teaser
+- Sign in button
+------------------------------------------------*/
+
+/* Card wrapper */
+.prod-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.prod-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+    border-color: #ddd;
+}
+
+/* Thin accent strip at top of card */
+.prod-card-accent {
+    height: 4px;
+    background: #1a1a1a;
+    flex-shrink: 0;
+}
+
+/* Card body — all text content */
+.prod-card-body {
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+/* Category label — small, uppercase, gray */
+.prod-cat-label {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: #888;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+/* Product name — main text */
+.prod-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111;
+    line-height: 1.4;
+    margin-bottom: 6px;
+    flex-grow: 1;
+}
+
+/* Unit — e.g. "Per Tray" */
+.prod-unit {
+    font-size: 12px;
+    color: #aaa;
+    margin-bottom: 12px;
+}
+
+
+/*------------------------------------------------
+8. BLURRED PRICE TEASER
+Shows a deliberately obscured price.
+Creates desire — buyer sees a price exists
+but cannot read it until they log in.
+------------------------------------------------*/
+
+.prod-price-wrap {
+    margin-bottom: 12px;
+}
+
+/* The blurred price number */
+.prod-price-blur {
+    font-size: 18px;
+    font-weight: 800;
+    color: #111;
+    letter-spacing: 1px;
+    filter: blur(6px);
+    user-select: none;
+    margin-bottom: 4px;
+    transition: filter 0.3s ease;
+}
+
+/* Hover reveals a slightly less blurred price */
+.prod-card:hover .prod-price-blur {
+    filter: blur(4px);
+}
+
+/* "Login to unlock" label below blurred price */
+.prod-price-label {
+    font-size: 11px;
+    color: #bbb;
+    font-weight: 500;
+}
+
+/* Lock button — links to login page */
+.prod-lock-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 14px;
+    background: #1a1a1a;
+    color: #fff;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.2s ease;
+    margin-top: auto;
+}
+
+.prod-lock-btn:hover {
+    background: #444;
+    transform: translateY(-1px);
+}
+
+
+/*------------------------------------------------
+9. EMPTY STATE
+Shown when search returns no results.
+Centered, with a clear search button.
+------------------------------------------------*/
+
+.prod-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.prod-empty-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 8px;
+}
+
+.prod-empty-sub {
+    font-size: 14px;
+    color: #999;
+    margin-bottom: 24px;
+    line-height: 1.6;
+}
+
+.prod-empty-state .btn {
+    padding: 10px 24px;
+    font-size: 13px;
+}
+
+
+/*------------------------------------------------
+10. FILTER FAB
+Mobile only — hidden on desktop.
+Fixed bottom right corner.
+Tapping opens the bottom sheet filter panel.
+------------------------------------------------*/
+
+.prod-filter-fab {
+    display: none; /* hidden on desktop */
+    position: fixed;
+    bottom: 70px;
+    right: 16px;
+    z-index: 250;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 56px;
+    height: 56px;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+.prod-filter-fab:hover {
+    background: #444;
+    transform: scale(1.05);
+}
+
+.prod-filter-fab span {
+    font-size: 9px;
+    letter-spacing: 0.5px;
+}
+
+
+/*------------------------------------------------
+11. BOTTOM SHEET (mobile filter panel)
+Slides up from bottom when FAB is tapped.
+Dark overlay behind it.
+Contains all category chips + apply button.
+Closed by: X button, overlay tap, or apply.
+------------------------------------------------*/
+
+/* Dark overlay behind the sheet */
+.prod-sheet-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 300;
+}
+
+/* Open state for overlay */
+.prod-sheet-overlay--open {
+    display: block;
+}
+
+/* The sheet panel itself */
+.prod-sheet {
+    position: fixed;
+    bottom: -100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 20px 40px;
+    z-index: 400;
+    transition: bottom 0.35s ease;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* Open state — slides up */
+.prod-sheet--open {
+    bottom: 0;
+}
+
+/* Sheet header row */
+.prod-sheet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* Sheet title text */
+.prod-sheet-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111;
+    margin: 0;
+}
+
+/* Close button */
+.prod-sheet-close {
+    width: 32px;
+    height: 32px;
+    background: #f5f5f5;
+    border: none;
+    border-radius: 50%;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    transition: all 0.2s ease;
+}
+
+.prod-sheet-close:hover {
+    background: #333;
+    color: #fff;
+}
+
+/* Chips grid inside sheet */
+.prod-sheet-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+/* Single sheet chip */
+.prod-sheet-chip {
+    padding: 9px 18px;
+    background: #fff;
+    color: #444;
+    border: 1.5px solid #eee;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.prod-sheet-chip:hover {
+    border-color: #ddd;
+    background: #f5f5f5;
+}
+
+/* Active sheet chip */
+.prod-sheet-chip.active {
+    background: #333;
+    color: #fff;
+    border-color: #333;
+}
+
+/* Apply button — full width */
+.prod-sheet-apply {
+    width: 100%;
+    padding: 14px;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.prod-sheet-apply:hover {
+    background: #444;
+}
+
+
+/*------------------------------------------------
+12. FLOATING CTA PILL
+Fixed bottom center — always visible.
+Encourages buyers to login or register.
+Contains: lock icon + text + two buttons.
+------------------------------------------------*/
+
+.prod-cta-pill {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 48px);
+    max-width: 680px;
+    background: #1a1a1a;
+    border-radius: 16px;
+    z-index: 200;
+    box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.25),
+        0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Inner row */
+.prod-cta-pill-inner {
+    padding: 10px 10px 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Text on left */
+.prod-cta-text {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    white-space: nowrap;
+    flex: 1;
+}
+
+.prod-cta-lock {
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+/* Buttons on right */
+.prod-cta-pill-buttons {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* Login button — red accent */
+.prod-cta-login {
+    padding: 9px 18px;
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.prod-cta-login:hover {
+    background: #555;
+}
+
+/* Create account button — outlined */
+.prod-cta-register {
+    padding: 9px 18px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border: 1.5px solid rgba(255, 255, 255, 0.25);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.prod-cta-register:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+
+/*------------------------------------------------
+13. RESPONSIVE — TABLET (max-width: 768px)
+------------------------------------------------*/
+
+@media (max-width: 768px) {
+
+    /* Page header — compact */
+    .prod-page-header {
+        padding: 32px 16px 20px;
+        display: block;
+    }
+
+    .prod-page-title {
+        font-size: 22px;
+    }
+
+   /* Search bar — sticky on mobile
+       top offset set dynamically by JS */
+    .prod-search-bar {
+        position: sticky;
+        padding: 12px 16px;
+    }
+
+    /* Jump buttons — 3 columns × 2 rows */
+    .prod-jump-section {
+        padding: 16px;
+        display: block;
+    }
+
+    .prod-jump-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        display: grid;
+    }
+
+    .prod-jump-btn {
+        padding: 14px 8px;
+    }
+
+    .prod-jump-icon {
+        font-size: 20px;
+    }
+
+    .prod-jump-label {
+        font-size: 11px;
+    }
+
+    /* Filter bar */
+    .prod-filter-bar {
+        padding: 10px 16px 0;
+    }
+
+    /* Recently viewed — show on mobile */
+    .prod-recent-wrap {
+        padding: 10px 16px;
+    }
+
+    /* Product grid — 2 columns */
+    .prod-section {
+        padding: 16px 12px 120px;
+    }
+
+    .prod-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    /* Cards — tighter padding */
+    .prod-card-body {
+        padding: 12px;
+    }
+
+    .prod-name {
+        font-size: 13px;
+    }
+
+    .prod-price-blur {
+        font-size: 16px;
+    }
+
+    /* Show filter FAB on mobile */
+    .prod-filter-fab {
+        display: flex;
+    }
+
+    /* CTA pill — compact on mobile */
+    .prod-cta-pill {
+        bottom: 16px;
+        width: calc(100% - 24px);
+        border-radius: 14px;
+    }
+
+   .prod-cta-pill-inner {
+        padding: 8px 12px;
+        flex-direction: row;
+        gap: 8px;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .prod-cta-text {
+        font-size: 11px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex: 1;
+    }
+
+    .prod-cta-pill-buttons {
+        display: flex;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+
+    .prod-cta-login,
+    .prod-cta-register {
+        padding: 8px 12px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+}
+
+
+/*------------------------------------------------
+14. RESPONSIVE — SMALL MOBILE (max-width: 480px)
+------------------------------------------------*/
+
+@media (max-width: 480px) {
+
+    /* Search bar — sticky, top set by JS */
+    .prod-search-bar {
+        position: sticky;
+    }
+
+    /* Jump grid stays 3 columns */
+    .prod-jump-grid {
+        gap: 6px;
+    }
+
+    .prod-jump-btn {
+        padding: 12px 6px;
+        border-radius: 10px;
+    }
+
+    .prod-jump-icon {
+        font-size: 18px;
+    }
+
+    .prod-jump-label {
+        font-size: 10px;
+    }
+
+    .prod-jump-count {
+        font-size: 10px;
+    }
+
+    /* Product cards */
+    .prod-card-body {
+        padding: 10px;
+    }
+
+    .prod-name {
+        font-size: 12px;
+    }
+
+    .prod-unit {
+        font-size: 11px;
+    }
+
+    .prod-lock-btn {
+        font-size: 11px;
+        padding: 8px 10px;
     }
 }

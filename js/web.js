@@ -7,12 +7,24 @@ document.addEventListener("DOMContentLoaded", function () {
 const setNavOffset = () => {
     const nav = document.querySelector(".navbar");
     if (nav) {
-        document.body.style.paddingTop = nav.offsetHeight + "px";
+        const navHeight = nav.offsetHeight;
+        document.body.style.paddingTop = navHeight + "px";
+
+        /* Also update sticky search bar on products page */
+        const searchBar = document.querySelector(
+            ".prod-search-bar"
+        );
+        if (searchBar) {
+            searchBar.style.top = navHeight + "px";
+        }
     }
 };
 
 setNavOffset();
-window.addEventListener("resize", setNavOffset);
+window.addEventListener("resize", function () {
+    clearTimeout(window._navResizeTimer);
+    window._navResizeTimer = setTimeout(setNavOffset, 150);
+});
 
             // Default empty path to index.html so the home link highlights
             let currentPage = window.location.pathname.split("/").pop();
