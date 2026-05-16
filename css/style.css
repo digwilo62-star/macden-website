@@ -4270,7 +4270,7 @@ Contains: icon, input, clear button.
     padding: 14px 20px;
     position: sticky;
     top: 0;
-    z-index: 90;
+    z-index: 999;
     box-sizing: border-box;
 }
 
@@ -4434,6 +4434,10 @@ Product count text sits below the chips row.
     background: #fff;
     border-bottom: 1px solid #eee;
     padding: 12px 20px 0;
+    position: sticky;
+    z-index: 998;
+    box-sizing: border-box;
+    /* top value set dynamically by web.js */
 }
 
 /* Inner container */
@@ -4837,7 +4841,7 @@ Closed by: X button, overlay tap, or apply.
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
-    z-index: 300;
+    z-index: 1150;
 }
 
 /* Open state for overlay */
@@ -4854,7 +4858,7 @@ Closed by: X button, overlay tap, or apply.
     background: #fff;
     border-radius: 20px 20px 0 0;
     padding: 20px 20px 40px;
-    z-index: 400;
+    z-index: 1200;
     transition: bottom 0.35s ease;
     box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.12);
 }
@@ -4905,8 +4909,8 @@ Closed by: X button, overlay tap, or apply.
 
 /* Chips grid inside sheet */
 .prod-sheet-chips {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 10px;
     margin-bottom: 24px;
 }
@@ -4954,6 +4958,12 @@ Closed by: X button, overlay tap, or apply.
 
 .prod-sheet-apply:hover {
     background: #444;
+}
+
+/* Hide CTA pill while filter sheet is open — sheet takes priority */
+.prod-sheet--open ~ .prod-cta-pill,
+body:has(.prod-sheet--open) .prod-cta-pill {
+    display: none;
 }
 
 
@@ -5100,9 +5110,10 @@ Contains: lock icon + text + two buttons.
     }
 
     /* Filter bar */
-    .prod-filter-bar {
-        padding: 10px 16px 0;
-    }
+.prod-filter-bar {
+    padding: 10px 16px 0;
+    position: static;
+}
 
     /* Recently viewed — show on mobile */
     .prod-recent-wrap {
@@ -5134,8 +5145,10 @@ Contains: lock icon + text + two buttons.
 
     /* Show filter FAB on mobile */
     .prod-filter-fab {
-        display: flex;
-    }
+    display: flex;
+    bottom: 140px;
+    z-index: 1100;
+}
 
 
    /* CTA pill sits above bottom nav on mobile */

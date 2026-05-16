@@ -437,6 +437,7 @@ function openSheet() {
         "prod-sheet-overlay"
     );
     if (sheet)   sheet.classList.add("prod-sheet--open");
+    document.body.classList.add('sheet-open');
     if (overlay) overlay.classList.add(
         "prod-sheet-overlay--open"
     );
@@ -449,6 +450,7 @@ function closeSheet() {
         "prod-sheet-overlay"
     );
     if (sheet)   sheet.classList.remove("prod-sheet--open");
+    document.body.classList.remove('sheet-open');
     if (overlay) overlay.classList.remove(
         "prod-sheet-overlay--open"
     );

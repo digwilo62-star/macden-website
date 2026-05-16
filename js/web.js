@@ -165,17 +165,42 @@ function setNavOffset() {
     const nav = document.querySelector(".navbar");
     if (!nav) return;
 
-    const navHeight = nav.offsetHeight;
+    /* Use bounding rect for accurate visible bottom edge */
+    const navRect = nav.getBoundingClientRect();
+    const navBottom = navRect.bottom;
 
     /* Body padding — clears fixed navbar */
-    document.body.style.paddingTop = navHeight + "px";
+    document.body.style.paddingTop = navBottom + "px";
 
-    /* Sticky search bar — top matches navbar height */
-    const searchBar = document.querySelector(
-        ".prod-search-bar"
-    );
+    /* Sticky search bar — top aligns to navbar's visible bottom.
+       Subtract 1px so the search bar's top border tucks under
+       the navbar's bottom border, eliminating the visible gap. */
+    const searchBar = document.querySelector(".prod-search-bar");
     if (searchBar) {
-        searchBar.style.top = navHeight + "px";
+        searchBar.style.top = (navBottom - 1) + "px";
         searchBar.style.marginTop = "0";
+
+        /* Sticky filter chips bar — sits directly under search bar.
+           Desktop only; mobile gets position:static via CSS. */
+        const filterBar = document.querySelector(".prod-filter-bar");
+        if (filterBar && window.innerWidth > 768) {
+            const searchHeight = searchBar.offsetHeight;
+            filterBar.style.top = (navBottom + searchHeight - 1) + "px";
+        } else if (filterBar) {
+            filterBar.style.top = "";
+        }
     }
 }
+
+/* Recalculate on scroll too — navbar shrinks on scroll,
+   so the offset needs to follow. Throttled via requestAnimationFrame. */
+let _scrollOffsetTicking = false;
+window.addEventListener("scroll", function () {
+    if (!_scrollOffsetTicking) {
+        window.requestAnimationFrame(function () {
+            setNavOffset();
+            _scrollOffsetTicking = false;
+        });
+        _scrollOffsetTicking = true;
+    }
+});
