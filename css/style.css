@@ -2948,18 +2948,26 @@ Page background */
     gap: 16px;
 }
 
-/* Carousel track */
+/* Carousel: tell the browser this area is swipeable */
 .carousel-track {
     display: flex;
     gap: 12px;
     flex: 1;
     align-items: center;
+    touch-action: pan-y;
+    user-select: none;
+    cursor: grab;
+}
+
+.carousel-track:active {
+    cursor: grabbing;
 }
 
 /* Single card */
 .carousel-card {
     flex: 1;
-    height: 220px;
+    height: 100%;
+    min-height: 380px;
     border-radius: 12px;
     overflow: hidden;
     cursor: pointer;
@@ -2981,6 +2989,10 @@ Page background */
     position: relative;
     display: flex;
     align-items: flex-end;
+}
+
+.gallery-carousel {
+    max-width: 100%;
 }
 
 /* Dark overlay */
@@ -3077,13 +3089,14 @@ Page background */
     display: flex;
 }
 
-/* Blurred dark overlay */
+/* Stronger backdrop blur — premium feel */
 .lightbox-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    cursor: pointer;
 }
 
 /* Modal box */
@@ -3093,23 +3106,29 @@ Page background */
     background: #fff;
     border-radius: 16px;
     overflow: hidden;
-    max-width: 800px;
-    width: 90%;
-    box-shadow: 0 32px 80px rgba(0, 0, 0, 0.35);
+    max-width: 640px;
+    width: 88%;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+    animation: lightbox-pop 0.25s ease;
+}
+
+@keyframes lightbox-pop {
+    from { transform: scale(0.96); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
 }
 
 /* Close button */
 .lightbox-close {
     position: absolute;
-    top: 14px;
-    right: 14px;
+    top: 12px;
+    right: 12px;
     width: 32px;
     height: 32px;
     background: rgba(0, 0, 0, 0.5);
     color: #fff;
     border: none;
     border-radius: 50%;
-    font-size: 14px;
+    font-size: 13px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -3118,29 +3137,40 @@ Page background */
     transition: background 0.2s ease;
 }
 
+@keyframes lightbox-pop {
+    from { transform: scale(0.94); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+}
+
+
 .lightbox-close:hover {
     background: #111;
 }
 
-/* Image */
+/* Image area — taller, supports swipe gestures */
 .lightbox-img-wrap {
     width: 100%;
-    height: 460px;
-    background: #111;
+    height: 380px;
+    background: #f5f5f5;
     display: flex;
     align-items: center;
     justify-content: center;
+    touch-action: pan-y;
+    user-select: none;
+    position: relative;
 }
 
 .lightbox-img {
     width: 100%;
     height: 100%;
     object-fit: contain;
+    pointer-events: none;
 }
 
-/* Caption */
+
+/* Caption + nav row sit on dark background, cleaner */
 .lightbox-caption {
-    padding: 14px 20px 8px;
+    padding: 14px 20px 6px;
     font-size: 14px;
     font-weight: 600;
     color: #111;
@@ -3282,10 +3312,11 @@ Page background */
     }
 
     /* One large card on mobile */
-    .carousel-card {
-        height: 200px;
-    }
-
+   .carousel-card {
+    height: 200px;
+    min-height: 200px;
+    max-height: 200px;
+}
     .carousel-arrow--left {
         left: 4px;
     }
@@ -3295,9 +3326,21 @@ Page background */
     }
 
     /* Lightbox */
-    .lightbox-img-wrap {
-        height: 260px;
+      .lightbox-img-wrap {
+        height: 280px;
     }
+    .lightbox-img-wrap::before {
+        content: "";
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 4px;
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 2px;
+    }
+
 
     /* Glass footer */
     .glass-footer-container {
