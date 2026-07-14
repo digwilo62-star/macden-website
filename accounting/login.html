@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Log in — MACDEN Accounting</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div class="auth-shell">
+    <div class="auth-card">
+      <div class="auth-logo-row">
+        <img src="assets/logo.jpeg" alt="MACDEN">
+        <span>MACDEN ACCOUNTING</span>
+      </div>
+
+      <h1 class="auth-title">Log in</h1>
+      <p class="auth-subtitle">Internal access for the accounting department.</p>
+
+      <div id="alert" class="alert alert-error"></div>
+
+      <form id="loginForm">
+        <div class="field">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" placeholder="e.g. daniel.accounts" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary" id="submitBtn">Log in</button>
+      </form>
+
+      <div class="auth-footer-link">
+        Don't have an account? <a href="register.html">Sign up</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script>
+    const form = document.getElementById('loginForm');
+    const alertEl = document.getElementById('alert');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideAlert(alertEl);
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Logging in…';
+
+      try {
+        await apiRequest('/auth/login', {
+          method: 'POST',
+          body: {
+            username: document.getElementById('username').value.trim(),
+            password: document.getElementById('password').value
+          }
+        });
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        showAlert(alertEl, err.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Log in';
+      }
+    });
+  </script>
+</body>
+</html>
+

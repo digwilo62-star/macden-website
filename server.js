@@ -7,7 +7,6 @@ const cors = require('cors');
 
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
-const priceRoutes = require('./routes/prices');
 const requireAuth = require('./middleware/requireAuth');
 
 const app = express();
@@ -28,7 +27,7 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // HTTPS required only in production
+    secure: true,       // requires HTTPS — Render gives you this by default
     sameSite: 'lax',
     maxAge: 1000 * 60 * 60 * 8   // 8-hour session, adjust as needed
   }
@@ -51,7 +50,6 @@ app.use('/api/accounting/auth', authRoutes);
 // routes will be added here as we build them.
 app.use('/api/accounting', requireAuth);
 app.use('/api/accounting/admin', adminRoutes);
-app.use('/api/accounting/prices', priceRoutes);
 
 app.get('/api/accounting/dashboard-check', (req, res) => {
   // Simple proof that requireAuth is working — returns the logged-in staff's info
@@ -62,4 +60,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Accounting backend running on port ${PORT}`);
 });
-
