@@ -1,3 +1,10 @@
+#!/usr/bin/env bash
+# Updates server.js to also serve the main storefront (moving it off Netlify onto Render),
+# with security guards blocking /server and /.git from being exposed.
+# Run this from the ROOT of your macden-website repo, in Git Bash.
+set -e
+
+cat > server/server.js << 'EOF_SERVER_JS'
 require('dotenv').config();
 
 const path = require('path');
@@ -79,3 +86,7 @@ app.listen(PORT, () => {
   console.log(`Accounting backend running on port ${PORT}`);
 });
 
+EOF_SERVER_JS
+
+echo "server.js updated — now serves the storefront + accounting section, with security guards."
+echo "Restart your server (Ctrl+C then npm start) to test locally, then push to GitHub for Render to redeploy."
