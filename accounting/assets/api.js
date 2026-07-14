@@ -26,3 +26,16 @@ function hideAlert(el) {
   el.className = 'alert';
 }
 
+// Shared across every page with the hamburger nav — keeps the unread badge live.
+async function loadUnreadBadge() {
+  const badge = document.getElementById('unreadBadge');
+  if (!badge) return;
+  try {
+    const result = await apiRequest('/messages/unread-count');
+    badge.textContent = result.unreadCount;
+    badge.style.display = result.unreadCount > 0 ? 'flex' : 'none';
+  } catch (err) {
+    // Fail silently — badge just stays at its last known state
+  }
+}
+
