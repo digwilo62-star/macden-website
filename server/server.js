@@ -8,6 +8,8 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const priceRoutes = require('./routes/prices');
+const staffRoutes = require('./routes/staff');
+const messageRoutes = require('./routes/messages');
 const requireAuth = require('./middleware/requireAuth');
 
 const app = express();
@@ -52,6 +54,8 @@ app.use('/api/accounting/auth', authRoutes);
 app.use('/api/accounting', requireAuth);
 app.use('/api/accounting/admin', adminRoutes);
 app.use('/api/accounting/prices', priceRoutes);
+app.use('/api/accounting/staff', staffRoutes);
+app.use('/api/accounting/messages', messageRoutes);
 
 app.get('/api/accounting/dashboard-check', (req, res) => {
   // Simple proof that requireAuth is working — returns the logged-in staff's info
