@@ -1,11 +1,40 @@
 /* ============================================================
    MACDEN Accounting — Design Tokens
-   Dark, near-black surface (Supabase-style) with a Supabase-green
-   primary accent and a warm terracotta secondary accent (Claude-style).
+   Light mode is the default. Dark mode (the original Supabase/Claude-
+   inspired near-black theme) is available via [data-theme="dark"] on <html>.
    Desktop-only, corporate-internal tool.
    ============================================================ */
 
 :root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --surface-raised: #f2f2f0;
+  --border: #e3e2dd;
+  --border-hover: #cfcec8;
+
+  --text-primary: #1c1d1a;
+  --text-secondary: #63645e;
+  --text-muted: #9a9a94;
+
+  --accent-green: #1d9e75;
+  --accent-green-hover: #17835f;
+  --accent-green-dim: rgba(29, 158, 117, 0.10);
+
+  --accent-clay: #b85a38;
+  --accent-clay-dim: rgba(184, 90, 56, 0.10);
+
+  --error: #d64545;
+  --error-dim: rgba(214, 69, 69, 0.10);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  --font-ui: -apple-system, "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono: "SF Mono", "JetBrains Mono", Consolas, monospace;
+}
+
+html[data-theme="dark"] {
   --bg: #0d0e0f;
   --surface: #16171a;
   --surface-raised: #1c1d21;
@@ -25,16 +54,9 @@
 
   --error: #f87171;
   --error-dim: rgba(248, 113, 113, 0.12);
-
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-
-  --font-ui: -apple-system, "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
-  --font-mono: "SF Mono", "JetBrains Mono", Consolas, monospace;
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; transition: background-color 0.15s ease, border-color 0.15s ease; }
 
 body {
   margin: 0;
@@ -284,6 +306,38 @@ body {
 }
 
 .logout-btn:hover { border-color: var(--border-hover); color: var(--text-primary); }
+
+/* ---------- Theme toggle ---------- */
+
+.theme-toggle {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid var(--border-hover);
+  background: var(--surface-raised);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.theme-toggle .theme-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 11px;
+  transition: left 0.15s ease;
+}
+
+html[data-theme="dark"] .theme-toggle .theme-knob { left: 22px; }
 
 /* ---------- Hamburger (right side, messaging nav) ---------- */
 

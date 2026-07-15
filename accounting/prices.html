@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>if(localStorage.getItem("accounting-theme")==="dark"){document.documentElement.setAttribute("data-theme","dark")}</script>
   <meta charset="UTF-8">
   <title>Price check — MACDEN Accounting</title>
   <link rel="stylesheet" href="assets/style.css">
@@ -84,6 +85,9 @@
       <div class="topbar-user">
         <span class="role-badge" id="roleBadge">—</span>
         <span class="user-name" id="userName">Loading…</span>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+          <span class="theme-knob"></span>
+        </button>
         <button class="logout-btn" id="logoutBtn">Log out</button>
       </div>
     </div>
@@ -152,6 +156,7 @@
   </div>
 
   <script src="assets/api.js"></script>
+  <script src="assets/theme.js"></script>
   <script>
     const hamburgerNav = document.getElementById('hamburgerNav');
     const hamburgerToggle = document.getElementById('hamburgerToggle');
