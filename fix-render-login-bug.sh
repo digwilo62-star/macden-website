@@ -1,3 +1,10 @@
+#!/usr/bin/env bash
+# Fixes the login-then-logout bug on Render by telling Express to trust the
+# reverse proxy, so secure cookies actually work correctly in production.
+# Run this from the ROOT of your macden-website repo, in Git Bash.
+set -e
+
+cat > server/server.js << 'EOF_SERVER_JS'
 require('dotenv').config();
 
 const path = require('path');
@@ -87,3 +94,7 @@ app.listen(PORT, () => {
   console.log(`Accounting backend running on port ${PORT}`);
 });
 
+EOF_SERVER_JS
+
+echo "server.js fixed."
+echo "Push this to GitHub and Render will auto-redeploy: bash save-progress.sh \"Fix session cookie behind Render proxy\""
