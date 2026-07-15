@@ -1,11 +1,9 @@
 const express = require('express');
 const supabase = require('../config/supabaseClient');
+const { isOnline } = require('./staff');
 
 const router = express.Router();
 
-// Helper: create an unread "message_reads" row for everyone in the conversation
-// except the sender. Only called when a message is actually SENT, never for drafts —
-// recipients shouldn't know a draft exists until it's sent.
 async function createReadRowsForRecipients(conversationId, messageId, senderId) {
   const { data: members } = await supabase
     .from('conversation_members')
@@ -19,7 +17,30 @@ async function createReadRowsForRecipients(conversationId, messageId, senderId) 
   await supabase.from('message_reads').insert(rows);
 }
 
-// GET /api/accounting/messages/unread-count — powers the hamburger badge
+async function getOtherParticipants(conversationId, excludeStaffId) {
+  const { data: memberRows } = await supabase
+    .from('conversation_members')
+    .select('staff_id')
+    .eq('conversation_id', conversationId)
+    .neq('staff_id', excludeStaffId);
+
+  if (!memberRows || memberRows.length === 0) return [];
+
+  const ids = memberRows.map(m => m.staff_id);
+  const { data: staffRows } = await supabase
+    .from('staff')
+    .select('id, full_name, last_seen')
+    .in('id', ids);
+
+  if (!staffRows) return [];
+
+  return staffRows.map(s => ({
+    id: s.id,
+    fullName: s.full_name,
+    isOnline: isOnline(s.last_seen)
+  }));
+}
+
 router.get('/unread-count', async (req, res) => {
   const { count, error } = await supabase
     .from('message_reads')
@@ -34,7 +55,6 @@ router.get('/unread-count', async (req, res) => {
   res.json({ unreadCount: count });
 });
 
-// GET /api/accounting/messages/conversations — inbox list
 router.get('/conversations', async (req, res) => {
   const staffId = req.session.staff.id;
 
@@ -54,7 +74,7 @@ router.get('/conversations', async (req, res) => {
 
   const { data: conversations, error: convError } = await supabase
     .from('conversations')
-    .select('id, subject, created_at')
+    .select('id, created_at')
     .in('id', conversationIds)
     .order('created_at', { ascending: false });
 
@@ -62,16 +82,20 @@ router.get('/conversations', async (req, res) => {
     return res.status(500).json({ error: 'Could not load inbox.' });
   }
 
-  // For each conversation, grab the latest SENT message and whether it's unread for this user
   const enriched = await Promise.all(conversations.map(async (conv) => {
-    const { data: lastMessage } = await supabase
-      .from('messages')
-      .select('id, sender_id, body, sent_at')
-      .eq('conversation_id', conv.id)
-      .eq('status', 'sent')
-      .order('sent_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const [lastMessageResult, participants] = await Promise.all([
+      supabase
+        .from('messages')
+        .select('id, sender_id, body, sent_at')
+        .eq('conversation_id', conv.id)
+        .eq('status', 'sent')
+        .order('sent_at', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      getOtherParticipants(conv.id, staffId)
+    ]);
+
+    const lastMessage = lastMessageResult.data;
 
     let isUnread = false;
     if (lastMessage) {
@@ -86,8 +110,9 @@ router.get('/conversations', async (req, res) => {
 
     return {
       id: conv.id,
-      subject: conv.subject,
-      lastMessagePreview: lastMessage ? lastMessage.body.slice(0, 80) : null,
+      participants,
+      displayName: participants.map(p => p.fullName).join(', ') || 'Conversation',
+      lastMessagePreview: lastMessage ? lastMessage.body.slice(0, 60) : null,
       lastMessageAt: lastMessage ? lastMessage.sent_at : conv.created_at,
       isUnread
     };
@@ -98,7 +123,6 @@ router.get('/conversations', async (req, res) => {
   res.json({ conversations: enriched });
 });
 
-// GET /api/accounting/messages/conversations/:id — full thread, marks it read
 router.get('/conversations/:id', async (req, res) => {
   const { id } = req.params;
   const staffId = req.session.staff.id;
@@ -114,13 +138,8 @@ router.get('/conversations/:id', async (req, res) => {
     return res.status(403).json({ error: 'You do not have access to this conversation.' });
   }
 
-  const { data: conversation } = await supabase
-    .from('conversations')
-    .select('id, subject')
-    .eq('id', id)
-    .single();
+  const participants = await getOtherParticipants(id, staffId);
 
-  // Show sent messages to everyone, but a draft only to the person who wrote it
   const { data: messages, error } = await supabase
     .from('messages')
     .select('id, sender_id, body, status, sent_at, created_at, attachment_url, attachment_type')
@@ -132,7 +151,6 @@ router.get('/conversations/:id', async (req, res) => {
     return res.status(500).json({ error: 'Could not load conversation.' });
   }
 
-  // Mark all sent messages in this thread as read for this user
   const sentMessageIds = messages.filter(m => m.status === 'sent').map(m => m.id);
   if (sentMessageIds.length > 0) {
     await supabase
@@ -143,26 +161,29 @@ router.get('/conversations/:id', async (req, res) => {
       .is('read_at', null);
   }
 
-  res.json({ conversation, messages });
+  res.json({ participants, messages });
 });
 
-// POST /api/accounting/messages/compose — start a new conversation (draft or send)
 router.post('/compose', async (req, res) => {
-  const { recipientIds, subject, body, status } = req.body;
+  const { recipientIds, body, status } = req.body;
   const staffId = req.session.staff.id;
 
-  if (!subject || !recipientIds || recipientIds.length === 0) {
-    return res.status(400).json({ error: 'Subject and at least one recipient are required.' });
+  if (!recipientIds || recipientIds.length === 0) {
+    return res.status(400).json({ error: 'Add at least one recipient.' });
   }
 
   const { data: conversation, error: convError } = await supabase
     .from('conversations')
-    .insert({ department_id: req.session.staff.departmentId, subject, is_group: recipientIds.length > 1 })
+    .insert({
+      department_id: req.session.staff.departmentId,
+      subject: 'Conversation',
+      is_group: recipientIds.length > 1
+    })
     .select()
     .single();
 
   if (convError) {
-    return res.status(500).json({ error: 'Could not create conversation.' });
+    return res.status(500).json({ error: 'Could not start conversation.' });
   }
 
   const memberRows = [staffId, ...recipientIds].map(id => ({ conversation_id: conversation.id, staff_id: id }));
@@ -182,7 +203,7 @@ router.post('/compose', async (req, res) => {
     .single();
 
   if (msgError) {
-    return res.status(500).json({ error: 'Could not create message.' });
+    return res.status(500).json({ error: 'Could not send message.' });
   }
 
   if (isSent) {
@@ -192,7 +213,6 @@ router.post('/compose', async (req, res) => {
   res.json({ success: true, conversationId: conversation.id, messageId: message.id });
 });
 
-// POST /api/accounting/messages/conversations/:id/reply — reply within an existing thread
 router.post('/conversations/:id/reply', async (req, res) => {
   const { id } = req.params;
   const { body, status } = req.body;
@@ -223,7 +243,7 @@ router.post('/conversations/:id/reply', async (req, res) => {
     .single();
 
   if (error) {
-    return res.status(500).json({ error: 'Could not send reply.' });
+    return res.status(500).json({ error: 'Could not send message.' });
   }
 
   if (isSent) {
@@ -233,7 +253,6 @@ router.post('/conversations/:id/reply', async (req, res) => {
   res.json({ success: true, message });
 });
 
-// GET /api/accounting/messages/drafts — this user's own unsent messages
 router.get('/drafts', async (req, res) => {
   const staffId = req.session.staff.id;
 
@@ -249,18 +268,16 @@ router.get('/drafts', async (req, res) => {
   }
 
   const enriched = await Promise.all(drafts.map(async (draft) => {
-    const { data: conv } = await supabase
-      .from('conversations')
-      .select('subject')
-      .eq('id', draft.conversation_id)
-      .single();
-    return { ...draft, subject: conv ? conv.subject : '(no subject)' };
+    const participants = await getOtherParticipants(draft.conversation_id, staffId);
+    return {
+      ...draft,
+      displayName: participants.map(p => p.fullName).join(', ') || 'Conversation'
+    };
   }));
 
   res.json({ drafts: enriched });
 });
 
-// PUT /api/accounting/messages/:id — update a draft's content, or send it
 router.put('/:id', async (req, res) => {
   const { id } = req.params;
   const { body, status } = req.body;

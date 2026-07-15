@@ -54,6 +54,7 @@
   </div>
 
   <script src="assets/api.js"></script>
+  <script src="assets/presence.js"></script>
   <script src="assets/theme.js"></script>
   <script>
     const hamburgerNav = document.getElementById('hamburgerNav');
@@ -92,7 +93,7 @@
         list.innerHTML = result.drafts.map(d => `
           <div class="conv-row" onclick="window.location.href='inbox.html?id=${d.conversation_id}'">
             <div>
-              <p class="conv-subject">${d.subject}</p>
+              <p class="conv-subject">${d.displayName}</p>
               <p class="conv-preview">${d.body || '(empty draft)'}</p>
             </div>
             <span class="conv-time">${new Date(d.created_at).toLocaleDateString()}</span>

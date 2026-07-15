@@ -5,38 +5,6 @@
   <meta charset="UTF-8">
   <title>Inbox — MACDEN Accounting</title>
   <link rel="stylesheet" href="assets/style.css">
-  <style>
-    .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .compose-btn { width: auto; padding: 9px 18px; }
-
-    .conv-list { display: flex; flex-direction: column; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
-    .conv-row { background: var(--surface); padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: flex-start; }
-    .conv-row:hover { background: var(--surface-raised); }
-    .conv-row.unread .conv-subject { font-weight: 700; }
-    .conv-row.unread::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent-green); display: inline-block; margin-right: 10px; flex-shrink: 0; margin-top: 6px; }
-    .conv-main { display: flex; flex: 1; min-width: 0; }
-    .conv-text { min-width: 0; }
-    .conv-subject { font-size: 13.5px; color: var(--text-primary); margin: 0 0 3px; }
-    .conv-preview { font-size: 12.5px; color: var(--text-secondary); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .conv-time { font-size: 11.5px; color: var(--text-muted); font-family: var(--font-mono); white-space: nowrap; margin-left: 16px; }
-
-    .empty-inbox { padding: 40px 20px; text-align: center; color: var(--text-muted); font-size: 13px; }
-
-    /* Thread view */
-    .thread-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
-    .back-link { color: var(--accent-green); text-decoration: none; font-size: 13px; }
-
-    .email-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px 24px; margin-bottom: 12px; }
-    .email-meta { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-    .email-sender { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
-    .email-time { font-size: 11.5px; color: var(--text-muted); font-family: var(--font-mono); }
-    .email-body { font-size: 13.5px; color: var(--text-primary); white-space: pre-wrap; line-height: 1.6; }
-
-    .reply-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; margin-top: 8px; }
-    .reply-box textarea { width: 100%; min-height: 90px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; color: var(--text-primary); font-size: 13.5px; font-family: var(--font-ui); resize: vertical; }
-    .reply-actions { display: flex; gap: 8px; margin-top: 10px; justify-content: flex-end; }
-    .reply-actions .btn { width: auto; padding: 8px 16px; }
-  </style>
 </head>
 <body>
   <div class="app-shell">
@@ -62,44 +30,45 @@
           <span>Inbox</span>
           <span class="unread-badge" id="unreadBadge">0</span>
         </a>
-        <a href="drafts.html" class="inbox-link">
-          <span>Drafts</span>
-        </a>
+        <a href="drafts.html" class="inbox-link"><span>Drafts</span></a>
       </div>
     </div>
 
     <div class="app-main" id="appMain">
 
-      <!-- LIST VIEW -->
       <div id="listView">
-        <div class="toolbar">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
           <div>
             <h1 class="page-title">Inbox</h1>
             <p class="page-subtitle"><a href="dashboard.html" style="color: var(--accent-green);">← Back to dashboard</a></p>
           </div>
-          <button class="btn btn-primary compose-btn" onclick="window.location.href='compose.html'">+ Compose</button>
+          <button class="btn btn-primary" style="width: auto; padding: 9px 18px;" onclick="window.location.href='compose.html'">+ New chat</button>
         </div>
-        <div class="conv-list" id="convList">
-          <div class="empty-inbox">Loading…</div>
+        <div class="chat-list" id="chatList">
+          <div style="padding: 40px 20px; text-align: center; color: var(--text-muted); font-size: 13px;">Loading…</div>
         </div>
       </div>
 
-      <!-- THREAD VIEW -->
       <div id="threadView" style="display: none;">
-        <div class="thread-header">
-          <a href="inbox.html" class="back-link">← Back to inbox</a>
-        </div>
-        <h1 class="page-title" id="threadSubject">—</h1>
-        <p class="page-subtitle">&nbsp;</p>
-        <div id="messagesContainer"></div>
+        <a href="inbox.html" style="color: var(--accent-green); text-decoration: none; font-size: 13px; display: inline-block; margin-bottom: 16px;">← Back to inbox</a>
 
-        <div class="reply-box">
-          <div id="replyAlert" class="alert alert-error"></div>
-          <textarea id="replyBody" placeholder="Write a reply…"></textarea>
-          <div class="reply-actions">
-            <button class="btn btn-ghost" id="saveDraftBtn">Save as draft</button>
-            <button class="btn btn-primary" id="sendReplyBtn">Send</button>
+        <div class="chat-header">
+          <div class="chat-avatar" id="threadAvatar" style="position: relative;">
+            <span id="threadInitials">—</span>
+            <span class="presence-dot" id="threadDot"></span>
           </div>
+          <div>
+            <p class="chat-header-name" id="threadName">—</p>
+            <p class="chat-header-status" id="threadStatus">—</p>
+          </div>
+        </div>
+
+        <div class="chat-messages" id="messagesContainer"></div>
+
+        <div id="replyAlert" class="alert alert-error"></div>
+        <div class="chat-composer">
+          <textarea id="replyBody" placeholder="Type a message…" rows="1"></textarea>
+          <button class="chat-send-btn" id="sendReplyBtn" aria-label="Send">→</button>
         </div>
       </div>
 
@@ -107,6 +76,7 @@
   </div>
 
   <script src="assets/api.js"></script>
+  <script src="assets/presence.js"></script>
   <script src="assets/theme.js"></script>
   <script>
     const hamburgerNav = document.getElementById('hamburgerNav');
@@ -123,8 +93,14 @@
     });
 
     let currentStaffId = null;
+    let currentConversationId = null;
     const params = new URLSearchParams(window.location.search);
     const openConversationId = params.get('id');
+
+    function initials(name) {
+      if (!name) return '?';
+      return name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+    }
 
     async function init() {
       try {
@@ -145,82 +121,100 @@
     }
 
     async function loadInbox() {
-      const list = document.getElementById('convList');
+      const list = document.getElementById('chatList');
       try {
         const result = await apiRequest('/messages/conversations');
         if (result.conversations.length === 0) {
-          list.innerHTML = '<div class="empty-inbox">No messages yet. Start a conversation with Compose.</div>';
+          list.innerHTML = '<div style="padding: 40px 20px; text-align: center; color: var(--text-muted); font-size: 13px;">No chats yet. Start one with New chat.</div>';
           return;
         }
-        list.innerHTML = result.conversations.map(c => `
-          <div class="conv-row ${c.isUnread ? 'unread' : ''}" onclick="window.location.href='inbox.html?id=${c.id}'">
-            <div class="conv-main">
-              <div class="conv-text">
-                <p class="conv-subject">${c.subject}</p>
-                <p class="conv-preview">${c.lastMessagePreview || '(no messages)'}</p>
+        list.innerHTML = result.conversations.map(c => {
+          const firstParticipant = c.participants[0];
+          const online = firstParticipant && firstParticipant.isOnline;
+          return `
+            <div class="chat-row ${c.isUnread ? 'unread' : ''}" onclick="window.location.href='inbox.html?id=${c.id}'">
+              <div class="chat-avatar">
+                ${initials(c.displayName)}
+                <span class="presence-dot ${online ? 'online' : ''}"></span>
               </div>
+              <div class="chat-row-text">
+                <p class="chat-row-name">${c.displayName}</p>
+                <p class="chat-row-preview">${c.lastMessagePreview || 'No messages yet'}</p>
+              </div>
+              <span class="chat-row-time">${c.lastMessageAt ? new Date(c.lastMessageAt).toLocaleDateString() : ''}</span>
             </div>
-            <span class="conv-time">${c.lastMessageAt ? new Date(c.lastMessageAt).toLocaleDateString() : ''}</span>
-          </div>
-        `).join('');
+          `;
+        }).join('');
       } catch (err) {
-        list.innerHTML = '<div class="empty-inbox">Could not load inbox.</div>';
+        list.innerHTML = '<div style="padding: 40px 20px; text-align: center; color: var(--text-muted); font-size: 13px;">Could not load inbox.</div>';
       }
     }
 
     async function openThread(id) {
+      currentConversationId = id;
       document.getElementById('listView').style.display = 'none';
       document.getElementById('threadView').style.display = 'block';
 
       try {
         const result = await apiRequest(`/messages/conversations/${id}`);
-        document.getElementById('threadSubject').textContent = result.conversation.subject;
+        const participant = result.participants[0];
+
+        document.getElementById('threadInitials').textContent = initials(participant ? participant.fullName : '?');
+        document.getElementById('threadName').textContent = participant ? participant.fullName : 'Conversation';
+        document.getElementById('threadStatus').textContent = participant && participant.isOnline ? 'Online' : 'Offline';
+        document.getElementById('threadDot').className = 'presence-dot' + (participant && participant.isOnline ? ' online' : '');
 
         const container = document.getElementById('messagesContainer');
-        container.innerHTML = result.messages.map(m => `
-          <div class="email-card">
-            <div class="email-meta">
-              <span class="email-sender">${m.sender_id === currentStaffId ? 'You' : 'Staff member'}${m.status === 'draft' ? ' (draft)' : ''}</span>
-              <span class="email-time">${m.sent_at ? new Date(m.sent_at).toLocaleString() : 'not sent'}</span>
+        container.innerHTML = result.messages.map(m => {
+          const sent = m.sender_id === currentStaffId;
+          return `
+            <div class="bubble-row ${sent ? 'sent' : 'received'}">
+              <div class="bubble">${m.body}${m.status === 'draft' ? ' (draft)' : ''}</div>
+              <div class="bubble-time">${m.sent_at ? new Date(m.sent_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : ''}</div>
             </div>
-            <div class="email-body">${m.body}</div>
-          </div>
-        `).join('');
+          `;
+        }).join('');
+        container.scrollTop = container.scrollHeight;
 
-        document.getElementById('sendReplyBtn').onclick = () => submitReply(id, 'sent');
-        document.getElementById('saveDraftBtn').onclick = () => submitReply(id, 'draft');
-
-        loadUnreadBadge(); // opening the thread just marked messages read server-side
+        loadUnreadBadge();
       } catch (err) {
-        document.getElementById('messagesContainer').innerHTML = `<div class="empty-inbox">${err.message}</div>`;
+        document.getElementById('messagesContainer').innerHTML = `<div style="color: var(--text-muted); font-size: 13px;">${err.message}</div>`;
       }
     }
 
-    async function submitReply(conversationId, status) {
+    document.getElementById('sendReplyBtn').addEventListener('click', async () => {
       const alertEl = document.getElementById('replyAlert');
-      const body = document.getElementById('replyBody').value.trim();
+      const textarea = document.getElementById('replyBody');
+      const body = textarea.value.trim();
       hideAlert(alertEl);
 
-      if (!body) {
-        showAlert(alertEl, 'Write something before sending.');
-        return;
-      }
+      if (!body || !currentConversationId) return;
 
       try {
-        await apiRequest(`/messages/conversations/${conversationId}/reply`, {
+        await apiRequest(`/messages/conversations/${currentConversationId}/reply`, {
           method: 'POST',
-          body: { body, status }
+          body: { body, status: 'sent' }
         });
-        if (status === 'sent') {
-          openThread(conversationId); // refresh thread to show the new message
-          document.getElementById('replyBody').value = '';
-        } else {
-          window.location.href = 'drafts.html';
-        }
+        textarea.value = '';
+        openThread(currentConversationId);
       } catch (err) {
         showAlert(alertEl, err.message);
       }
-    }
+    });
+
+    document.getElementById('replyBody').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        document.getElementById('sendReplyBtn').click();
+      }
+    });
+
+    // Lightweight presence + new-message refresh while a thread is open
+    setInterval(() => {
+      if (currentConversationId && document.getElementById('threadView').style.display !== 'none') {
+        openThread(currentConversationId);
+      }
+    }, 20000);
 
     init();
     loadUnreadBadge();

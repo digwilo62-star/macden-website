@@ -64,10 +64,6 @@
           </div>
         </div>
         <div class="field">
-          <label>Subject</label>
-          <input type="text" id="subject" placeholder="What's this about?">
-        </div>
-        <div class="field">
           <label>Message</label>
           <textarea class="compose-textarea" id="body" placeholder="Write your message…"></textarea>
         </div>
@@ -80,6 +76,7 @@
   </div>
 
   <script src="assets/api.js"></script>
+  <script src="assets/presence.js"></script>
   <script src="assets/theme.js"></script>
   <script>
     const hamburgerNav = document.getElementById('hamburgerNav');
@@ -130,7 +127,10 @@
           searchResults.innerHTML = '<div class="search-result-item" style="color: var(--text-muted);">No matches.</div>';
         } else {
           searchResults.innerHTML = available.map(s => `
-            <div class="search-result-item" onclick='selectRecipient(${JSON.stringify(s)})'>${s.full_name} · ${s.username}</div>
+            <div class="search-result-item" style="display: flex; align-items: center; gap: 8px;" onclick='selectRecipient(${JSON.stringify(s)})'>
+              <span class="presence-dot ${s.isOnline ? 'online' : ''}"></span>
+              <span>${s.full_name} · ${s.username}</span>
+            </div>
           `).join('');
         }
         searchResults.classList.add('visible');
@@ -164,15 +164,14 @@
       const alertEl = document.getElementById('alert');
       hideAlert(alertEl);
 
-      const subject = document.getElementById('subject').value.trim();
       const body = document.getElementById('body').value.trim();
 
       if (selectedRecipients.length === 0) {
         showAlert(alertEl, 'Add at least one recipient.');
         return;
       }
-      if (!subject) {
-        showAlert(alertEl, 'Add a subject.');
+      if (!body) {
+        showAlert(alertEl, 'Write a message.');
         return;
       }
 
@@ -181,7 +180,6 @@
           method: 'POST',
           body: {
             recipientIds: selectedRecipients.map(r => r.id),
-            subject,
             body,
             status
           }

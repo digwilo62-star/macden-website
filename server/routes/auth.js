@@ -148,6 +148,11 @@ router.post('/login', async (req, res) => {
     departmentId: staffMember.department_id
   };
 
+  await supabase
+    .from('staff')
+    .update({ last_seen: new Date().toISOString() })
+    .eq('id', staffMember.id);
+
   res.json({ success: true, staff: req.session.staff });
 });
 
