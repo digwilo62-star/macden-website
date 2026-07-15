@@ -84,6 +84,14 @@ app.get('/api/accounting/dashboard-check', (req, res) => {
   res.json({ message: `Welcome, ${req.session.staff.fullName}`, staff: req.session.staff });
 });
 
+// Safety net: if anything else throws unexpectedly, always send JSON back —
+// never Express's default HTML error page, which is what breaks the frontend
+// (it expects to parse every API response as JSON).
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Something went wrong on the server.' });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Accounting backend running on port ${PORT}`);
