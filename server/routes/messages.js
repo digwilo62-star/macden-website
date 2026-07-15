@@ -354,5 +354,33 @@ router.delete('/:id', async (req, res) => {
   res.json({ success: true });
 });
 
+// DELETE /api/accounting/messages/conversations/:id
+// Deletes the whole conversation — cascade cleans up its messages and read
+// records automatically. Any participant can do this, same as deleting an
+// email thread. No account or login access is affected by this at all.
+router.delete('/conversations/:id', async (req, res) => {
+  const { id } = req.params;
+  const staffId = req.session.staff.id;
+
+  const { data: membership } = await supabase
+    .from('conversation_members')
+    .select('id')
+    .eq('conversation_id', id)
+    .eq('staff_id', staffId)
+    .maybeSingle();
+
+  if (!membership) {
+    return res.status(403).json({ error: 'You do not have access to this conversation.' });
+  }
+
+  const { error } = await supabase.from('conversations').delete().eq('id', id);
+
+  if (error) {
+    return res.status(500).json({ error: 'Could not delete conversation.' });
+  }
+
+  res.json({ success: true });
+});
+
 module.exports = router;
 
