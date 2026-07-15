@@ -41,10 +41,10 @@
 <body>
   <div class="app-shell">
     <div class="app-topbar">
-      <div class="topbar-brand">
+      <a href="dashboard.html" class="topbar-brand" style="text-decoration: none;">
         <img src="assets/logo.jpeg" alt="MACDEN">
         <span>MACDEN Accounting</span>
-      </div>
+      </a>
       <div class="topbar-user">
         <span class="role-badge" id="roleBadge">—</span>
         <span class="user-name" id="userName">Loading…</span>
@@ -75,7 +75,7 @@
         <div class="toolbar">
           <div>
             <h1 class="page-title">Inbox</h1>
-            <p class="page-subtitle">Messages between accounting staff.</p>
+            <p class="page-subtitle"><a href="dashboard.html" style="color: var(--accent-green);">← Back to dashboard</a></p>
           </div>
           <button class="btn btn-primary compose-btn" onclick="window.location.href='compose.html'">+ Compose</button>
         </div>
