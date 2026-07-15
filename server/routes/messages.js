@@ -324,5 +324,35 @@ router.put('/:id', async (req, res) => {
   res.json({ success: true, message: updated });
 });
 
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+  const staffId = req.session.staff.id;
+
+  const { data: existing, error: fetchError } = await supabase
+    .from('messages')
+    .select('id, sender_id')
+    .eq('id', id)
+    .single();
+
+  if (fetchError || !existing) {
+    return res.status(404).json({ error: 'Message not found.' });
+  }
+
+  if (existing.sender_id !== staffId) {
+    return res.status(403).json({ error: 'You can only delete your own messages.' });
+  }
+
+  const { error: deleteError } = await supabase
+    .from('messages')
+    .delete()
+    .eq('id', id);
+
+  if (deleteError) {
+    return res.status(500).json({ error: 'Could not delete message.' });
+  }
+
+  res.json({ success: true });
+});
+
 module.exports = router;
 
