@@ -48,5 +48,49 @@ router.post('/approve-staff/:id', async (req, res) => {
   res.json({ success: true, message: `${data.full_name} has been approved and can now log in.` });
 });
 
+// DELETE /api/accounting/admin/staff/:id
+// Deactivates a staff member (soft-disable, not a hard delete — their past
+// messages and price edits stay intact) and clears any shared conversation
+// with the admin performing this action.
+router.delete('/staff/:id', async (req, res) => {
+  const { id } = req.params;
+  const adminId = req.session.staff.id;
+
+  if (id === adminId) {
+    return res.status(400).json({ error: 'You cannot deactivate your own account.' });
+  }
+
+  const { data: targetMemberships } = await supabase
+    .from('conversation_members')
+    .select('conversation_id')
+    .eq('staff_id', id);
+
+  const { data: adminMemberships } = await supabase
+    .from('conversation_members')
+    .select('conversation_id')
+    .eq('staff_id', adminId);
+
+  const targetIds = new Set((targetMemberships || []).map(m => m.conversation_id));
+  const sharedConversationIds = (adminMemberships || [])
+    .map(m => m.conversation_id)
+    .filter(convId => targetIds.has(convId));
+
+  if (sharedConversationIds.length > 0) {
+    // Cascade delete handles conversation_members, messages, and message_reads automatically
+    await supabase.from('conversations').delete().in('id', sharedConversationIds);
+  }
+
+  const { error } = await supabase
+    .from('staff')
+    .update({ is_active: false })
+    .eq('id', id);
+
+  if (error) {
+    return res.status(500).json({ error: 'Could not deactivate this account.' });
+  }
+
+  res.json({ success: true });
+});
+
 module.exports = router;
 

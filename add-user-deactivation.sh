@@ -1,3 +1,112 @@
+#!/usr/bin/env bash
+# Adds admin-only 'remove user' from inbox: deactivates the account (soft-
+# disable, preserves history) and clears the shared chat. Regular staff
+# don't see this option at all.
+# Run this from the ROOT of your macden-website repo, in Git Bash.
+set -e
+
+mkdir -p server/routes accounting
+
+cat > server/routes/admin.js << 'EOF_SERVER_ROUTES_ADMIN_JS'
+const express = require('express');
+const supabase = require('../config/supabaseClient');
+
+const router = express.Router();
+
+// Only staff with role = 'admin' can reach these routes.
+function requireAdmin(req, res, next) {
+  if (req.session.staff.role !== 'admin') {
+    return res.status(403).json({ error: 'Admin access only.' });
+  }
+  next();
+}
+
+router.use(requireAdmin);
+
+// GET /api/accounting/admin/pending-staff
+// Lists everyone who has verified their email but is still waiting on approval.
+router.get('/pending-staff', async (req, res) => {
+  const { data, error } = await supabase
+    .from('staff')
+    .select('id, full_name, username, email, created_at')
+    .eq('email_verified', true)
+    .eq('is_active', false)
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    return res.status(500).json({ error: 'Could not load pending accounts.' });
+  }
+
+  res.json({ pending: data });
+});
+
+// POST /api/accounting/admin/approve-staff/:id
+router.post('/approve-staff/:id', async (req, res) => {
+  const { id } = req.params;
+
+  const { data, error } = await supabase
+    .from('staff')
+    .update({ is_active: true })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error || !data) {
+    return res.status(400).json({ error: 'Could not approve this account.' });
+  }
+
+  res.json({ success: true, message: `${data.full_name} has been approved and can now log in.` });
+});
+
+// DELETE /api/accounting/admin/staff/:id
+// Deactivates a staff member (soft-disable, not a hard delete — their past
+// messages and price edits stay intact) and clears any shared conversation
+// with the admin performing this action.
+router.delete('/staff/:id', async (req, res) => {
+  const { id } = req.params;
+  const adminId = req.session.staff.id;
+
+  if (id === adminId) {
+    return res.status(400).json({ error: 'You cannot deactivate your own account.' });
+  }
+
+  const { data: targetMemberships } = await supabase
+    .from('conversation_members')
+    .select('conversation_id')
+    .eq('staff_id', id);
+
+  const { data: adminMemberships } = await supabase
+    .from('conversation_members')
+    .select('conversation_id')
+    .eq('staff_id', adminId);
+
+  const targetIds = new Set((targetMemberships || []).map(m => m.conversation_id));
+  const sharedConversationIds = (adminMemberships || [])
+    .map(m => m.conversation_id)
+    .filter(convId => targetIds.has(convId));
+
+  if (sharedConversationIds.length > 0) {
+    // Cascade delete handles conversation_members, messages, and message_reads automatically
+    await supabase.from('conversations').delete().in('id', sharedConversationIds);
+  }
+
+  const { error } = await supabase
+    .from('staff')
+    .update({ is_active: false })
+    .eq('id', id);
+
+  if (error) {
+    return res.status(500).json({ error: 'Could not deactivate this account.' });
+  }
+
+  res.json({ success: true });
+});
+
+module.exports = router;
+
+EOF_SERVER_ROUTES_ADMIN_JS
+
+cat > accounting/inbox.html << 'EOF_ACCOUNTING_INBOX_HTML'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -315,3 +424,7 @@
 </body>
 </html>
 
+EOF_ACCOUNTING_INBOX_HTML
+
+echo "Admin-only user removal added to inbox."
+echo "Push to deploy: bash save-progress.sh \"Add admin-only user deactivation from inbox\""
