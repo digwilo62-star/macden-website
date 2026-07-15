@@ -80,6 +80,18 @@
     </div>
   </div>
 
+  <div class="modal-backdrop" id="deleteModalBackdrop">
+    <div class="modal">
+      <h3>Delete conversation?</h3>
+      <p id="deleteModalText">This will permanently delete this conversation.</p>
+      <div id="deleteModalAlert" class="alert alert-error"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="deleteModalCancel">Cancel</button>
+        <button class="btn btn-primary" id="deleteModalConfirm" style="background: var(--error); color: #fff;">Delete</button>
+      </div>
+    </div>
+  </div>
+
   <script src="assets/api.js"></script>
   <script src="assets/presence.js"></script>
   <script src="assets/theme.js"></script>
@@ -193,25 +205,49 @@
       }
     }
 
-    async function deleteConversation(conversationId, displayName) {
-      const confirmed = confirm('Delete the conversation with ' + displayName + '? This cannot be undone.');
-      if (!confirmed) return;
+    let pendingDeleteId = null;
+
+    function deleteConversation(conversationId, displayName) {
+      pendingDeleteId = conversationId;
+      document.getElementById('deleteModalText').textContent =
+        'This will permanently delete your conversation with ' + displayName + '. This cannot be undone.';
+      hideAlert(document.getElementById('deleteModalAlert'));
+      document.getElementById('deleteModalBackdrop').classList.add('visible');
+    }
+
+    document.getElementById('deleteModalCancel').addEventListener('click', () => {
+      document.getElementById('deleteModalBackdrop').classList.remove('visible');
+      pendingDeleteId = null;
+    });
+
+    document.getElementById('deleteModalConfirm').addEventListener('click', async () => {
+      if (!pendingDeleteId) return;
+      const alertEl = document.getElementById('deleteModalAlert');
+      const confirmBtn = document.getElementById('deleteModalConfirm');
+      hideAlert(alertEl);
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Deleting…';
 
       try {
-        await apiRequest('/messages/conversations/' + conversationId, { method: 'DELETE' });
+        await apiRequest('/messages/conversations/' + pendingDeleteId, { method: 'DELETE' });
 
-        if (conversationId === currentConversationId) {
+        if (pendingDeleteId === currentConversationId) {
           document.getElementById('emptyState').style.display = 'flex';
           document.getElementById('activeChat').style.display = 'none';
           currentConversationId = null;
           history.replaceState(null, '', 'inbox.html');
         }
 
-        loadSidebar();
+        document.getElementById('deleteModalBackdrop').classList.remove('visible');
+        pendingDeleteId = null;
+        await loadSidebar();
       } catch (err) {
-        alert(err.message);
+        showAlert(alertEl, err.message);
+      } finally {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Delete';
       }
-    }
+    });
 
     document.getElementById('sendReplyBtn').addEventListener('click', async () => {
       const textarea = document.getElementById('replyBody');
