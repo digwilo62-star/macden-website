@@ -40,44 +40,44 @@
     </div>
 
     <div class="app-main" id="appMain">
+      <h1 class="page-title">Inbox</h1>
+      <p class="page-subtitle"><a href="dashboard.html" style="color: var(--accent-green);">← Back to dashboard</a></p>
 
-      <div id="listView">
-        <div style="margin-bottom: 20px;">
-          <h1 class="page-title">Inbox</h1>
-          <p class="page-subtitle"><a href="dashboard.html" style="color: var(--accent-green);">← Back to dashboard</a></p>
-        </div>
-        <div style="position: relative; margin-bottom: 20px;">
-          <input type="text" id="userSearch" placeholder="Search by name or username…" style="width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; color: var(--text-primary); font-size: 13.5px; font-family: var(--font-ui);">
-          <div class="search-results" id="userSearchResults"></div>
-        </div>
-        <div class="chat-list" id="chatList">
-          <div style="padding: 40px 20px; text-align: center; color: var(--text-muted); font-size: 13px;">Loading…</div>
-        </div>
-      </div>
-
-      <div id="threadView" style="display: none;">
-        <a href="inbox.html" style="color: var(--accent-green); text-decoration: none; font-size: 13px; display: inline-block; margin-bottom: 16px;">← Back to inbox</a>
-
-        <div class="chat-header">
-          <div class="chat-avatar" id="threadAvatar" style="position: relative;">
-            <span id="threadInitials">—</span>
-            <span class="presence-dot" id="threadDot"></span>
+      <div class="chat-shell">
+        <div class="chat-sidebar">
+          <div class="chat-sidebar-search" style="position: relative;">
+            <input type="text" id="userSearch" placeholder="Search by name or username…">
+            <div class="search-results" id="userSearchResults"></div>
           </div>
-          <div>
-            <p class="chat-header-name" id="threadName">—</p>
-            <p class="chat-header-status" id="threadStatus">—</p>
+          <div class="chat-sidebar-list" id="chatList">
+            <div style="padding: 40px 16px; text-align: center; color: var(--text-muted); font-size: 13px;">Loading…</div>
           </div>
         </div>
 
-        <div class="chat-messages" id="messagesContainer"></div>
+        <div class="chat-panel">
+          <div id="emptyState" class="chat-empty-state">Select a chat to get started</div>
 
-        <div id="replyAlert" class="alert alert-error"></div>
-        <div class="chat-composer">
-          <textarea id="replyBody" placeholder="Type a message…" rows="1"></textarea>
-          <button class="chat-send-btn" id="sendReplyBtn" aria-label="Send">→</button>
+          <div id="activeChat" style="display: none; flex-direction: column; flex: 1;">
+            <div class="chat-panel-header">
+              <div class="chat-avatar" id="threadAvatar" style="position: relative;">
+                <span id="threadInitials">—</span>
+                <span class="presence-dot" id="threadDot"></span>
+              </div>
+              <div>
+                <p class="chat-header-name" id="threadName">—</p>
+                <p class="chat-header-status" id="threadStatus">—</p>
+              </div>
+            </div>
+
+            <div class="chat-panel-messages" id="messagesContainer"></div>
+
+            <div class="chat-panel-composer">
+              <textarea id="replyBody" placeholder="Type a message…" rows="1"></textarea>
+              <button class="chat-send-btn" id="sendReplyBtn" aria-label="Send">→</button>
+            </div>
+          </div>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -100,8 +100,9 @@
 
     let currentStaffId = null;
     let currentConversationId = null;
+    let conversationsCache = [];
     const params = new URLSearchParams(window.location.search);
-    const openConversationId = params.get('id');
+    const initialConversationId = params.get('id');
 
     function initials(name) {
       if (!name) return '?';
@@ -119,50 +120,52 @@
         return;
       }
 
-      if (openConversationId) {
-        openThread(openConversationId);
-      } else {
-        loadInbox();
+      await loadSidebar();
+
+      if (initialConversationId) {
+        selectChat(initialConversationId);
       }
     }
 
-    async function loadInbox() {
+    async function loadSidebar() {
       const list = document.getElementById('chatList');
       try {
         const result = await apiRequest('/messages/conversations');
+        conversationsCache = result.conversations;
+
         if (result.conversations.length === 0) {
-          list.innerHTML = '<div style="padding: 40px 20px; text-align: center; color: var(--text-muted); font-size: 13px;">No chats yet. Start one with New chat.</div>';
+          list.innerHTML = '<div style="padding: 40px 16px; text-align: center; color: var(--text-muted); font-size: 13px;">No chats yet. Search above to start one.</div>';
           return;
         }
+
         list.innerHTML = result.conversations.map(c => {
-          const firstParticipant = c.participants[0];
-          const online = firstParticipant && firstParticipant.isOnline;
-          return `
-            <div class="chat-row ${c.isUnread ? 'unread' : ''}" onclick="window.location.href='inbox.html?id=${c.id}'">
-              <div class="chat-avatar">
-                ${initials(c.displayName)}
-                <span class="presence-dot ${online ? 'online' : ''}"></span>
-              </div>
-              <div class="chat-row-text">
-                <p class="chat-row-name">${c.displayName}</p>
-                <p class="chat-row-preview">${c.lastMessagePreview || 'No messages yet'}</p>
-              </div>
-              <span class="chat-row-time">${c.lastMessageAt ? new Date(c.lastMessageAt).toLocaleDateString() : ''}</span>
-            </div>
-          `;
+          const p = c.participants[0];
+          const online = p && p.isOnline;
+          const active = c.id === currentConversationId ? 'active' : '';
+          const unread = c.isUnread ? 'unread' : '';
+          return '<div class="chat-sidebar-row ' + active + ' ' + unread + '" data-id="' + c.id + '" onclick="selectChat(\'' + c.id + '\')">' +
+            '<div class="chat-avatar">' + initials(c.displayName) + '<span class="presence-dot ' + (online ? 'online' : '') + '"></span></div>' +
+            '<div class="chat-row-text"><p class="chat-row-name">' + c.displayName + '</p><p class="chat-row-preview">' + (c.lastMessagePreview || 'No messages yet') + '</p></div>' +
+            '</div>';
         }).join('');
       } catch (err) {
-        list.innerHTML = '<div style="padding: 40px 20px; text-align: center; color: var(--text-muted); font-size: 13px;">Could not load inbox.</div>';
+        list.innerHTML = '<div style="padding: 40px 16px; text-align: center; color: var(--text-muted); font-size: 13px;">Could not load chats.</div>';
       }
     }
 
-    async function openThread(id) {
+    async function selectChat(id) {
       currentConversationId = id;
-      document.getElementById('listView').style.display = 'none';
-      document.getElementById('threadView').style.display = 'block';
+      history.replaceState(null, '', 'inbox.html?id=' + id);
+
+      document.querySelectorAll('.chat-sidebar-row').forEach(row => {
+        row.classList.toggle('active', row.dataset.id === id);
+      });
+
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('activeChat').style.display = 'flex';
 
       try {
-        const result = await apiRequest(`/messages/conversations/${id}`);
+        const result = await apiRequest('/messages/conversations/' + id);
         const participant = result.participants[0];
 
         document.getElementById('threadInitials').textContent = initials(participant ? participant.fullName : '?');
@@ -173,31 +176,43 @@
         const container = document.getElementById('messagesContainer');
         container.innerHTML = result.messages.map(m => {
           const sent = m.sender_id === currentStaffId;
-          const deleteBtn = sent ? `<button onclick="deleteMessage('${m.id}')" aria-label="Delete message" style="background: none; border: none; color: inherit; opacity: 0.65; cursor: pointer; font-size: 11px; margin-left: 8px; padding: 0;">✕</button>` : '';
-          return `
-            <div class="bubble-row ${sent ? 'sent' : 'received'}">
-              <div class="bubble">${m.body}${m.status === 'draft' ? ' (draft)' : ''}${deleteBtn}</div>
-              <div class="bubble-time">${m.sent_at ? new Date(m.sent_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : ''}</div>
-            </div>
-          `;
+          return '<div class="bubble-row ' + (sent ? 'sent' : 'received') + '">' +
+            '<div class="bubble">' + m.body + (m.status === 'draft' ? ' (draft)' : '') + '</div>' +
+            '<div class="bubble-time">' + (m.sent_at ? new Date(m.sent_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) : '') + '</div>' +
+            '</div>';
         }).join('');
         container.scrollTop = container.scrollHeight;
 
         loadUnreadBadge();
+        loadSidebar();
       } catch (err) {
-        document.getElementById('messagesContainer').innerHTML = `<div style="color: var(--text-muted); font-size: 13px;">${err.message}</div>`;
+        document.getElementById('messagesContainer').innerHTML = '<div style="color: var(--text-muted); font-size: 13px;">' + err.message + '</div>';
       }
     }
 
-    async function deleteMessage(id) {
-      if (!confirm('Delete this message? This cannot be undone.')) return;
+    document.getElementById('sendReplyBtn').addEventListener('click', async () => {
+      const textarea = document.getElementById('replyBody');
+      const body = textarea.value.trim();
+      if (!body || !currentConversationId) return;
+
       try {
-        await apiRequest(`/messages/${id}`, { method: 'DELETE' });
-        openThread(currentConversationId);
+        await apiRequest('/messages/conversations/' + currentConversationId + '/reply', {
+          method: 'POST',
+          body: { body: body, status: 'sent' }
+        });
+        textarea.value = '';
+        selectChat(currentConversationId);
       } catch (err) {
         alert(err.message);
       }
-    }
+    });
+
+    document.getElementById('replyBody').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        document.getElementById('sendReplyBtn').click();
+      }
+    });
 
     const userSearchInput = document.getElementById('userSearch');
     const userSearchResults = document.getElementById('userSearchResults');
@@ -215,16 +230,15 @@
 
     async function searchUsers(query) {
       try {
-        const result = await apiRequest(`/staff?search=${encodeURIComponent(query)}`);
+        const result = await apiRequest('/staff?search=' + encodeURIComponent(query));
         if (result.staff.length === 0) {
           userSearchResults.innerHTML = '<div class="search-result-item" style="color: var(--text-muted);">No matches.</div>';
         } else {
-          userSearchResults.innerHTML = result.staff.map(s => `
-            <div class="search-result-item" onclick='startOrOpenChat(${JSON.stringify(s)})'>
-              <span class="presence-dot ${s.isOnline ? 'online' : ''}"></span>
-              <span>${s.full_name} · ${s.username}</span>
-            </div>
-          `).join('');
+          userSearchResults.innerHTML = result.staff.map(s => {
+            return '<div class="search-result-item" onclick=\'startOrOpenChat(' + JSON.stringify(s) + ')\'>' +
+              '<span class="presence-dot ' + (s.isOnline ? 'online' : '') + '"></span>' +
+              '<span>' + s.full_name + ' · ' + s.username + '</span></div>';
+          }).join('');
         }
         userSearchResults.style.display = 'block';
       } catch (err) {
@@ -235,18 +249,20 @@
     async function startOrOpenChat(staff) {
       userSearchResults.style.display = 'none';
       userSearchInput.value = '';
+
+      const match = conversationsCache.find(c => c.participants.length === 1 && c.participants[0].id === staff.id);
+      if (match) {
+        selectChat(match.id);
+        return;
+      }
+
       try {
-        const existing = await apiRequest('/messages/conversations');
-        const match = existing.conversations.find(c => c.participants.length === 1 && c.participants[0].id === staff.id);
-        if (match) {
-          window.location.href = `inbox.html?id=${match.id}`;
-          return;
-        }
         const result = await apiRequest('/messages/compose', {
           method: 'POST',
           body: { recipientIds: [staff.id], body: '', status: 'draft' }
         });
-        window.location.href = `inbox.html?id=${result.conversationId}`;
+        await loadSidebar();
+        selectChat(result.conversationId);
       } catch (err) {
         alert(err.message);
       }
@@ -258,38 +274,9 @@
       }
     });
 
-    document.getElementById('sendReplyBtn').addEventListener('click', async () => {
-      const alertEl = document.getElementById('replyAlert');
-      const textarea = document.getElementById('replyBody');
-      const body = textarea.value.trim();
-      hideAlert(alertEl);
-
-      if (!body || !currentConversationId) return;
-
-      try {
-        await apiRequest(`/messages/conversations/${currentConversationId}/reply`, {
-          method: 'POST',
-          body: { body, status: 'sent' }
-        });
-        textarea.value = '';
-        openThread(currentConversationId);
-      } catch (err) {
-        showAlert(alertEl, err.message);
-      }
-    });
-
-    document.getElementById('replyBody').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        document.getElementById('sendReplyBtn').click();
-      }
-    });
-
-    // Lightweight presence + new-message refresh while a thread is open
+    setInterval(loadSidebar, 20000);
     setInterval(() => {
-      if (currentConversationId && document.getElementById('threadView').style.display !== 'none') {
-        openThread(currentConversationId);
-      }
+      if (currentConversationId) selectChat(currentConversationId);
     }, 20000);
 
     init();
