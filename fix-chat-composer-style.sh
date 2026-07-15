@@ -1,3 +1,11 @@
+#!/usr/bin/env bash
+# Fixes the unstyled message input box in the two-panel inbox.
+# Run this from the ROOT of your macden-website repo, in Git Bash.
+set -e
+
+mkdir -p accounting/assets
+
+cat > accounting/assets/style.css << 'EOF_STYLE_CSS'
 /* ============================================================
    MACDEN Accounting — Design Tokens
    Light mode is the default. Dark mode (the original Supabase/Claude-
@@ -812,3 +820,7 @@ html[data-theme="dark"] .theme-toggle .theme-knob { left: 22px; }
   font-size: 13px;
 }
 
+EOF_STYLE_CSS
+
+echo "Message input styling fixed."
+echo "Push to deploy: bash save-progress.sh \"Fix unstyled chat composer\""
