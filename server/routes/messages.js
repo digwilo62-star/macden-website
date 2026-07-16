@@ -45,7 +45,11 @@ router.post('/upload', (req, res) => {
         .upload(fileName, req.file.buffer, { contentType: req.file.mimetype });
 
       if (uploadError) {
-        return res.status(500).json({ error: 'Could not upload file.' });
+        console.error('Supabase storage upload error:', uploadError);
+        // Surface the real reason (e.g. "Bucket not found") instead of a generic
+        // message — this is the difference between a fixable, diagnosable error
+        // and a dead end.
+        return res.status(500).json({ error: 'Upload failed: ' + (uploadError.message || 'unknown error') });
       }
 
       const { data: publicUrlData } = supabase.storage.from('attachments').getPublicUrl(fileName);
