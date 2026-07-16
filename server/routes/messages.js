@@ -1,8 +1,67 @@
 const express = require('express');
+const multer = require('multer');
 const supabase = require('../config/supabaseClient');
 const { isOnline } = require('./staff');
 
 const router = express.Router();
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 15 * 1024 * 1024 }, // 15MB
+  fileFilter: (req, file, cb) => {
+    const allowed = {
+      'application/pdf': 'pdf',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx'
+    };
+    if (allowed[file.mimetype]) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF and Excel (.xlsx) files are allowed.'));
+    }
+  }
+});
+
+// POST /api/accounting/messages/upload — uploads a PDF or Excel file to
+// Supabase Storage and returns the URL to attach to a message.
+router.post('/upload', (req, res) => {
+  upload.single('attachment')(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ error: err.message });
+    }
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file provided.' });
+    }
+
+    try {
+      const typeMap = {
+        'application/pdf': 'pdf',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx'
+      };
+      const attachmentType = typeMap[req.file.mimetype];
+      const fileName = `${req.session.staff.id}-${Date.now()}-${req.file.originalname}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('attachments')
+        .upload(fileName, req.file.buffer, { contentType: req.file.mimetype });
+
+      if (uploadError) {
+        return res.status(500).json({ error: 'Could not upload file.' });
+      }
+
+      const { data: publicUrlData } = supabase.storage.from('attachments').getPublicUrl(fileName);
+
+      res.json({
+        success: true,
+        url: publicUrlData.publicUrl,
+        type: attachmentType,
+        name: req.file.originalname
+      });
+    } catch (err) {
+      console.error('Upload error:', err);
+      res.status(500).json({ error: 'Something went wrong uploading this file.' });
+    }
+  });
+});
 
 async function createReadRowsForRecipients(conversationId, messageId, senderId) {
   const { data: members } = await supabase
@@ -165,7 +224,7 @@ router.get('/conversations/:id', async (req, res) => {
 });
 
 router.post('/compose', async (req, res) => {
-  const { recipientIds, body, status } = req.body;
+  const { recipientIds, body, status, attachmentUrl, attachmentType } = req.body;
   const staffId = req.session.staff.id;
 
   if (!recipientIds || recipientIds.length === 0) {
@@ -197,7 +256,9 @@ router.post('/compose', async (req, res) => {
       sender_id: staffId,
       body: body || '',
       status: isSent ? 'sent' : 'draft',
-      sent_at: isSent ? new Date().toISOString() : null
+      sent_at: isSent ? new Date().toISOString() : null,
+      attachment_url: attachmentUrl || null,
+      attachment_type: attachmentType || null
     })
     .select()
     .single();
@@ -215,7 +276,7 @@ router.post('/compose', async (req, res) => {
 
 router.post('/conversations/:id/reply', async (req, res) => {
   const { id } = req.params;
-  const { body, status } = req.body;
+  const { body, status, attachmentUrl, attachmentType } = req.body;
   const staffId = req.session.staff.id;
 
   const { data: membership } = await supabase
@@ -237,7 +298,9 @@ router.post('/conversations/:id/reply', async (req, res) => {
       sender_id: staffId,
       body: body || '',
       status: isSent ? 'sent' : 'draft',
-      sent_at: isSent ? new Date().toISOString() : null
+      sent_at: isSent ? new Date().toISOString() : null,
+      attachment_url: attachmentUrl || null,
+      attachment_type: attachmentType || null
     })
     .select()
     .single();
@@ -325,33 +388,38 @@ router.put('/:id', async (req, res) => {
 });
 
 router.delete('/:id', async (req, res) => {
-  const { id } = req.params;
-  const staffId = req.session.staff.id;
+  try {
+    const { id } = req.params;
+    const staffId = req.session.staff.id;
 
-  const { data: existing, error: fetchError } = await supabase
-    .from('messages')
-    .select('id, sender_id')
-    .eq('id', id)
-    .single();
+    const { data: existing, error: fetchError } = await supabase
+      .from('messages')
+      .select('id, sender_id')
+      .eq('id', id)
+      .single();
 
-  if (fetchError || !existing) {
-    return res.status(404).json({ error: 'Message not found.' });
+    if (fetchError || !existing) {
+      return res.status(404).json({ error: 'Message not found.' });
+    }
+
+    if (existing.sender_id !== staffId) {
+      return res.status(403).json({ error: 'You can only delete your own messages.' });
+    }
+
+    const { error: deleteError } = await supabase
+      .from('messages')
+      .delete()
+      .eq('id', id);
+
+    if (deleteError) {
+      return res.status(500).json({ error: 'Could not delete message.' });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Delete message error:', err);
+    res.status(500).json({ error: 'Something went wrong deleting this message.' });
   }
-
-  if (existing.sender_id !== staffId) {
-    return res.status(403).json({ error: 'You can only delete your own messages.' });
-  }
-
-  const { error: deleteError } = await supabase
-    .from('messages')
-    .delete()
-    .eq('id', id);
-
-  if (deleteError) {
-    return res.status(500).json({ error: 'Could not delete message.' });
-  }
-
-  res.json({ success: true });
 });
 
 // DELETE /api/accounting/messages/conversations/:id
