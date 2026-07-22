@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Staff Directory — MACDEN Portal</title>
+  <link rel="stylesheet" href="assets/portal-style.css">
+  <link rel="stylesheet" href="assets/portal-shell.css">
+  <link rel="stylesheet" href="assets/portal-inbox.css">
+  <style>
+    .dir-toolbar { display: flex; gap: 12px; margin-bottom: 18px; }
+    .dir-toolbar input {
+      flex: 1; max-width: 380px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; font-family: var(--font-body);
+      color: var(--text-primary);
+    }
+    .dir-list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+    .dir-header-row { display: grid; grid-template-columns: 220px 160px 160px 1fr 130px; gap: 14px; padding: 12px 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    .dir-row { display: grid; grid-template-columns: 220px 160px 160px 1fr 130px; gap: 14px; align-items: center; padding: 13px 20px; border-bottom: 1px solid var(--border); cursor: pointer; }
+    .dir-row:last-child { border-bottom: none; }
+    .dir-row:hover { background: var(--surface-raised); }
+    .dir-name-cell { display: flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
+    .dir-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); color: #a17a00; display: flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 700; flex-shrink: 0; position: relative; }
+    .dir-cell { font-size: 12.5px; color: var(--text-secondary); }
+    .dir-role-badge { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; background: var(--primary-dim); color: var(--primary); }
+    .dir-empty { padding: 60px 20px; text-align: center; color: var(--text-muted); font-size: 13px; }
+
+    .profile-field-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .profile-field-row:last-child { border-bottom: none; }
+    .profile-field-label { color: var(--text-secondary); }
+    .profile-field-value { color: var(--text-primary); font-weight: 500; }
+    .profile-field-value.muted { color: var(--text-muted); font-style: italic; font-weight: 400; }
+    .profile-avatar-large { width: 72px; height: 72px; border-radius: 50%; background: var(--gold-dim); color: #a17a00; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; margin: 0 auto 14px; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-brand">
+        <img src="assets/logo.jpeg" alt="MACDEN">
+        <span>MACDEN</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="inbox.html" class="sidebar-link"><i class="ti ti-mail"></i> Inbox <span class="badge" id="unreadBadge" style="display:none;">0</span></a>
+        <a href="compose.html" class="sidebar-link"><i class="ti ti-pencil"></i> Compose</a>
+        <a href="broadcasts.html" class="sidebar-link"><i class="ti ti-speakerphone"></i> Broadcasts</a>
+        <a href="directory.html" class="sidebar-link active"><i class="ti ti-users"></i> Directory</a>
+        <a href="leave.html" class="sidebar-link"><i class="ti ti-calendar-event"></i> Leave &amp; Requests</a>
+        <a href="documents.html" class="sidebar-link"><i class="ti ti-file-text"></i> Documents</a>
+        <a href="#" class="sidebar-link"><i class="ti ti-book"></i> Policies</a>
+        <a href="#" class="sidebar-link"><i class="ti ti-settings"></i> Settings</a>
+      </nav>
+      <div class="sidebar-logout">
+        <button id="logoutBtn"><i class="ti ti-logout"></i> Logout</button>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-search"><input type="text" placeholder="Search messages, people, documents…"></div>
+        <button class="topbar-bell"><i class="ti ti-bell"></i></button>
+        <img class="topbar-avatar" src="assets/logo.jpeg" alt="You">
+      </div>
+
+      <div class="page-body">
+        <h1 class="page-greeting" style="font-size: 22px;">Staff Directory</h1>
+        <p class="page-greeting-sub"><a href="dashboard.html" style="color: var(--primary); text-decoration:none; font-weight:600;">← Back to dashboard</a></p>
+
+        <div class="dir-toolbar">
+          <input type="text" id="dirSearch" placeholder="Search by name or username…">
+        </div>
+
+        <div class="dir-list">
+          <div class="dir-header-row">
+            <div>Staff Member</div><div>Role</div><div>Department</div><div>Email</div><div>Status</div>
+          </div>
+          <div id="dirRows">
+            <div class="dir-empty">Loading…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="profileModalBackdrop">
+    <div class="modal" style="width: 380px; text-align: center;">
+      <button onclick="closeProfileModal()" style="float:right; background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:16px;"><i class="ti ti-x"></i></button>
+      <div class="profile-avatar-large" id="profileAvatar">—</div>
+      <h3 id="profileName" style="text-align:center; font-size:17px;">—</h3>
+      <p id="profileRole" style="text-align:center; color:var(--text-secondary); font-size:12.5px; margin-top:-6px;">—</p>
+
+      <div style="text-align:left; margin-top:18px;">
+        <div class="profile-field-row"><span class="profile-field-label">Department</span><span class="profile-field-value" id="profileDept">—</span></div>
+        <div class="profile-field-row"><span class="profile-field-label">Username</span><span class="profile-field-value" id="profileUsername">—</span></div>
+        <div class="profile-field-row"><span class="profile-field-label">Email</span><span class="profile-field-value" id="profileEmail">—</span></div>
+        <div class="profile-field-row"><span class="profile-field-label">Date Joined</span><span class="profile-field-value" id="profileDate">—</span></div>
+        <div class="profile-field-row"><span class="profile-field-label">Phone</span><span class="profile-field-value muted">Not yet added</span></div>
+        <div class="profile-field-row"><span class="profile-field-label">Branch</span><span class="profile-field-value muted">Not yet added</span></div>
+      </div>
+
+      <button class="btn btn-primary" id="messageProfileBtn" style="margin-top:18px; display:inline-flex; align-items:center; justify-content:center; gap:8px; width:auto; padding:10px 24px;">
+        <i class="ti ti-mail"></i> Message
+      </button>
+    </div>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script src="assets/presence.js"></script>
+  <script>
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await apiRequest('/auth/logout', { method: 'POST' });
+      window.location.href = 'login.html';
+    });
+
+    function initials(name) {
+      if (!name) return '?';
+      return name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+    }
+
+    let staffCache = [];
+    let searchTimeout = null;
+
+    async function init() {
+      try {
+        await apiRequest('/dashboard-check');
+      } catch (err) {
+        window.location.href = 'login.html';
+        return;
+      }
+      loadUnreadBadge();
+      loadDirectory('');
+    }
+
+    async function loadDirectory(query) {
+      const rows = document.getElementById('dirRows');
+      try {
+        const result = await apiRequest('/staff?search=' + encodeURIComponent(query));
+        staffCache = result.staff;
+
+        if (result.staff.length === 0) {
+          rows.innerHTML = '<div class="dir-empty">No staff found.</div>';
+          return;
+        }
+
+        rows.innerHTML = result.staff.map(s => {
+          const statusDot = s.isOnline ? '<span style="color:var(--primary-light); font-size:11px;">● Online</span>' : '<span style="color:var(--text-muted); font-size:11px;">○ Offline</span>';
+          return '<div class="dir-row" onclick="openProfile(\'' + s.id + '\')">' +
+            '<div class="dir-name-cell"><span class="dir-avatar">' + initials(s.full_name) + '</span>' + s.full_name + '</div>' +
+            '<div class="dir-cell"><span class="dir-role-badge">' + s.role + '</span></div>' +
+            '<div class="dir-cell">' + (s.department || '—') + '</div>' +
+            '<div class="dir-cell">' + s.email + '</div>' +
+            '<div class="dir-cell">' + statusDot + '</div>' +
+            '</div>';
+        }).join('');
+      } catch (err) {
+        rows.innerHTML = '<div class="dir-empty">Could not load directory.</div>';
+      }
+    }
+
+    document.getElementById('dirSearch').addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => loadDirectory(e.target.value.trim()), 250);
+    });
+
+    function openProfile(id) {
+      const person = staffCache.find(s => s.id === id);
+      if (!person) return;
+
+      document.getElementById('profileAvatar').textContent = initials(person.full_name);
+      document.getElementById('profileName').textContent = person.full_name;
+      document.getElementById('profileRole').textContent = person.role + (person.department ? ' · ' + person.department : '');
+      document.getElementById('profileDept').textContent = person.department || '—';
+      document.getElementById('profileUsername').textContent = person.username;
+      document.getElementById('profileEmail').textContent = person.email;
+      document.getElementById('profileDate').textContent = person.dateStarted ? new Date(person.dateStarted).toLocaleDateString() : '—';
+
+      document.getElementById('messageProfileBtn').onclick = () => {
+        window.location.href = 'compose.html?to=' + person.id + '&name=' + encodeURIComponent(person.full_name);
+      };
+
+      document.getElementById('profileModalBackdrop').classList.add('visible');
+    }
+
+    function closeProfileModal() {
+      document.getElementById('profileModalBackdrop').classList.remove('visible');
+    }
+
+    init();
+  </script>
+</body>
+</html>
+

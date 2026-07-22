@@ -2,36 +2,49 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Log in — MACDEN Accounting</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <title>Sign In — MACDEN Portal</title>
+  <link rel="stylesheet" href="assets/portal-style.css">
 </head>
 <body>
-  <div class="auth-shell">
-    <div class="auth-card">
-      <div class="auth-logo-row">
+  <div class="login-shell">
+    <div class="login-brand-panel">
+      <div class="login-brand-logo">
         <img src="assets/logo.jpeg" alt="MACDEN">
-        <span>MACDEN ACCOUNTING</span>
+        <div>
+          <span>MACDEN</span>
+          <small>COMMUNICATIONS</small>
+        </div>
       </div>
+      <div class="login-tagline">
+        Stronger Together.<br>
+        <span class="gold">Better Every Day.</span>
+      </div>
+    </div>
 
-      <h1 class="auth-title">Log in</h1>
-      <p class="auth-subtitle">Internal access for the accounting department.</p>
+    <div class="login-form-panel">
+      <div class="login-form-inner">
+        <h1>Welcome Back</h1>
+        <p class="login-form-subtitle">Sign in to your account</p>
 
-      <div id="alert" class="alert alert-error"></div>
+        <div id="alert" class="alert alert-error"></div>
 
-      <form id="loginForm">
-        <div class="field">
-          <label for="username">Username</label>
-          <input type="text" id="username" name="username" placeholder="e.g. daniel.accounts" required>
-        </div>
-        <div class="field">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" placeholder="••••••••" required>
-        </div>
-        <button type="submit" class="btn btn-primary" id="submitBtn">Log in</button>
-      </form>
+        <form id="loginForm">
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="text" id="email" name="email" placeholder="name@macden.com" required>
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="••••••••" required>
+          </div>
+          <div class="login-row-between">
+            <label><input type="checkbox" id="rememberMe"> Remember me</label>
+            <a href="#">Forgot password?</a>
+          </div>
+          <button type="submit" class="btn btn-primary" id="submitBtn">Sign In</button>
+        </form>
 
-      <div class="auth-footer-link">
-        Don't have an account? <a href="register.html">Sign up</a>
+        <p class="login-footer-link">Need help? Contact IT Support</p>
       </div>
     </div>
   </div>
@@ -46,13 +59,13 @@
       e.preventDefault();
       hideAlert(alertEl);
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Logging in…';
+      submitBtn.textContent = 'Signing in…';
 
       try {
         await apiRequest('/auth/login', {
           method: 'POST',
           body: {
-            username: document.getElementById('username').value.trim(),
+            username: document.getElementById('email').value.trim(),
             password: document.getElementById('password').value
           }
         });
@@ -60,7 +73,7 @@
       } catch (err) {
         showAlert(alertEl, err.message);
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Log in';
+        submitBtn.textContent = 'Sign In';
       }
     });
   </script>

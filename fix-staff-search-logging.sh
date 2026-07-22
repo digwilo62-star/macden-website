@@ -1,3 +1,12 @@
+#!/usr/bin/env bash
+# Adds error logging to the staff search route so we can actually see why
+# it was returning 500 with no terminal output.
+# Run this from the ROOT of your macden-website repo, in Git Bash.
+set -e
+
+mkdir -p server/routes
+
+cat > server/routes/staff.js << 'EOF_STAFF_JS'
 const express = require('express');
 const supabase = require('../config/supabaseClient');
 
@@ -17,7 +26,7 @@ router.get('/', async (req, res) => {
 
     let query = supabase
       .from('staff')
-      .select('id, full_name, username, email, role, last_seen, created_at, departments(name)')
+      .select('id, full_name, username, last_seen')
       .eq('is_active', true)
       .neq('id', req.session.staff.id)
       .order('full_name', { ascending: true });
@@ -37,10 +46,6 @@ router.get('/', async (req, res) => {
       id: s.id,
       full_name: s.full_name,
       username: s.username,
-      email: s.email,
-      role: s.role,
-      department: s.departments ? s.departments.name : null,
-      dateStarted: s.created_at,
       isOnline: isOnline(s.last_seen)
     }));
 
@@ -53,4 +58,6 @@ router.get('/', async (req, res) => {
 
 module.exports = router;
 module.exports.isOnline = isOnline;
+EOF_STAFF_JS
 
+echo "Staff route error logging fixed."

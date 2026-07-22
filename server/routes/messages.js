@@ -137,7 +137,7 @@ router.get('/conversations', async (req, res) => {
 
   const { data: conversations, error: convError } = await supabase
     .from('conversations')
-    .select('id, created_at')
+    .select('id, subject, is_broadcast, created_at')
     .in('id', conversationIds)
     .order('created_at', { ascending: false });
 
@@ -173,8 +173,10 @@ router.get('/conversations', async (req, res) => {
 
     return {
       id: conv.id,
+      subject: conv.subject,
+      isBroadcast: conv.is_broadcast,
       participants,
-      displayName: participants.map(p => p.fullName).join(', ') || 'Conversation',
+      displayName: participants.map(p => p.fullName).join(', ') || 'Unknown',
       lastMessagePreview: lastMessage ? lastMessage.body.slice(0, 60) : null,
       lastMessageAt: lastMessage ? lastMessage.sent_at : conv.created_at,
       isUnread
@@ -201,7 +203,27 @@ router.get('/conversations/:id', async (req, res) => {
     return res.status(403).json({ error: 'You do not have access to this conversation.' });
   }
 
+  const { data: conversation } = await supabase
+    .from('conversations')
+    .select('id, subject')
+    .eq('id', id)
+    .single();
+
   const participants = await getOtherParticipants(id, staffId);
+
+  // Build a full sender-name lookup (including yourself) so every message
+  // in the thread can show a real "From" name, not just the other party.
+  const { data: allMemberRows } = await supabase
+    .from('conversation_members')
+    .select('staff_id')
+    .eq('conversation_id', id);
+  const allMemberIds = (allMemberRows || []).map(m => m.staff_id);
+  const { data: allStaffRows } = await supabase
+    .from('staff')
+    .select('id, full_name')
+    .in('id', allMemberIds.length > 0 ? allMemberIds : ['00000000-0000-0000-0000-000000000000']);
+  const nameById = {};
+  (allStaffRows || []).forEach(s => { nameById[s.id] = s.full_name; });
 
   const { data: messages, error } = await supabase
     .from('messages')
@@ -214,6 +236,11 @@ router.get('/conversations/:id', async (req, res) => {
     return res.status(500).json({ error: 'Could not load conversation.' });
   }
 
+  const messagesWithSenderNames = messages.map(m => ({
+    ...m,
+    senderName: m.sender_id === staffId ? 'You' : (nameById[m.sender_id] || 'Unknown')
+  }));
+
   const sentMessageIds = messages.filter(m => m.status === 'sent').map(m => m.id);
   if (sentMessageIds.length > 0) {
     await supabase
@@ -224,22 +251,31 @@ router.get('/conversations/:id', async (req, res) => {
       .is('read_at', null);
   }
 
-  res.json({ participants, messages });
+  res.json({
+    subject: conversation ? conversation.subject : 'Conversation',
+    participants,
+    toLine: participants.map(p => p.fullName).join(', '),
+    messages: messagesWithSenderNames
+  });
 });
 
 router.post('/compose', async (req, res) => {
-  const { recipientIds, body, status, attachmentUrl, attachmentType } = req.body;
+  const { recipientIds, subject, body, status, attachmentUrl, attachmentType } = req.body;
   const staffId = req.session.staff.id;
 
   if (!recipientIds || recipientIds.length === 0) {
     return res.status(400).json({ error: 'Add at least one recipient.' });
   }
 
+  if (!subject || !subject.trim()) {
+    return res.status(400).json({ error: 'Subject is required.' });
+  }
+
   const { data: conversation, error: convError } = await supabase
     .from('conversations')
     .insert({
       department_id: req.session.staff.departmentId,
-      subject: 'Conversation',
+      subject: subject.trim(),
       is_group: recipientIds.length > 1
     })
     .select()
@@ -456,6 +492,135 @@ router.delete('/conversations/:id', async (req, res) => {
   } catch (err) {
     console.error('Delete conversation error:', err);
     res.status(500).json({ error: 'Something went wrong deleting this conversation.' });
+  }
+});
+
+// POST /api/accounting/messages/broadcast — admin-only, sends to every active staff member
+router.post('/broadcast', async (req, res) => {
+  try {
+    if (req.session.staff.role !== 'admin') {
+      return res.status(403).json({ error: 'Only admins can send broadcasts.' });
+    }
+
+    const { subject, body } = req.body;
+    const staffId = req.session.staff.id;
+
+    if (!subject || !subject.trim()) {
+      return res.status(400).json({ error: 'Subject is required.' });
+    }
+    if (!body || !body.trim()) {
+      return res.status(400).json({ error: 'Message body is required.' });
+    }
+
+    const { data: allActiveStaff, error: staffError } = await supabase
+      .from('staff')
+      .select('id')
+      .eq('is_active', true)
+      .neq('id', staffId);
+
+    if (staffError) {
+      return res.status(500).json({ error: 'Could not load staff list.' });
+    }
+
+    const { data: conversation, error: convError } = await supabase
+      .from('conversations')
+      .insert({
+        department_id: req.session.staff.departmentId,
+        subject: subject.trim(),
+        is_group: true,
+        is_broadcast: true
+      })
+      .select()
+      .single();
+
+    if (convError) {
+      return res.status(500).json({ error: 'Could not create broadcast.' });
+    }
+
+    const memberRows = [staffId, ...allActiveStaff.map(s => s.id)]
+      .map(id => ({ conversation_id: conversation.id, staff_id: id }));
+    await supabase.from('conversation_members').insert(memberRows);
+
+    const { data: message, error: msgError } = await supabase
+      .from('messages')
+      .insert({
+        conversation_id: conversation.id,
+        sender_id: staffId,
+        body: body.trim(),
+        status: 'sent',
+        sent_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (msgError) {
+      return res.status(500).json({ error: 'Could not send broadcast.' });
+    }
+
+    await createReadRowsForRecipients(conversation.id, message.id, staffId);
+
+    res.json({ success: true, conversationId: conversation.id, recipientCount: allActiveStaff.length });
+  } catch (err) {
+    console.error('Broadcast send error:', err);
+    res.status(500).json({ error: 'Something went wrong sending this broadcast.' });
+  }
+});
+
+// GET /api/accounting/messages/broadcasts — admin-only, sent history with open rates
+router.get('/broadcasts', async (req, res) => {
+  try {
+    if (req.session.staff.role !== 'admin') {
+      return res.status(403).json({ error: 'Only admins can view broadcast history.' });
+    }
+
+    const { data: conversations, error } = await supabase
+      .from('conversations')
+      .select('id, subject, created_at')
+      .eq('is_broadcast', true)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      return res.status(500).json({ error: 'Could not load broadcast history.' });
+    }
+
+    const enriched = await Promise.all(conversations.map(async (conv) => {
+      const { data: message } = await supabase
+        .from('messages')
+        .select('id, body, sent_at')
+        .eq('conversation_id', conv.id)
+        .eq('status', 'sent')
+        .limit(1)
+        .maybeSingle();
+
+      let recipientCount = 0;
+      let openedCount = 0;
+      if (message) {
+        const { count: total } = await supabase
+          .from('message_reads')
+          .select('*', { count: 'exact', head: true })
+          .eq('message_id', message.id);
+        const { count: opened } = await supabase
+          .from('message_reads')
+          .select('*', { count: 'exact', head: true })
+          .eq('message_id', message.id)
+          .not('read_at', 'is', null);
+        recipientCount = total || 0;
+        openedCount = opened || 0;
+      }
+
+      return {
+        id: conv.id,
+        subject: conv.subject,
+        sentAt: message ? message.sent_at : conv.created_at,
+        recipientCount,
+        openedCount
+      };
+    }));
+
+    res.json({ broadcasts: enriched });
+  } catch (err) {
+    console.error('Broadcast history error:', err);
+    res.status(500).json({ error: 'Something went wrong loading broadcast history.' });
   }
 });
 

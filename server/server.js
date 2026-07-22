@@ -3,6 +3,8 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
+const { Pool } = require('pg');
 const cors = require('cors');
 
 const authRoutes = require('./routes/auth');
@@ -11,6 +13,8 @@ const priceRoutes = require('./routes/prices');
 const staffRoutes = require('./routes/staff');
 const messageRoutes = require('./routes/messages');
 const presenceRoutes = require('./routes/presence');
+const leaveRoutes = require('./routes/leave');
+const documentsRoutes = require('./routes/documents');
 const requireAuth = require('./middleware/requireAuth');
 
 const app = express();
@@ -33,7 +37,21 @@ app.use(cors({
   credentials: true
 }));
 
+// Sessions were previously stored in-memory, which meant every server
+// restart (including Render's periodic free-tier restarts) silently logged
+// everyone out. This stores sessions in Postgres instead, so they survive
+// restarts. The table is created automatically on first run if missing.
+const pgPool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false } // required for Supabase's connection pooler
+});
+
 app.use(session({
+  store: new pgSession({
+    pool: pgPool,
+    tableName: 'user_sessions',
+    createTableIfMissing: true
+  }),
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
@@ -78,6 +96,8 @@ app.use('/api/accounting/prices', priceRoutes);
 app.use('/api/accounting/staff', staffRoutes);
 app.use('/api/accounting/messages', messageRoutes);
 app.use('/api/accounting/presence', presenceRoutes);
+app.use('/api/accounting/leave', leaveRoutes);
+app.use('/api/accounting/documents', documentsRoutes);
 
 app.get('/api/accounting/dashboard-check', (req, res) => {
   // Simple proof that requireAuth is working — returns the logged-in staff's info

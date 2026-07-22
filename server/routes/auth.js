@@ -1,10 +1,21 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
 const supabase = require('../config/supabaseClient');
 const { sendVerificationEmail } = require('../utils/email');
 
 const router = express.Router();
+
+// Limits brute-force login attempts and signup/verification abuse.
+// 10 attempts per 15 minutes per IP is generous for a real person, tight for a script.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many attempts. Please wait a few minutes and try again.' }
+});
 
 function generateCode() {
   // 6-digit numeric code, e.g. 483920
@@ -12,7 +23,7 @@ function generateCode() {
 }
 
 // POST /api/accounting/auth/register
-router.post('/register', async (req, res) => {
+router.post('/register', authLimiter, async (req, res) => {
   const { fullName, username, email, password } = req.body;
 
   if (!fullName || !username || !email || !password) {
@@ -69,7 +80,7 @@ router.post('/register', async (req, res) => {
 });
 
 // POST /api/accounting/auth/verify-email
-router.post('/verify-email', async (req, res) => {
+router.post('/verify-email', authLimiter, async (req, res) => {
   const { email, code } = req.body;
 
   if (!email || !code) {
@@ -107,27 +118,30 @@ router.post('/verify-email', async (req, res) => {
 });
 
 // POST /api/accounting/auth/login
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res.status(400).json({ error: 'Username and password are required.' });
+    return res.status(400).json({ error: 'Email and password are required.' });
   }
 
+  // The new portal design logs in with email, but existing accounts (and the
+  // CLI script) are keyed by username — accept either so nothing breaks.
+  const isEmail = username.includes('@');
   const { data: staffMember, error } = await supabase
     .from('staff')
     .select('id, full_name, username, password_hash, role, can_edit_prices, is_active, email_verified, department_id')
-    .eq('username', username)
+    .eq(isEmail ? 'email' : 'username', username)
     .single();
 
   if (error || !staffMember) {
-    return res.status(401).json({ error: 'Invalid username or password.' });
+    return res.status(401).json({ error: 'Invalid email or password.' });
   }
 
   const passwordMatches = await bcrypt.compare(password, staffMember.password_hash);
 
   if (!passwordMatches) {
-    return res.status(401).json({ error: 'Invalid username or password.' });
+    return res.status(401).json({ error: 'Invalid email or password.' });
   }
 
   if (!staffMember.email_verified) {

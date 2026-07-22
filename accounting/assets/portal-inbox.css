@@ -1,0 +1,104 @@
+/* ---------- Alerts & modal (shared) ---------- */
+
+.alert { padding: 11px 14px; border-radius: var(--radius-sm); font-size: 12.5px; margin-bottom: 18px; display: none; }
+.alert-error { background: var(--error-dim); color: var(--error); border: 1px solid rgba(220,38,38,0.2); }
+.alert.visible { display: block; }
+
+.modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); align-items: center; justify-content: center; z-index: 100; }
+.modal-backdrop.visible { display: flex; }
+.modal { width: 380px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; }
+.modal h3 { margin: 0 0 8px; font-size: 15px; }
+.modal p { margin: 0 0 4px; font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+.modal-actions { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
+.modal-actions .btn { width: auto; padding: 8px 16px; }
+.btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--text-primary); }
+.btn-ghost:hover { border-color: var(--border-hover); }
+
+/* ---------- Presence (used in recipient picker only) ---------- */
+
+.presence-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); flex-shrink: 0; display: inline-block; }
+.presence-dot.online { background: var(--primary-light); }
+
+/* ---------- Email list view ---------- */
+
+.email-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.email-toolbar-tabs { display: flex; gap: 4px; }
+.email-tab { padding: 7px 14px; border-radius: var(--radius-sm); font-size: 12.5px; font-weight: 600; color: var(--text-secondary); cursor: pointer; border: none; background: none; font-family: var(--font-body); }
+.email-tab.active { background: var(--primary-dim); color: var(--primary); }
+
+.email-list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+
+.email-row { display: grid; grid-template-columns: 220px 1fr 110px 36px; align-items: center; gap: 16px; padding: 14px 20px; border-bottom: 1px solid var(--border); cursor: pointer; }
+.email-row:last-child { border-bottom: none; }
+.email-row:hover { background: var(--surface-raised); }
+.email-row.unread { background: rgba(13,92,47,0.03); }
+.email-row.unread .email-sender, .email-row.unread .email-subject { font-weight: 700; }
+
+.email-sender { font-size: 13.5px; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+.email-sender-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--gold-dim); color: #a17a00; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.email-subject { font-size: 13.5px; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.email-subject .preview { color: var(--text-muted); font-weight: 400; }
+.email-date { font-size: 12px; color: var(--text-muted); text-align: right; font-family: var(--font-body); }
+.email-row-delete { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 14px; }
+.email-row-delete:hover { color: var(--error); }
+
+.email-empty { padding: 60px 20px; text-align: center; color: var(--text-muted); font-size: 13px; }
+
+/* ---------- Message detail view ---------- */
+
+.email-detail-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.email-back { color: var(--primary); text-decoration: none; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+
+.email-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; margin-bottom: 14px; }
+
+.email-detail-subject { font-family: var(--font-heading); font-size: 19px; font-weight: 700; margin: 0 0 16px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+
+.email-meta-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.email-meta-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--gold-dim); color: #a17a00; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+.email-meta-text { flex: 1; }
+.email-meta-from { font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
+.email-meta-to { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+.email-meta-date { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+
+.email-body-text { font-size: 13.5px; line-height: 1.7; color: var(--text-primary); white-space: pre-wrap; margin-top: 10px; }
+.email-attachment { margin-top: 14px; display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12.5px; text-decoration: none; color: var(--text-primary); }
+
+.email-action-row { display: flex; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.email-action-btn { padding: 8px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: var(--font-body); }
+.email-action-btn:hover { border-color: var(--primary); color: var(--primary); }
+.email-action-btn.danger:hover { border-color: var(--error); color: var(--error); }
+
+/* ---------- Reply box ---------- */
+
+.reply-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 18px; display: none; }
+.reply-box.visible { display: block; }
+.reply-box-label { font-size: 12.5px; color: var(--text-secondary); margin-bottom: 8px; }
+.reply-box textarea {
+  width: 100%; min-height: 110px; background: var(--surface-raised); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13.5px; font-family: var(--font-body);
+  color: var(--text-primary); resize: vertical;
+}
+.reply-box textarea:focus { outline: none; border-color: var(--primary); }
+.reply-box-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+.reply-attach-btn { background: none; border: 1px solid var(--border); border-radius: 50%; width: 36px; height: 36px; color: var(--text-secondary); cursor: pointer; font-size: 15px; }
+
+/* ---------- Compose page ---------- */
+
+.compose-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 26px; max-width: 720px; }
+.compose-field { border-bottom: 1px solid var(--border); padding: 12px 0; display: flex; align-items: center; gap: 10px; }
+.compose-field label { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); width: 60px; flex-shrink: 0; }
+.compose-field input[type=text] { flex: 1; border: none; outline: none; font-size: 13.5px; font-family: var(--font-body); color: var(--text-primary); background: none; padding: 4px 0; }
+
+.compose-recipients { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; position: relative; }
+.compose-chip { background: var(--primary-dim); color: var(--primary); font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; display: flex; align-items: center; gap: 6px; }
+.compose-chip button { background: none; border: none; color: var(--primary); cursor: pointer; font-size: 12px; padding: 0; }
+.compose-recipient-input { border: none; outline: none; font-size: 13px; font-family: var(--font-body); flex: 1; min-width: 120px; padding: 4px 0; }
+
+.compose-body-area { margin-top: 16px; }
+.compose-body-area textarea {
+  width: 100%; min-height: 260px; border: none; outline: none; resize: vertical;
+  font-size: 13.5px; font-family: var(--font-body); color: var(--text-primary); line-height: 1.6;
+}
+
+.compose-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+

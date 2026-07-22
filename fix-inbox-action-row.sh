@@ -1,3 +1,12 @@
+#!/usr/bin/env bash
+# Adds missing Reply/Reply All/Forward/Delete action buttons to the message
+# detail view, and fixes delete to redirect back to the inbox list properly.
+# Run this from the ROOT of your macden-website repo, in Git Bash.
+set -e
+
+mkdir -p accounting
+
+cat > accounting/inbox.html << 'EOF_INBOX_HTML'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,10 +27,10 @@
         <a href="dashboard.html" class="sidebar-link"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
         <a href="inbox.html" class="sidebar-link active"><i class="ti ti-mail"></i> Inbox <span class="badge" id="unreadBadge" style="display:none;">0</span></a>
         <a href="compose.html" class="sidebar-link"><i class="ti ti-pencil"></i> Compose</a>
-        <a href="broadcasts.html" class="sidebar-link"><i class="ti ti-speakerphone"></i> Broadcasts</a>
-        <a href="directory.html" class="sidebar-link"><i class="ti ti-users"></i> Directory</a>
-        <a href="leave.html" class="sidebar-link"><i class="ti ti-calendar-event"></i> Leave &amp; Requests</a>
-        <a href="documents.html" class="sidebar-link"><i class="ti ti-file-text"></i> Documents</a>
+        <a href="#" class="sidebar-link"><i class="ti ti-speakerphone"></i> Broadcasts</a>
+        <a href="#" class="sidebar-link"><i class="ti ti-users"></i> Directory</a>
+        <a href="#" class="sidebar-link"><i class="ti ti-calendar-event"></i> Leave &amp; Requests</a>
+        <a href="#" class="sidebar-link"><i class="ti ti-file-text"></i> Documents</a>
         <a href="#" class="sidebar-link"><i class="ti ti-book"></i> Policies</a>
         <a href="#" class="sidebar-link"><i class="ti ti-settings"></i> Settings</a>
       </nav>
@@ -301,4 +310,6 @@
   </script>
 </body>
 </html>
+EOF_INBOX_HTML
 
+echo "Action row and delete-redirect fixed."
