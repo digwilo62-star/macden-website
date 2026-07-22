@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Policies — MACDEN Portal</title>
+  <link rel="stylesheet" href="assets/portal-style.css">
+  <link rel="stylesheet" href="assets/portal-shell.css">
+  <link rel="stylesheet" href="assets/portal-inbox.css">
+  <style>
+    .pol-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .pol-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; }
+    .pol-card h3 { font-size: 14.5px; margin: 0 0 8px; }
+    .pol-card p { font-size: 12.5px; color: var(--text-secondary); margin: 0 0 14px; line-height: 1.5; }
+    .pol-card .updated { font-size: 11.5px; color: var(--text-muted); margin-bottom: 12px; }
+    .pol-card-actions { display: flex; gap: 8px; }
+    .pol-read-btn { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 14px; font-size: 12px; font-weight: 600; color: var(--text-primary); background: none; cursor: pointer; font-family: var(--font-body); }
+    .pol-read-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .pol-empty { padding: 60px 20px; text-align: center; color: var(--text-muted); font-size: 13px; grid-column: 1 / -1; }
+
+    #detailView .email-card { max-width: 720px; }
+    #detailView .email-body-text { font-size: 13.5px; line-height: 1.75; }
+
+    .pol-form-field { margin-bottom: 14px; }
+    .pol-form-field label { display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; }
+    .pol-form-field input, .pol-form-field textarea {
+      width: 100%; background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 10px 12px; font-size: 13px; font-family: var(--font-body); color: var(--text-primary);
+    }
+    .pol-form-field textarea { min-height: 200px; resize: vertical; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-brand">
+        <img src="assets/logo.jpeg" alt="MACDEN">
+        <span>MACDEN</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="inbox.html" class="sidebar-link"><i class="ti ti-mail"></i> Inbox <span class="badge" id="unreadBadge" style="display:none;">0</span></a>
+        <a href="compose.html" class="sidebar-link"><i class="ti ti-pencil"></i> Compose</a>
+        <a href="broadcasts.html" class="sidebar-link"><i class="ti ti-speakerphone"></i> Broadcasts</a>
+        <a href="directory.html" class="sidebar-link"><i class="ti ti-users"></i> Directory</a>
+        <a href="leave.html" class="sidebar-link"><i class="ti ti-calendar-event"></i> Leave &amp; Requests</a>
+        <a href="documents.html" class="sidebar-link"><i class="ti ti-file-text"></i> Documents</a>
+        <a href="policies.html" class="sidebar-link active"><i class="ti ti-book"></i> Policies</a>
+        <a href="#" class="sidebar-link"><i class="ti ti-settings"></i> Settings</a>
+      </nav>
+      <div class="sidebar-logout">
+        <button id="logoutBtn"><i class="ti ti-logout"></i> Logout</button>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-search"><input type="text" placeholder="Search messages, people, documents…"></div>
+        <button class="topbar-bell"><i class="ti ti-bell"></i></button>
+        <img class="topbar-avatar" src="assets/logo.jpeg" alt="You">
+      </div>
+
+      <div class="page-body">
+
+        <div id="listView">
+          <div class="email-toolbar">
+            <div>
+              <h1 class="page-greeting" style="font-size: 22px;">Policies</h1>
+              <p class="page-greeting-sub" style="margin:0;"><a href="dashboard.html" style="color: var(--primary); text-decoration:none; font-weight:600;">← Back to dashboard</a></p>
+            </div>
+            <button class="btn btn-primary" id="addPolicyBtn" style="width:auto; padding:10px 20px; display:none; align-items:center; gap:8px;"><i class="ti ti-plus"></i> Add Policy</button>
+          </div>
+
+          <div class="pol-grid" id="polGrid">
+            <div class="pol-empty">Loading…</div>
+          </div>
+        </div>
+
+        <div id="detailView" style="display:none;">
+          <a href="policies.html" class="email-back" style="display:inline-flex; align-items:center; gap:5px; margin-bottom:16px;"><i class="ti ti-arrow-left"></i> Back to Policies</a>
+          <div class="email-card">
+            <h2 class="email-detail-subject" id="detailTitle">—</h2>
+            <p class="pol-card .updated" style="font-size:12px; color:var(--text-muted); margin-bottom:14px;" id="detailUpdated"></p>
+            <div class="email-body-text" id="detailBody"></div>
+            <div class="email-action-row" id="detailAdminActions" style="display:none;">
+              <button class="email-action-btn" id="editPolicyBtn"><i class="ti ti-pencil"></i> Edit</button>
+              <button class="email-action-btn danger" id="deletePolicyBtn"><i class="ti ti-trash"></i> Delete</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="policyModalBackdrop">
+    <div class="modal" style="width: 480px;">
+      <h3 id="policyModalTitle">Add Policy</h3>
+      <div id="policyModalAlert" class="alert alert-error"></div>
+      <div class="pol-form-field">
+        <label>Title</label>
+        <input type="text" id="policyTitleInput" placeholder="e.g. Remote Work Policy">
+      </div>
+      <div class="pol-form-field">
+        <label>Content</label>
+        <textarea id="policyBodyInput" placeholder="Write the full policy text…"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="policyModalCancel">Cancel</button>
+        <button class="btn btn-primary" id="policyModalSave">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script src="assets/presence.js"></script>
+  <script>
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await apiRequest('/auth/logout', { method: 'POST' });
+      window.location.href = 'login.html';
+    });
+
+    let isAdmin = false;
+    let policiesCache = [];
+    let editingPolicyId = null;
+    const params = new URLSearchParams(window.location.search);
+    const openId = params.get('id');
+
+    async function init() {
+      try {
+        const result = await apiRequest('/dashboard-check');
+        isAdmin = result.staff.role === 'admin';
+        if (isAdmin) document.getElementById('addPolicyBtn').style.display = 'inline-flex';
+      } catch (err) {
+        window.location.href = 'login.html';
+        return;
+      }
+      loadUnreadBadge();
+      await loadPolicies();
+
+      if (openId) openDetail(openId);
+    }
+
+    async function loadPolicies() {
+      const grid = document.getElementById('polGrid');
+      try {
+        const result = await apiRequest('/policies');
+        policiesCache = result.policies;
+
+        if (result.policies.length === 0) {
+          grid.innerHTML = '<div class="pol-empty">No policies added yet.' + (isAdmin ? ' Click Add Policy to create one.' : '') + '</div>';
+          return;
+        }
+
+        grid.innerHTML = result.policies.map(p => {
+          const excerpt = p.body.length > 90 ? p.body.slice(0, 90) + '…' : p.body;
+          return '<div class="pol-card">' +
+            '<h3>' + p.title + '</h3>' +
+            '<p>' + excerpt + '</p>' +
+            '<div class="updated">Last updated: ' + new Date(p.updated_at).toLocaleDateString() + '</div>' +
+            '<div class="pol-card-actions"><button class="pol-read-btn" onclick="window.location.href=\'policies.html?id=' + p.id + '\'"><i class="ti ti-book"></i> Read Policy</button></div>' +
+            '</div>';
+        }).join('');
+      } catch (err) {
+        grid.innerHTML = '<div class="pol-empty">Could not load policies.</div>';
+      }
+    }
+
+    function openDetail(id) {
+      const policy = policiesCache.find(p => p.id === id);
+      if (!policy) return;
+
+      document.getElementById('listView').style.display = 'none';
+      document.getElementById('detailView').style.display = 'block';
+      document.getElementById('detailTitle').textContent = policy.title;
+      document.getElementById('detailUpdated').textContent = 'Last updated: ' + new Date(policy.updated_at).toLocaleDateString();
+      document.getElementById('detailBody').textContent = policy.body;
+
+      if (isAdmin) {
+        document.getElementById('detailAdminActions').style.display = 'flex';
+        document.getElementById('editPolicyBtn').onclick = () => openPolicyModal(policy);
+        document.getElementById('deletePolicyBtn').onclick = () => deletePolicy(policy.id);
+      }
+    }
+
+    function openPolicyModal(policy) {
+      editingPolicyId = policy ? policy.id : null;
+      document.getElementById('policyModalTitle').textContent = policy ? 'Edit Policy' : 'Add Policy';
+      document.getElementById('policyTitleInput').value = policy ? policy.title : '';
+      document.getElementById('policyBodyInput').value = policy ? policy.body : '';
+      hideAlert(document.getElementById('policyModalAlert'));
+      document.getElementById('policyModalBackdrop').classList.add('visible');
+    }
+
+    document.getElementById('addPolicyBtn').addEventListener('click', () => openPolicyModal(null));
+    document.getElementById('policyModalCancel').addEventListener('click', () => {
+      document.getElementById('policyModalBackdrop').classList.remove('visible');
+    });
+
+    document.getElementById('policyModalSave').addEventListener('click', async () => {
+      const alertEl = document.getElementById('policyModalAlert');
+      hideAlert(alertEl);
+      const title = document.getElementById('policyTitleInput').value.trim();
+      const body = document.getElementById('policyBodyInput').value.trim();
+
+      if (!title || !body) { showAlert(alertEl, 'Title and content are required.'); return; }
+
+      const btn = document.getElementById('policyModalSave');
+      btn.disabled = true;
+
+      try {
+        if (editingPolicyId) {
+          await apiRequest('/policies/' + editingPolicyId, { method: 'PUT', body: { title, body } });
+        } else {
+          await apiRequest('/policies', { method: 'POST', body: { title, body } });
+        }
+        document.getElementById('policyModalBackdrop').classList.remove('visible');
+        window.location.href = 'policies.html';
+      } catch (err) {
+        showAlert(alertEl, err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    async function deletePolicy(id) {
+      if (!confirm('Delete this policy? This cannot be undone.')) return;
+      try {
+        await apiRequest('/policies/' + id, { method: 'DELETE' });
+        window.location.href = 'policies.html';
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
+
