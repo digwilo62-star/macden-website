@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Staff — MACDEN Portal</title>
+  <link rel="stylesheet" href="assets/portal-style.css">
+  <link rel="stylesheet" href="assets/portal-shell.css">
+  <link rel="stylesheet" href="assets/portal-inbox.css">
+  <style>
+    .ms-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .ms-list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+    .ms-header-row { display: grid; grid-template-columns: 200px 130px 130px 1fr 90px 90px; gap: 12px; padding: 12px 18px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    .ms-row { display: grid; grid-template-columns: 200px 130px 130px 1fr 90px 90px; gap: 12px; align-items: center; padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+    .ms-row:last-child { border-bottom: none; }
+    .ms-empty { padding: 50px 18px; text-align: center; color: var(--text-muted); font-size: 13px; }
+    .ms-status { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 10.5px; font-weight: 700; }
+    .ms-status.active { background: var(--success-dim); color: var(--success); }
+    .ms-status.inactive { background: var(--error-dim); color: var(--error); }
+    .ms-action-btn { border: 1px solid var(--border); background: var(--surface); border-radius: var(--radius-sm); padding: 5px 11px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: var(--font-body); color: var(--text-primary); }
+    .ms-action-btn:hover { border-color: var(--error); color: var(--error); background: var(--error-dim); }
+    .ms-action-btn.reactivate { background: var(--success-dim); color: var(--success); border-color: transparent; }
+    .ms-action-btn.reactivate:hover { background: var(--success); color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-brand"><img src="assets/logo.jpeg" alt="MACDEN"><span>MACDEN</span></div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="inbox.html" class="sidebar-link"><i class="ti ti-mail"></i> Inbox <span class="badge" id="unreadBadge" style="display:none;">0</span></a>
+        <a href="compose.html" class="sidebar-link"><i class="ti ti-pencil"></i> Compose</a>
+        <a href="broadcasts.html" class="sidebar-link"><i class="ti ti-speakerphone"></i> Broadcasts</a>
+        <a href="directory.html" class="sidebar-link"><i class="ti ti-users"></i> Directory</a>
+        <a href="leave.html" class="sidebar-link"><i class="ti ti-calendar-event"></i> Leave &amp; Requests</a>
+        <a href="documents.html" class="sidebar-link"><i class="ti ti-file-text"></i> Documents</a>
+        <a href="policies.html" class="sidebar-link"><i class="ti ti-book"></i> Policies</a>
+        <a href="settings.html" class="sidebar-link"><i class="ti ti-settings"></i> Settings</a>
+      </nav>
+      <div class="sidebar-logout"><button id="logoutBtn"><i class="ti ti-logout"></i> Logout</button></div>
+    </div>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-search"><input type="text" placeholder="Search messages, people, documents…"></div>
+        <button class="topbar-bell"><i class="ti ti-bell"></i></button>
+        <img class="topbar-avatar" src="assets/logo.jpeg" alt="You">
+      </div>
+
+      <div class="page-body">
+        <div class="ms-toolbar">
+          <div>
+            <h1 class="page-greeting" style="font-size: 22px;">Manage Staff</h1>
+            <p class="page-greeting-sub" style="margin:0;"><a href="directory.html" style="color: var(--primary); text-decoration:none; font-weight:600;">← Back to Directory</a></p>
+          </div>
+          <a href="onboard.html" class="btn btn-primary" style="width:auto; padding:10px 20px; text-decoration:none; display:inline-flex; align-items:center; gap:8px;"><i class="ti ti-user-plus"></i> Add New Staff</a>
+        </div>
+
+        <div class="ms-list">
+          <div class="ms-header-row"><div>Staff Member</div><div>Role</div><div>Department</div><div>Email</div><div>Status</div><div>Actions</div></div>
+          <div id="msRows"><div class="ms-empty">Loading…</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script src="assets/presence.js"></script>
+  <script>
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await apiRequest('/auth/logout', { method: 'POST' });
+      window.location.href = 'login.html';
+    });
+
+    async function init() {
+      try {
+        const result = await apiRequest('/dashboard-check');
+        if (result.staff.role !== 'admin') {
+          document.body.innerHTML = '<div style="padding:40px; font-family:sans-serif;">Admin access only.</div>';
+          return;
+        }
+      } catch (err) {
+        window.location.href = 'login.html';
+        return;
+      }
+      loadUnreadBadge();
+      loadStaff();
+    }
+
+    async function loadStaff() {
+      const rows = document.getElementById('msRows');
+      try {
+        const result = await apiRequest('/admin/all-staff');
+        if (result.staff.length === 0) {
+          rows.innerHTML = '<div class="ms-empty">No staff yet.</div>';
+          return;
+        }
+        rows.innerHTML = result.staff.map(s => {
+          const statusHtml = s.isActive ? '<span class="ms-status active">Active</span>' : '<span class="ms-status inactive">Deactivated</span>';
+          const actionBtn = s.isActive
+            ? '<button class="ms-action-btn" onclick="deactivate(\'' + s.id + '\')">Deactivate</button>'
+            : '<button class="ms-action-btn reactivate" onclick="reactivate(\'' + s.id + '\')">Reactivate</button>';
+          return '<div class="ms-row">' +
+            '<div>' + s.fullName + '</div>' +
+            '<div>' + s.role + '</div>' +
+            '<div>' + (s.department || '—') + '</div>' +
+            '<div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + s.email + '</div>' +
+            '<div>' + statusHtml + '</div>' +
+            '<div>' + actionBtn + '</div>' +
+            '</div>';
+        }).join('');
+      } catch (err) {
+        rows.innerHTML = '<div class="ms-empty">Could not load staff.</div>';
+      }
+    }
+
+    async function deactivate(id) {
+      if (!confirm('Deactivate this staff member? They will no longer be able to log in.')) return;
+      try {
+        await apiRequest('/admin/staff/' + id, { method: 'DELETE' });
+        loadStaff();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function reactivate(id) {
+      try {
+        await apiRequest('/admin/staff/' + id + '/reactivate', { method: 'POST' });
+        loadStaff();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

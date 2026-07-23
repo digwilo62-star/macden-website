@@ -1,0 +1,308 @@
+#!/usr/bin/env bash
+# Fixes the fragile alert() popup for onboarding credentials - now shows a
+# persistent on-page panel that cannot be missed or accidentally dismissed.
+# Run this from the ROOT of your macden-website repo, in Git Bash.
+set -e
+
+mkdir -p accounting
+
+cat > accounting/onboard.html << 'EOF_ONBOARD_HTML'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Add New Staff — MACDEN Portal</title>
+  <link rel="stylesheet" href="assets/portal-style.css">
+  <link rel="stylesheet" href="assets/portal-shell.css">
+  <link rel="stylesheet" href="assets/portal-inbox.css">
+  <style>
+    .step-indicator { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+    .step-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-muted); }
+    .step-item.active, .step-item.done { color: var(--text-primary); font-weight: 600; }
+    .step-num { width: 22px; height: 22px; border-radius: 50%; background: var(--border); color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+    .step-item.active .step-num { background: var(--primary); color: #fff; }
+    .step-item.done .step-num { background: var(--success); color: #fff; }
+    .step-arrow { color: var(--border); }
+
+    .onb-grid { display: grid; grid-template-columns: 1fr 260px; gap: 20px; }
+    .onb-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 26px; }
+    .onb-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .onb-field label { display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; }
+    .onb-field input, .onb-field select, .onb-field textarea {
+      width: 100%; background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 9px 12px; font-size: 13px; font-family: var(--font-body); color: var(--text-primary);
+    }
+    .onb-note { background: var(--gold-dim); color: #8a6d00; padding: 12px 16px; border-radius: var(--radius-sm); font-size: 12px; }
+
+    .review-section { margin-bottom: 16px; }
+    .review-section h4 { font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 8px; }
+    .review-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px solid var(--border); }
+
+    .search-results { position: absolute; top: 100%; left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-top: 4px; max-height: 180px; overflow-y: auto; z-index: 5; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .search-result-item { padding: 8px 12px; cursor: pointer; font-size: 12.5px; }
+    .search-result-item:hover { background: var(--surface-raised); }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-brand"><img src="assets/logo.jpeg" alt="MACDEN"><span>MACDEN</span></div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="inbox.html" class="sidebar-link"><i class="ti ti-mail"></i> Inbox <span class="badge" id="unreadBadge" style="display:none;">0</span></a>
+        <a href="compose.html" class="sidebar-link"><i class="ti ti-pencil"></i> Compose</a>
+        <a href="broadcasts.html" class="sidebar-link"><i class="ti ti-speakerphone"></i> Broadcasts</a>
+        <a href="directory.html" class="sidebar-link"><i class="ti ti-users"></i> Directory</a>
+        <a href="leave.html" class="sidebar-link"><i class="ti ti-calendar-event"></i> Leave &amp; Requests</a>
+        <a href="documents.html" class="sidebar-link"><i class="ti ti-file-text"></i> Documents</a>
+        <a href="policies.html" class="sidebar-link"><i class="ti ti-book"></i> Policies</a>
+        <a href="settings.html" class="sidebar-link"><i class="ti ti-settings"></i> Settings</a>
+      </nav>
+      <div class="sidebar-logout"><button id="logoutBtn"><i class="ti ti-logout"></i> Logout</button></div>
+    </div>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-search"><input type="text" placeholder="Search messages, people, documents…"></div>
+        <button class="topbar-bell"><i class="ti ti-bell"></i></button>
+        <img class="topbar-avatar" src="assets/logo.jpeg" alt="You">
+      </div>
+
+      <div class="page-body">
+        <h1 class="page-greeting" style="font-size: 22px;">Add New Staff Member</h1>
+        <p class="page-greeting-sub"><a href="manage-staff.html" style="color: var(--primary); text-decoration:none; font-weight:600;">← Back to Manage Staff</a></p>
+
+        <div class="step-indicator">
+          <div class="step-item active" id="stepInd1"><span class="step-num">1</span> Personal Information</div>
+          <span class="step-arrow">→</span>
+          <div class="step-item" id="stepInd2"><span class="step-num">2</span> Work Information</div>
+          <span class="step-arrow">→</span>
+          <div class="step-item" id="stepInd3"><span class="step-num">3</span> Review &amp; Create</div>
+        </div>
+
+        <div id="alert" class="alert alert-error"></div>
+
+        <!-- Step 1 -->
+        <div id="step1" class="onb-grid">
+          <div class="onb-card">
+            <div class="onb-field-row">
+              <div class="onb-field"><label>Full Name *</label><input type="text" id="fullName"></div>
+              <div class="onb-field"><label>Email Address *</label><input type="text" id="email"></div>
+            </div>
+            <div class="onb-field-row">
+              <div class="onb-field"><label>Phone Number</label><input type="text" id="phone"></div>
+              <div class="onb-field"><label>NIN</label><input type="text" id="nin"></div>
+            </div>
+            <div class="onb-field"><label>Residential Address</label><textarea id="address" style="min-height:70px;"></textarea></div>
+            <div style="text-align:right; margin-top:16px;"><button class="btn btn-primary" style="width:auto; padding:9px 22px;" onclick="goToStep(2)">Next: Work Information →</button></div>
+          </div>
+          <div class="onb-note"><i class="ti ti-info-circle"></i> Photo upload isn't supported yet — staff records don't have a photo field in the database yet.</div>
+        </div>
+
+        <!-- Step 2 -->
+        <div id="step2" class="onb-grid" style="display:none;">
+          <div class="onb-card">
+            <div class="onb-field-row">
+              <div class="onb-field"><label>Role / Job Title *</label><input type="text" id="role"></div>
+              <div class="onb-field"><label>Department *</label><select id="departmentId"></select></div>
+            </div>
+            <div class="onb-field-row">
+              <div class="onb-field"><label>Branch</label><input type="text" id="branch" placeholder="e.g. Ikeja Branch"></div>
+              <div class="onb-field"><label>Date Started</label><input type="date" id="dateStarted"></div>
+            </div>
+            <div class="onb-field" style="position:relative;">
+              <label>Reports To (Direct Manager)</label>
+              <input type="text" id="reportsToSearch" placeholder="Search staff member…">
+              <div class="search-results" id="reportsToResults"></div>
+              <div id="reportsToSelected" style="margin-top:6px; font-size:12.5px; color:var(--primary); display:none;"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-top:16px;">
+              <button class="btn btn-ghost" style="width:auto; padding:9px 22px;" onclick="goToStep(1)">← Back</button>
+              <button class="btn btn-primary" style="width:auto; padding:9px 22px;" onclick="goToStep(3)">Next: Review &amp; Create →</button>
+            </div>
+          </div>
+          <div class="onb-note"><i class="ti ti-info-circle"></i> Branch is a free-text field for now — no managed branch list exists yet.</div>
+        </div>
+
+        <!-- Step 3 -->
+        <div id="step3" style="display:none;">
+          <div class="onb-card" style="max-width:640px;">
+            <div class="review-section">
+              <h4>Personal Information</h4>
+              <div class="review-row"><span>Full Name</span><span id="rvName"></span></div>
+              <div class="review-row"><span>Email</span><span id="rvEmail"></span></div>
+              <div class="review-row"><span>Phone</span><span id="rvPhone"></span></div>
+              <div class="review-row"><span>NIN</span><span id="rvNin"></span></div>
+            </div>
+            <div class="review-section">
+              <h4>Work Information</h4>
+              <div class="review-row"><span>Role</span><span id="rvRole"></span></div>
+              <div class="review-row"><span>Department</span><span id="rvDept"></span></div>
+              <div class="review-row"><span>Branch</span><span id="rvBranch"></span></div>
+              <div class="review-row"><span>Reports To</span><span id="rvReportsTo"></span></div>
+            </div>
+            <div class="onb-note" style="margin-top:16px;"><i class="ti ti-mail"></i> The staff member will receive an email with their login credentials.</div>
+            <div style="display:flex; justify-content:space-between; margin-top:16px;">
+              <button class="btn btn-ghost" style="width:auto; padding:9px 22px;" onclick="goToStep(2)">← Back</button>
+              <button class="btn btn-primary" id="createAccountBtn" style="width:auto; padding:9px 22px;">Create Account</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="successView" style="display:none;">
+          <div class="onb-card" style="max-width:520px;">
+            <h2 style="font-size:16px; margin-bottom:6px; color: var(--success);"><i class="ti ti-circle-check"></i> Account Created</h2>
+            <p id="successNormalMsg" style="font-size:13px; color:var(--text-secondary); display:none;">A welcome email with login details has been sent.</p>
+            <div id="successWarningBox" style="display:none;">
+              <div class="onb-note" style="margin-bottom:14px;">
+                <i class="ti ti-alert-triangle"></i> The welcome email failed to send. Share these credentials with the new staff member directly &mdash; <strong>this is the only time they will be shown.</strong>
+              </div>
+              <div style="background: var(--surface-raised); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; font-family: var(--font-mono); font-size: 13px;">
+                <div>Username: <strong id="credUsername"></strong></div>
+                <div style="margin-top:6px;">Temporary password: <strong id="credPassword"></strong></div>
+              </div>
+            </div>
+            <button class="btn btn-primary" style="width:auto; padding:9px 22px; margin-top:16px;" onclick="window.location.href='manage-staff.html'">Go to Manage Staff</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script src="assets/presence.js"></script>
+  <script>
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await apiRequest('/auth/logout', { method: 'POST' });
+      window.location.href = 'login.html';
+    });
+
+    let selectedReportsTo = null;
+
+    async function init() {
+      try {
+        const result = await apiRequest('/dashboard-check');
+        if (result.staff.role !== 'admin') {
+          document.body.innerHTML = '<div style="padding:40px; font-family:sans-serif;">Admin access only.</div>';
+          return;
+        }
+      } catch (err) {
+        window.location.href = 'login.html';
+        return;
+      }
+      loadUnreadBadge();
+
+      try {
+        const result = await apiRequest('/admin/departments');
+        document.getElementById('departmentId').innerHTML = result.departments.map(d => '<option value="' + d.id + '">' + d.name + '</option>').join('');
+      } catch (err) {}
+    }
+
+    function goToStep(n) {
+      [1,2,3].forEach(i => {
+        document.getElementById('step' + i).style.display = i === n ? (i === 3 ? 'block' : 'grid') : 'none';
+        const ind = document.getElementById('stepInd' + i);
+        ind.classList.remove('active', 'done');
+        if (i < n) ind.classList.add('done');
+        if (i === n) ind.classList.add('active');
+      });
+      if (n === 3) populateReview();
+    }
+
+    function populateReview() {
+      document.getElementById('rvName').textContent = document.getElementById('fullName').value;
+      document.getElementById('rvEmail').textContent = document.getElementById('email').value;
+      document.getElementById('rvPhone').textContent = document.getElementById('phone').value || '—';
+      document.getElementById('rvNin').textContent = document.getElementById('nin').value || '—';
+      document.getElementById('rvRole').textContent = document.getElementById('role').value;
+      document.getElementById('rvDept').textContent = document.getElementById('departmentId').selectedOptions[0]?.textContent || '—';
+      document.getElementById('rvBranch').textContent = document.getElementById('branch').value || '—';
+      document.getElementById('rvReportsTo').textContent = selectedReportsTo ? selectedReportsTo.full_name : '—';
+    }
+
+    let searchTimeout = null;
+    document.getElementById('reportsToSearch').addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      const q = e.target.value.trim();
+      const results = document.getElementById('reportsToResults');
+      if (!q) { results.style.display = 'none'; return; }
+      searchTimeout = setTimeout(async () => {
+        try {
+          const result = await apiRequest('/staff?search=' + encodeURIComponent(q));
+          results.innerHTML = result.staff.map(s => '<div class="search-result-item" onclick=\'selectReportsTo(' + JSON.stringify(s) + ')\'>' + s.full_name + ' · ' + (s.department || '') + '</div>').join('');
+          results.style.display = 'block';
+        } catch (err) {}
+      }, 250);
+    });
+
+    function selectReportsTo(staff) {
+      selectedReportsTo = staff;
+      document.getElementById('reportsToSearch').value = '';
+      document.getElementById('reportsToResults').style.display = 'none';
+      const el = document.getElementById('reportsToSelected');
+      el.textContent = '✓ ' + staff.full_name;
+      el.style.display = 'block';
+    }
+
+    document.getElementById('createAccountBtn').addEventListener('click', async () => {
+      const alertEl = document.getElementById('alert');
+      hideAlert(alertEl);
+
+      const fullName = document.getElementById('fullName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const role = document.getElementById('role').value.trim();
+      const departmentId = document.getElementById('departmentId').value;
+
+      if (!fullName || !email || !role || !departmentId) {
+        showAlert(alertEl, 'Full name, email, role, and department are required.');
+        goToStep(1);
+        return;
+      }
+
+      const btn = document.getElementById('createAccountBtn');
+      btn.disabled = true;
+      btn.textContent = 'Creating…';
+
+      try {
+        const result = await apiRequest('/admin/onboard-staff', {
+          method: 'POST',
+          body: {
+            fullName, email,
+            phone: document.getElementById('phone').value.trim(),
+            nin: document.getElementById('nin').value.trim(),
+            address: document.getElementById('address').value.trim(),
+            role,
+            departmentId,
+            branch: document.getElementById('branch').value.trim(),
+            dateStarted: document.getElementById('dateStarted').value,
+            reportsTo: selectedReportsTo ? selectedReportsTo.id : null
+          }
+        });
+
+        document.getElementById('step3').style.display = 'none';
+        document.getElementById('successView').style.display = 'block';
+
+        if (result.warning) {
+          // Extract username/password from the warning message for clean display
+          const match = result.warning.match(/Username:\s*([^\s,]+),\s*temporary password:\s*(\S+)/);
+          document.getElementById('successWarningBox').style.display = 'block';
+          document.getElementById('credUsername').textContent = match ? match[1] : '(check server logs)';
+          document.getElementById('credPassword').textContent = match ? match[2] : '(check server logs)';
+        } else {
+          document.getElementById('successNormalMsg').style.display = 'block';
+        }
+      } catch (err) {
+        showAlert(alertEl, err.message);
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>
+EOF_ONBOARD_HTML
+
+echo "Onboarding credentials display fixed."

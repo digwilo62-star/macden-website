@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Settings — MACDEN Portal</title>
+  <link rel="stylesheet" href="assets/portal-style.css">
+  <link rel="stylesheet" href="assets/portal-shell.css">
+  <link rel="stylesheet" href="assets/portal-inbox.css">
+  <style>
+    .set-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; margin-bottom: 20px; max-width: 640px; }
+    .set-panel h2 { font-size: 15px; margin-bottom: 4px; }
+    .set-panel .sub { font-size: 12.5px; color: var(--text-secondary); margin-bottom: 18px; }
+
+    .set-avatar-row { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+    .set-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--gold-dim); color: #a17a00; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; }
+
+    .set-field-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .set-field-row:last-child { border-bottom: none; }
+    .set-field-label { color: var(--text-secondary); }
+    .set-field-value { color: var(--text-primary); font-weight: 500; }
+
+    .set-locked-note { background: var(--gold-dim); color: #8a6d00; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 12px; margin-top: 14px; }
+
+    .set-toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .set-toggle-row:last-child { border-bottom: none; }
+    .set-toggle-row .label { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+    .set-toggle-row .desc { font-size: 11.5px; color: var(--text-muted); }
+    .set-toggle { position: relative; width: 40px; height: 22px; border-radius: 999px; border: none; cursor: pointer; background: var(--border); flex-shrink: 0; }
+    .set-toggle.on { background: var(--primary); }
+    .set-toggle .knob { position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: left 0.15s ease; }
+    .set-toggle.on .knob { left: 20px; }
+
+    .set-appearance-row { display: flex; gap: 10px; }
+    .set-appearance-btn { flex: 1; padding: 12px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); text-align: center; font-size: 12.5px; font-weight: 600; cursor: pointer; background: var(--surface); color: var(--text-primary); }
+    .set-appearance-btn.active { border-color: var(--primary); background: var(--primary-dim); color: var(--primary); }
+    .set-appearance-btn.disabled { opacity: 0.5; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-brand">
+        <img src="assets/logo.jpeg" alt="MACDEN">
+        <span>MACDEN</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="inbox.html" class="sidebar-link"><i class="ti ti-mail"></i> Inbox <span class="badge" id="unreadBadge" style="display:none;">0</span></a>
+        <a href="compose.html" class="sidebar-link"><i class="ti ti-pencil"></i> Compose</a>
+        <a href="broadcasts.html" class="sidebar-link"><i class="ti ti-speakerphone"></i> Broadcasts</a>
+        <a href="directory.html" class="sidebar-link"><i class="ti ti-users"></i> Directory</a>
+        <a href="leave.html" class="sidebar-link"><i class="ti ti-calendar-event"></i> Leave &amp; Requests</a>
+        <a href="documents.html" class="sidebar-link"><i class="ti ti-file-text"></i> Documents</a>
+        <a href="policies.html" class="sidebar-link"><i class="ti ti-book"></i> Policies</a>
+        <a href="settings.html" class="sidebar-link active"><i class="ti ti-settings"></i> Settings</a>
+      </nav>
+      <div class="sidebar-logout">
+        <button id="logoutBtn"><i class="ti ti-logout"></i> Logout</button>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-search"><input type="text" placeholder="Search messages, people, documents…"></div>
+        <button class="topbar-bell"><i class="ti ti-bell"></i></button>
+        <img class="topbar-avatar" src="assets/logo.jpeg" alt="You">
+      </div>
+
+      <div class="page-body">
+        <h1 class="page-greeting" style="font-size: 22px;">Settings</h1>
+        <p class="page-greeting-sub"><a href="dashboard.html" style="color: var(--primary); text-decoration:none; font-weight:600;">← Back to dashboard</a></p>
+
+        <!-- Profile -->
+        <div class="set-panel">
+          <h2>Profile</h2>
+          <p class="sub">View and update your personal information.</p>
+
+          <div class="set-avatar-row">
+            <div class="set-avatar" id="profileAvatar">—</div>
+            <div>
+              <div style="font-weight:700; font-size:15px;" id="profileName">—</div>
+              <div style="font-size:12.5px; color:var(--text-secondary);" id="profileRoleDept">—</div>
+            </div>
+          </div>
+
+          <div class="set-field-row"><span class="set-field-label">Username</span><span class="set-field-value" id="profileUsername">—</span></div>
+          <div class="set-field-row"><span class="set-field-label">Email</span><span class="set-field-value" id="profileEmail">—</span></div>
+          <div class="set-field-row"><span class="set-field-label">Date Joined</span><span class="set-field-value" id="profileDate">—</span></div>
+
+          <div class="set-locked-note"><i class="ti ti-info-circle"></i> Your name, role, department, and join date are managed by HR and can't be changed here.</div>
+
+          <div style="margin-top:16px;">
+            <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:6px;">Status / Bio</label>
+            <textarea id="bioInput" placeholder="A short status or bio…" style="width:100%; min-height:70px; background:var(--surface-raised); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px; font-size:13px; font-family:var(--font-body); color:var(--text-primary); resize:vertical;"></textarea>
+            <div id="profileAlert" class="alert alert-error" style="margin-top:10px;"></div>
+            <button class="btn btn-primary" id="saveBioBtn" style="width:auto; padding:9px 20px; margin-top:10px;">Save</button>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="set-panel">
+          <h2>Notifications</h2>
+          <p class="sub">Choose how and when you want to be notified.</p>
+          <div class="set-toggle-row">
+            <div><div class="label">Email me for new broadcasts</div><div class="desc">Receive an email when a new broadcast is sent.</div></div>
+            <button class="set-toggle" id="toggleBroadcasts" onclick="toggleSwitch(this)"><span class="knob"></span></button>
+          </div>
+          <div class="set-toggle-row">
+            <div><div class="label">Email me for direct messages</div><div class="desc">Receive an email when someone sends you a message.</div></div>
+            <button class="set-toggle" id="toggleMessages" onclick="toggleSwitch(this)"><span class="knob"></span></button>
+          </div>
+          <div class="set-toggle-row">
+            <div><div class="label">Desktop notifications</div><div class="desc">Show desktop notifications for new activity.</div></div>
+            <button class="set-toggle" id="toggleDesktop" onclick="toggleSwitch(this)"><span class="knob"></span></button>
+          </div>
+          <div class="set-locked-note" style="margin-top:14px;"><i class="ti ti-info-circle"></i> Your preferences are saved, but no feature sends email notifications yet — this becomes active once that's built.</div>
+        </div>
+
+        <!-- Security -->
+        <div class="set-panel">
+          <h2>Security</h2>
+          <p class="sub">Keep your account secure.</p>
+          <div id="passwordAlert" class="alert alert-error"></div>
+          <div id="passwordSuccess" class="alert alert-success"></div>
+          <div style="margin-bottom:12px;">
+            <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:6px;">Current Password</label>
+            <input type="password" id="currentPassword" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body);">
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:6px;">New Password</label>
+            <input type="password" id="newPassword" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body);">
+          </div>
+          <div style="margin-bottom:16px;">
+            <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:6px;">Confirm New Password</label>
+            <input type="password" id="confirmPassword" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body);">
+          </div>
+          <button class="btn btn-primary" id="changePasswordBtn" style="width:auto; padding:9px 20px;">Update Password</button>
+        </div>
+
+        <!-- Appearance -->
+        <div class="set-panel">
+          <h2>Appearance</h2>
+          <p class="sub">Customize how the app looks.</p>
+          <div class="set-appearance-row">
+            <div class="set-appearance-btn active"><i class="ti ti-sun"></i> Light</div>
+            <div class="set-appearance-btn disabled" title="Coming soon"><i class="ti ti-moon"></i> Dark (coming soon)</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script src="assets/presence.js"></script>
+  <script>
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await apiRequest('/auth/logout', { method: 'POST' });
+      window.location.href = 'login.html';
+    });
+
+    function initials(name) {
+      if (!name) return '?';
+      return name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+    }
+
+    function toggleSwitch(btn) {
+      btn.classList.toggle('on');
+    }
+
+    async function init() {
+      try {
+        const result = await apiRequest('/settings/me');
+        const p = result.profile;
+
+        document.getElementById('profileAvatar').textContent = initials(p.fullName);
+        document.getElementById('profileName').textContent = p.fullName;
+        document.getElementById('profileRoleDept').textContent = p.role + (p.department ? ' · ' + p.department : '');
+        document.getElementById('profileUsername').textContent = p.username;
+        document.getElementById('profileEmail').textContent = p.email;
+        document.getElementById('profileDate').textContent = new Date(p.dateJoined).toLocaleDateString();
+        document.getElementById('bioInput').value = p.bio || '';
+
+        if (p.notifyEmailBroadcasts) document.getElementById('toggleBroadcasts').classList.add('on');
+        if (p.notifyEmailMessages) document.getElementById('toggleMessages').classList.add('on');
+        if (p.notifyDesktop) document.getElementById('toggleDesktop').classList.add('on');
+      } catch (err) {
+        window.location.href = 'login.html';
+        return;
+      }
+      loadUnreadBadge();
+    }
+
+    document.getElementById('saveBioBtn').addEventListener('click', async () => {
+      const alertEl = document.getElementById('profileAlert');
+      hideAlert(alertEl);
+      try {
+        await apiRequest('/settings/profile', { method: 'PUT', body: { bio: document.getElementById('bioInput').value.trim() } });
+      } catch (err) {
+        showAlert(alertEl, err.message);
+      }
+    });
+
+    ['toggleBroadcasts', 'toggleMessages', 'toggleDesktop'].forEach(id => {
+      document.getElementById(id).addEventListener('click', async () => {
+        try {
+          await apiRequest('/settings/notifications', {
+            method: 'PUT',
+            body: {
+              notifyEmailBroadcasts: document.getElementById('toggleBroadcasts').classList.contains('on'),
+              notifyEmailMessages: document.getElementById('toggleMessages').classList.contains('on'),
+              notifyDesktop: document.getElementById('toggleDesktop').classList.contains('on')
+            }
+          });
+        } catch (err) {
+          alert(err.message);
+        }
+      });
+    });
+
+    document.getElementById('changePasswordBtn').addEventListener('click', async () => {
+      const alertEl = document.getElementById('passwordAlert');
+      const successEl = document.getElementById('passwordSuccess');
+      hideAlert(alertEl);
+      hideAlert(successEl);
+
+      const currentPassword = document.getElementById('currentPassword').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (newPassword !== confirmPassword) {
+        showAlert(alertEl, 'New password and confirmation do not match.');
+        return;
+      }
+
+      const btn = document.getElementById('changePasswordBtn');
+      btn.disabled = true;
+
+      try {
+        await apiRequest('/settings/password', { method: 'PUT', body: { currentPassword, newPassword } });
+        showAlert(successEl, 'Password updated successfully.', 'success');
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+      } catch (err) {
+        showAlert(alertEl, err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>
+

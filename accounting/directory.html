@@ -48,7 +48,7 @@
         <a href="leave.html" class="sidebar-link"><i class="ti ti-calendar-event"></i> Leave &amp; Requests</a>
         <a href="documents.html" class="sidebar-link"><i class="ti ti-file-text"></i> Documents</a>
         <a href="policies.html" class="sidebar-link"><i class="ti ti-book"></i> Policies</a>
-        <a href="#" class="sidebar-link"><i class="ti ti-settings"></i> Settings</a>
+        <a href="settings.html" class="sidebar-link"><i class="ti ti-settings"></i> Settings</a>
       </nav>
       <div class="sidebar-logout">
         <button id="logoutBtn"><i class="ti ti-logout"></i> Logout</button>
@@ -68,6 +68,7 @@
 
         <div class="dir-toolbar">
           <input type="text" id="dirSearch" placeholder="Search by name or username…">
+          <a href="manage-staff.html" class="btn btn-primary" id="manageStaffLink" style="width:auto; padding:10px 18px; text-decoration:none; display:none; align-items:center; gap:8px; margin-left:auto;"><i class="ti ti-settings"></i> Manage Staff</a>
         </div>
 
         <div class="dir-list">
@@ -122,7 +123,10 @@
 
     async function init() {
       try {
-        await apiRequest('/dashboard-check');
+        const result = await apiRequest('/dashboard-check');
+        if (result.staff.role === 'admin') {
+          document.getElementById('manageStaffLink').style.display = 'inline-flex';
+        }
       } catch (err) {
         window.location.href = 'login.html';
         return;

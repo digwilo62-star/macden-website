@@ -26,5 +26,21 @@ async function sendVerificationEmail(toEmail, fullName, code) {
   });
 }
 
-module.exports = { sendVerificationEmail };
+async function sendWelcomeEmail(toEmail, fullName, username, tempPassword) {
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM || '"MACDEN Accounting" <no-reply@macden.com.ng>',
+    to: toEmail,
+    subject: 'Welcome to MACDEN — Your account is ready',
+    text: `Hi ${fullName},\n\nHR has created your MACDEN portal account.\n\nUsername: ${username}\nTemporary password: ${tempPassword}\n\nPlease log in and change your password as soon as possible from Settings.`,
+    html: `
+      <p>Hi ${fullName},</p>
+      <p>HR has created your MACDEN portal account.</p>
+      <p><strong>Username:</strong> ${username}<br>
+      <strong>Temporary password:</strong> ${tempPassword}</p>
+      <p>Please log in and change your password as soon as possible from Settings.</p>
+    `
+  });
+}
+
+module.exports = { sendVerificationEmail, sendWelcomeEmail };
 
