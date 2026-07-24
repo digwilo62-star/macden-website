@@ -165,36 +165,47 @@ router.post('/staff/:id/reactivate', async (req, res) => {
 // GET /api/accounting/admin/pending-staff
 // Lists everyone who has verified their email but is still waiting on approval.
 router.get('/pending-staff', async (req, res) => {
-  const { data, error } = await supabase
-    .from('staff')
-    .select('id, full_name, username, email, created_at')
-    .eq('email_verified', true)
-    .eq('is_active', false)
-    .order('created_at', { ascending: true });
+  try {
+    const { data, error } = await supabase
+      .from('staff')
+      .select('id, full_name, username, email, created_at')
+      .eq('email_verified', true)
+      .eq('is_active', false)
+      .order('created_at', { ascending: true });
 
-  if (error) {
-    return res.status(500).json({ error: 'Could not load pending accounts.' });
+    if (error) {
+      console.error('Pending staff fetch error:', error);
+      return res.status(500).json({ error: 'Could not load pending accounts.' });
+    }
+
+    res.json({ pending: data });
+  } catch (err) {
+    console.error('Pending staff unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong.' });
   }
-
-  res.json({ pending: data });
 });
 
 // POST /api/accounting/admin/approve-staff/:id
 router.post('/approve-staff/:id', async (req, res) => {
-  const { id } = req.params;
+  try {
+    const { id } = req.params;
 
-  const { data, error } = await supabase
-    .from('staff')
-    .update({ is_active: true })
-    .eq('id', id)
-    .select()
-    .single();
+    const { data, error } = await supabase
+      .from('staff')
+      .update({ is_active: true })
+      .eq('id', id)
+      .select()
+      .single();
 
-  if (error || !data) {
-    return res.status(400).json({ error: 'Could not approve this account.' });
+    if (error || !data) {
+      return res.status(400).json({ error: 'Could not approve this account.' });
+    }
+
+    res.json({ success: true, message: `${data.full_name} has been approved and can now log in.` });
+  } catch (err) {
+    console.error('Approve staff unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong approving this account.' });
   }
-
-  res.json({ success: true, message: `${data.full_name} has been approved and can now log in.` });
 });
 
 // DELETE /api/accounting/admin/staff/:id

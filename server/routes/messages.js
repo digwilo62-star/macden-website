@@ -105,326 +105,370 @@ async function getOtherParticipants(conversationId, excludeStaffId) {
 }
 
 router.get('/unread-count', async (req, res) => {
-  const { count, error } = await supabase
-    .from('message_reads')
-    .select('*', { count: 'exact', head: true })
-    .eq('staff_id', req.session.staff.id)
-    .is('read_at', null);
+  try {
+    const { count, error } = await supabase
+      .from('message_reads')
+      .select('*', { count: 'exact', head: true })
+      .eq('staff_id', req.session.staff.id)
+      .is('read_at', null);
 
-  if (error) {
-    return res.status(500).json({ error: 'Could not load unread count.' });
+    if (error) {
+      console.error('Unread count error:', error);
+      return res.status(500).json({ error: 'Could not load unread count.' });
+    }
+
+    res.json({ unreadCount: count });
+  } catch (err) {
+    console.error('Unread count unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong.' });
   }
-
-  res.json({ unreadCount: count });
 });
 
 router.get('/conversations', async (req, res) => {
-  const staffId = req.session.staff.id;
+  try {
+    const staffId = req.session.staff.id;
 
-  const { data: memberRows, error: memberError } = await supabase
-    .from('conversation_members')
-    .select('conversation_id')
-    .eq('staff_id', staffId);
+    const { data: memberRows, error: memberError } = await supabase
+      .from('conversation_members')
+      .select('conversation_id')
+      .eq('staff_id', staffId);
 
-  if (memberError) {
-    return res.status(500).json({ error: 'Could not load inbox.' });
-  }
-
-  const conversationIds = memberRows.map(r => r.conversation_id);
-  if (conversationIds.length === 0) {
-    return res.json({ conversations: [] });
-  }
-
-  const { data: conversations, error: convError } = await supabase
-    .from('conversations')
-    .select('id, subject, is_broadcast, created_at')
-    .in('id', conversationIds)
-    .order('created_at', { ascending: false });
-
-  if (convError) {
-    return res.status(500).json({ error: 'Could not load inbox.' });
-  }
-
-  const enriched = await Promise.all(conversations.map(async (conv) => {
-    const [lastMessageResult, participants] = await Promise.all([
-      supabase
-        .from('messages')
-        .select('id, sender_id, body, sent_at')
-        .eq('conversation_id', conv.id)
-        .eq('status', 'sent')
-        .order('sent_at', { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-      getOtherParticipants(conv.id, staffId)
-    ]);
-
-    const lastMessage = lastMessageResult.data;
-
-    let isUnread = false;
-    if (lastMessage) {
-      const { data: readRow } = await supabase
-        .from('message_reads')
-        .select('read_at')
-        .eq('message_id', lastMessage.id)
-        .eq('staff_id', staffId)
-        .maybeSingle();
-      isUnread = readRow ? readRow.read_at === null : false;
+    if (memberError) {
+      console.error('Conversation members fetch error:', memberError);
+      return res.status(500).json({ error: 'Could not load inbox.' });
     }
 
-    return {
-      id: conv.id,
-      subject: conv.subject,
-      isBroadcast: conv.is_broadcast,
-      participants,
-      displayName: participants.map(p => p.fullName).join(', ') || 'Unknown',
-      lastMessagePreview: lastMessage ? lastMessage.body.slice(0, 60) : null,
-      lastMessageAt: lastMessage ? lastMessage.sent_at : conv.created_at,
-      isUnread
-    };
-  }));
+    const conversationIds = memberRows.map(r => r.conversation_id);
+    if (conversationIds.length === 0) {
+      return res.json({ conversations: [] });
+    }
 
-  enriched.sort((a, b) => new Date(b.lastMessageAt) - new Date(a.lastMessageAt));
+    const { data: conversations, error: convError } = await supabase
+      .from('conversations')
+      .select('id, subject, is_broadcast, created_at')
+      .in('id', conversationIds)
+      .order('created_at', { ascending: false });
 
-  res.json({ conversations: enriched });
+    if (convError) {
+      console.error('Conversations fetch error:', convError);
+      return res.status(500).json({ error: 'Could not load inbox.' });
+    }
+
+    const enriched = await Promise.all(conversations.map(async (conv) => {
+      const [lastMessageResult, participants] = await Promise.all([
+        supabase
+          .from('messages')
+          .select('id, sender_id, body, sent_at')
+          .eq('conversation_id', conv.id)
+          .eq('status', 'sent')
+          .order('sent_at', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        getOtherParticipants(conv.id, staffId)
+      ]);
+
+      const lastMessage = lastMessageResult.data;
+
+      let isUnread = false;
+      if (lastMessage) {
+        const { data: readRow } = await supabase
+          .from('message_reads')
+          .select('read_at')
+          .eq('message_id', lastMessage.id)
+          .eq('staff_id', staffId)
+          .maybeSingle();
+        isUnread = readRow ? readRow.read_at === null : false;
+      }
+
+      return {
+        id: conv.id,
+        subject: conv.subject,
+        isBroadcast: conv.is_broadcast,
+        participants,
+        displayName: participants.map(p => p.fullName).join(', ') || 'Unknown',
+        lastMessagePreview: lastMessage ? lastMessage.body.slice(0, 60) : null,
+        lastMessageAt: lastMessage ? lastMessage.sent_at : conv.created_at,
+        isUnread
+      };
+    }));
+
+    enriched.sort((a, b) => new Date(b.lastMessageAt) - new Date(a.lastMessageAt));
+
+    res.json({ conversations: enriched });
+  } catch (err) {
+    console.error('Conversations list unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong loading your inbox.' });
+  }
 });
 
 router.get('/conversations/:id', async (req, res) => {
-  const { id } = req.params;
-  const staffId = req.session.staff.id;
+  try {
+    const { id } = req.params;
+    const staffId = req.session.staff.id;
 
-  const { data: membership } = await supabase
-    .from('conversation_members')
-    .select('id')
-    .eq('conversation_id', id)
-    .eq('staff_id', staffId)
-    .maybeSingle();
-
-  if (!membership) {
-    return res.status(403).json({ error: 'You do not have access to this conversation.' });
-  }
-
-  const { data: conversation } = await supabase
-    .from('conversations')
-    .select('id, subject')
-    .eq('id', id)
-    .single();
-
-  const participants = await getOtherParticipants(id, staffId);
-
-  // Build a full sender-name lookup (including yourself) so every message
-  // in the thread can show a real "From" name, not just the other party.
-  const { data: allMemberRows } = await supabase
-    .from('conversation_members')
-    .select('staff_id')
-    .eq('conversation_id', id);
-  const allMemberIds = (allMemberRows || []).map(m => m.staff_id);
-  const { data: allStaffRows } = await supabase
-    .from('staff')
-    .select('id, full_name')
-    .in('id', allMemberIds.length > 0 ? allMemberIds : ['00000000-0000-0000-0000-000000000000']);
-  const nameById = {};
-  (allStaffRows || []).forEach(s => { nameById[s.id] = s.full_name; });
-
-  const { data: messages, error } = await supabase
-    .from('messages')
-    .select('id, sender_id, body, status, sent_at, created_at, attachment_url, attachment_type')
-    .eq('conversation_id', id)
-    .or(`status.eq.sent,and(status.eq.draft,sender_id.eq.${staffId})`)
-    .order('created_at', { ascending: true });
-
-  if (error) {
-    return res.status(500).json({ error: 'Could not load conversation.' });
-  }
-
-  const messagesWithSenderNames = messages.map(m => ({
-    ...m,
-    senderName: m.sender_id === staffId ? 'You' : (nameById[m.sender_id] || 'Unknown')
-  }));
-
-  const sentMessageIds = messages.filter(m => m.status === 'sent').map(m => m.id);
-  if (sentMessageIds.length > 0) {
-    await supabase
-      .from('message_reads')
-      .update({ read_at: new Date().toISOString() })
+    const { data: membership } = await supabase
+      .from('conversation_members')
+      .select('id')
+      .eq('conversation_id', id)
       .eq('staff_id', staffId)
-      .in('message_id', sentMessageIds)
-      .is('read_at', null);
-  }
+      .maybeSingle();
 
-  res.json({
-    subject: conversation ? conversation.subject : 'Conversation',
-    participants,
-    toLine: participants.map(p => p.fullName).join(', '),
-    messages: messagesWithSenderNames
-  });
+    if (!membership) {
+      return res.status(403).json({ error: 'You do not have access to this conversation.' });
+    }
+
+    const { data: conversation } = await supabase
+      .from('conversations')
+      .select('id, subject')
+      .eq('id', id)
+      .single();
+
+    const participants = await getOtherParticipants(id, staffId);
+
+    // Build a full sender-name lookup (including yourself) so every message
+    // in the thread can show a real "From" name, not just the other party.
+    const { data: allMemberRows } = await supabase
+      .from('conversation_members')
+      .select('staff_id')
+      .eq('conversation_id', id);
+    const allMemberIds = (allMemberRows || []).map(m => m.staff_id);
+    const { data: allStaffRows } = await supabase
+      .from('staff')
+      .select('id, full_name')
+      .in('id', allMemberIds.length > 0 ? allMemberIds : ['00000000-0000-0000-0000-000000000000']);
+    const nameById = {};
+    (allStaffRows || []).forEach(s => { nameById[s.id] = s.full_name; });
+
+    const { data: messages, error } = await supabase
+      .from('messages')
+      .select('id, sender_id, body, status, sent_at, created_at, attachment_url, attachment_type')
+      .eq('conversation_id', id)
+      .or(`status.eq.sent,and(status.eq.draft,sender_id.eq.${staffId})`)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.error('Conversation messages fetch error:', error);
+      return res.status(500).json({ error: 'Could not load conversation.' });
+    }
+
+    const messagesWithSenderNames = messages.map(m => ({
+      ...m,
+      senderName: m.sender_id === staffId ? 'You' : (nameById[m.sender_id] || 'Unknown')
+    }));
+
+    const sentMessageIds = messages.filter(m => m.status === 'sent').map(m => m.id);
+    if (sentMessageIds.length > 0) {
+      await supabase
+        .from('message_reads')
+        .update({ read_at: new Date().toISOString() })
+        .eq('staff_id', staffId)
+        .in('message_id', sentMessageIds)
+        .is('read_at', null);
+    }
+
+    res.json({
+      subject: conversation ? conversation.subject : 'Conversation',
+      participants,
+      toLine: participants.map(p => p.fullName).join(', '),
+      messages: messagesWithSenderNames
+    });
+  } catch (err) {
+    console.error('Conversation detail unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong loading this conversation.' });
+  }
 });
 
 router.post('/compose', async (req, res) => {
-  const { recipientIds, subject, body, status, attachmentUrl, attachmentType } = req.body;
-  const staffId = req.session.staff.id;
+  try {
+    const { recipientIds, subject, body, status, attachmentUrl, attachmentType } = req.body;
+    const staffId = req.session.staff.id;
 
-  if (!recipientIds || recipientIds.length === 0) {
-    return res.status(400).json({ error: 'Add at least one recipient.' });
+    if (!recipientIds || recipientIds.length === 0) {
+      return res.status(400).json({ error: 'Add at least one recipient.' });
+    }
+
+    if (!subject || !subject.trim()) {
+      return res.status(400).json({ error: 'Subject is required.' });
+    }
+
+    const { data: conversation, error: convError } = await supabase
+      .from('conversations')
+      .insert({
+        department_id: req.session.staff.departmentId,
+        subject: subject.trim(),
+        is_group: recipientIds.length > 1
+      })
+      .select()
+      .single();
+
+    if (convError) {
+      console.error('Compose conversation insert error:', convError);
+      return res.status(500).json({ error: 'Could not start conversation.' });
+    }
+
+    const memberRows = [staffId, ...recipientIds].map(id => ({ conversation_id: conversation.id, staff_id: id }));
+    await supabase.from('conversation_members').insert(memberRows);
+
+    const isSent = status === 'sent';
+    const { data: message, error: msgError } = await supabase
+      .from('messages')
+      .insert({
+        conversation_id: conversation.id,
+        sender_id: staffId,
+        body: body || '',
+        status: isSent ? 'sent' : 'draft',
+        sent_at: isSent ? new Date().toISOString() : null,
+        attachment_url: attachmentUrl || null,
+        attachment_type: attachmentType || null
+      })
+      .select()
+      .single();
+
+    if (msgError) {
+      console.error('Compose message insert error:', msgError);
+      return res.status(500).json({ error: 'Could not send message.' });
+    }
+
+    if (isSent) {
+      await createReadRowsForRecipients(conversation.id, message.id, staffId);
+    }
+
+    res.json({ success: true, conversationId: conversation.id, messageId: message.id });
+  } catch (err) {
+    console.error('Compose unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong sending this message.' });
   }
-
-  if (!subject || !subject.trim()) {
-    return res.status(400).json({ error: 'Subject is required.' });
-  }
-
-  const { data: conversation, error: convError } = await supabase
-    .from('conversations')
-    .insert({
-      department_id: req.session.staff.departmentId,
-      subject: subject.trim(),
-      is_group: recipientIds.length > 1
-    })
-    .select()
-    .single();
-
-  if (convError) {
-    return res.status(500).json({ error: 'Could not start conversation.' });
-  }
-
-  const memberRows = [staffId, ...recipientIds].map(id => ({ conversation_id: conversation.id, staff_id: id }));
-  await supabase.from('conversation_members').insert(memberRows);
-
-  const isSent = status === 'sent';
-  const { data: message, error: msgError } = await supabase
-    .from('messages')
-    .insert({
-      conversation_id: conversation.id,
-      sender_id: staffId,
-      body: body || '',
-      status: isSent ? 'sent' : 'draft',
-      sent_at: isSent ? new Date().toISOString() : null,
-      attachment_url: attachmentUrl || null,
-      attachment_type: attachmentType || null
-    })
-    .select()
-    .single();
-
-  if (msgError) {
-    return res.status(500).json({ error: 'Could not send message.' });
-  }
-
-  if (isSent) {
-    await createReadRowsForRecipients(conversation.id, message.id, staffId);
-  }
-
-  res.json({ success: true, conversationId: conversation.id, messageId: message.id });
 });
 
 router.post('/conversations/:id/reply', async (req, res) => {
-  const { id } = req.params;
-  const { body, status, attachmentUrl, attachmentType } = req.body;
-  const staffId = req.session.staff.id;
+  try {
+    const { id } = req.params;
+    const { body, status, attachmentUrl, attachmentType } = req.body;
+    const staffId = req.session.staff.id;
 
-  const { data: membership } = await supabase
-    .from('conversation_members')
-    .select('id')
-    .eq('conversation_id', id)
-    .eq('staff_id', staffId)
-    .maybeSingle();
+    const { data: membership } = await supabase
+      .from('conversation_members')
+      .select('id')
+      .eq('conversation_id', id)
+      .eq('staff_id', staffId)
+      .maybeSingle();
 
-  if (!membership) {
-    return res.status(403).json({ error: 'You do not have access to this conversation.' });
+    if (!membership) {
+      return res.status(403).json({ error: 'You do not have access to this conversation.' });
+    }
+
+    const isSent = status === 'sent';
+    const { data: message, error } = await supabase
+      .from('messages')
+      .insert({
+        conversation_id: id,
+        sender_id: staffId,
+        body: body || '',
+        status: isSent ? 'sent' : 'draft',
+        sent_at: isSent ? new Date().toISOString() : null,
+        attachment_url: attachmentUrl || null,
+        attachment_type: attachmentType || null
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Reply insert error:', error);
+      return res.status(500).json({ error: 'Could not send message.' });
+    }
+
+    if (isSent) {
+      await createReadRowsForRecipients(id, message.id, staffId);
+    }
+
+    res.json({ success: true, message });
+  } catch (err) {
+    console.error('Reply unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong sending your reply.' });
   }
-
-  const isSent = status === 'sent';
-  const { data: message, error } = await supabase
-    .from('messages')
-    .insert({
-      conversation_id: id,
-      sender_id: staffId,
-      body: body || '',
-      status: isSent ? 'sent' : 'draft',
-      sent_at: isSent ? new Date().toISOString() : null,
-      attachment_url: attachmentUrl || null,
-      attachment_type: attachmentType || null
-    })
-    .select()
-    .single();
-
-  if (error) {
-    return res.status(500).json({ error: 'Could not send message.' });
-  }
-
-  if (isSent) {
-    await createReadRowsForRecipients(id, message.id, staffId);
-  }
-
-  res.json({ success: true, message });
 });
 
 router.get('/drafts', async (req, res) => {
-  const staffId = req.session.staff.id;
+  try {
+    const staffId = req.session.staff.id;
 
-  const { data: drafts, error } = await supabase
-    .from('messages')
-    .select('id, conversation_id, body, created_at')
-    .eq('sender_id', staffId)
-    .eq('status', 'draft')
-    .order('created_at', { ascending: false });
+    const { data: drafts, error } = await supabase
+      .from('messages')
+      .select('id, conversation_id, body, created_at')
+      .eq('sender_id', staffId)
+      .eq('status', 'draft')
+      .order('created_at', { ascending: false });
 
-  if (error) {
-    return res.status(500).json({ error: 'Could not load drafts.' });
+    if (error) {
+      console.error('Drafts fetch error:', error);
+      return res.status(500).json({ error: 'Could not load drafts.' });
+    }
+
+    const enriched = await Promise.all(drafts.map(async (draft) => {
+      const participants = await getOtherParticipants(draft.conversation_id, staffId);
+      return {
+        ...draft,
+        displayName: participants.map(p => p.fullName).join(', ') || 'Conversation'
+      };
+    }));
+
+    res.json({ drafts: enriched });
+  } catch (err) {
+    console.error('Drafts unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong loading your drafts.' });
   }
-
-  const enriched = await Promise.all(drafts.map(async (draft) => {
-    const participants = await getOtherParticipants(draft.conversation_id, staffId);
-    return {
-      ...draft,
-      displayName: participants.map(p => p.fullName).join(', ') || 'Conversation'
-    };
-  }));
-
-  res.json({ drafts: enriched });
 });
 
 router.put('/:id', async (req, res) => {
-  const { id } = req.params;
-  const { body, status } = req.body;
-  const staffId = req.session.staff.id;
+  try {
+    const { id } = req.params;
+    const { body, status } = req.body;
+    const staffId = req.session.staff.id;
 
-  const { data: existing, error: fetchError } = await supabase
-    .from('messages')
-    .select('id, conversation_id, sender_id, status')
-    .eq('id', id)
-    .single();
+    const { data: existing, error: fetchError } = await supabase
+      .from('messages')
+      .select('id, conversation_id, sender_id, status')
+      .eq('id', id)
+      .single();
 
-  if (fetchError || !existing) {
-    return res.status(404).json({ error: 'Message not found.' });
+    if (fetchError || !existing) {
+      return res.status(404).json({ error: 'Message not found.' });
+    }
+
+    if (existing.sender_id !== staffId) {
+      return res.status(403).json({ error: 'You can only edit your own drafts.' });
+    }
+
+    if (existing.status === 'sent') {
+      return res.status(400).json({ error: 'This message has already been sent and cannot be edited.' });
+    }
+
+    const isSending = status === 'sent';
+    const { data: updated, error: updateError } = await supabase
+      .from('messages')
+      .update({
+        body: body !== undefined ? body : undefined,
+        status: isSending ? 'sent' : 'draft',
+        sent_at: isSending ? new Date().toISOString() : null
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error('Draft update error:', updateError);
+      return res.status(500).json({ error: 'Could not update message.' });
+    }
+
+    if (isSending) {
+      await createReadRowsForRecipients(existing.conversation_id, id, staffId);
+    }
+
+    res.json({ success: true, message: updated });
+  } catch (err) {
+    console.error('Draft update unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong updating this message.' });
   }
-
-  if (existing.sender_id !== staffId) {
-    return res.status(403).json({ error: 'You can only edit your own drafts.' });
-  }
-
-  if (existing.status === 'sent') {
-    return res.status(400).json({ error: 'This message has already been sent and cannot be edited.' });
-  }
-
-  const isSending = status === 'sent';
-  const { data: updated, error: updateError } = await supabase
-    .from('messages')
-    .update({
-      body: body !== undefined ? body : undefined,
-      status: isSending ? 'sent' : 'draft',
-      sent_at: isSending ? new Date().toISOString() : null
-    })
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (updateError) {
-    return res.status(500).json({ error: 'Could not update message.' });
-  }
-
-  if (isSending) {
-    await createReadRowsForRecipients(existing.conversation_id, id, staffId);
-  }
-
-  res.json({ success: true, message: updated });
 });
 
 router.delete('/:id', async (req, res) => {
