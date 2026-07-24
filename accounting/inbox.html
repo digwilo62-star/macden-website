@@ -33,7 +33,10 @@
     <div class="main-content">
       <div class="topbar">
         <div class="topbar-search"><input type="text" placeholder="Search messages, people, documents…"></div>
-        <button class="topbar-bell"><i class="ti ti-bell"></i></button>
+        <div class="notif-wrap">
+          <button class="topbar-bell" id="notifBell"><i class="ti ti-bell"></i><span class="dot" id="notifDot" style="display:none;">0</span></button>
+          <div class="notif-dropdown" id="notifDropdown"></div>
+        </div>
         <img class="topbar-avatar" src="assets/logo.jpeg" alt="You">
       </div>
 
@@ -104,6 +107,7 @@
   </div>
 
   <script src="assets/api.js"></script>
+  <script src="assets/notifications.js"></script>
   <script src="assets/presence.js"></script>
   <script>
     document.getElementById('logoutBtn').addEventListener('click', async () => {

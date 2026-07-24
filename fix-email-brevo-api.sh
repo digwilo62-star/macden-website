@@ -1,3 +1,14 @@
+#!/usr/bin/env bash
+# Switches email sending from SMTP to Brevo's HTTP API. Render's free tier
+# blocks all outbound SMTP ports (25, 465, 587) as an anti-spam measure --
+# this was the actual cause of the connection timeouts on production. HTTPS
+# is never blocked, so this fixes it permanently, on Render and locally.
+# Run this from the ROOT of your macden-website repo, in Git Bash.
+set -e
+
+mkdir -p server/utils
+
+cat > server/utils/email.js << "EOF_EMAIL_JS"
 // Uses Brevo's HTTP API instead of raw SMTP. This is the fix for Render's
 // free-tier policy that blocks all outbound SMTP ports (25, 465, 587) to
 // prevent spam abuse -- HTTPS (port 443) is never blocked, so the API works
@@ -55,3 +66,6 @@ async function sendWelcomeEmail(toEmail, fullName, username, tempPassword) {
 }
 
 module.exports = { sendVerificationEmail, sendWelcomeEmail };
+EOF_EMAIL_JS
+
+echo "Email switched to Brevo API. You must add BREVO_API_KEY and SMTP_FROM_EMAIL to .env and Render."

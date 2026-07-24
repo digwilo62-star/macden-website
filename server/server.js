@@ -17,6 +17,7 @@ const leaveRoutes = require('./routes/leave');
 const documentsRoutes = require('./routes/documents');
 const policiesRoutes = require('./routes/policies');
 const settingsRoutes = require('./routes/settings');
+const notificationsRoutes = require('./routes/notifications');
 const requireAuth = require('./middleware/requireAuth');
 
 const app = express();
@@ -102,6 +103,7 @@ app.use('/api/accounting/leave', leaveRoutes);
 app.use('/api/accounting/documents', documentsRoutes);
 app.use('/api/accounting/policies', policiesRoutes);
 app.use('/api/accounting/settings', settingsRoutes);
+app.use('/api/accounting/notifications', notificationsRoutes);
 
 app.get('/api/accounting/dashboard-check', (req, res) => {
   // Simple proof that requireAuth is working — returns the logged-in staff's info
