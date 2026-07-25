@@ -44,6 +44,15 @@
           <button type="submit" class="btn btn-primary" id="submitBtn">Sign In</button>
         </form>
 
+        <form id="mfaForm" style="display:none;">
+          <p style="font-size:13px; color:var(--text-secondary); margin-bottom:18px;">Enter the 6-digit code from your authenticator app.</p>
+          <div class="field">
+            <label for="mfaCode">Authentication Code</label>
+            <input type="text" id="mfaCode" placeholder="000000" maxlength="6" inputmode="numeric" autocomplete="one-time-code" required>
+          </div>
+          <button type="submit" class="btn btn-primary" id="mfaSubmitBtn">Verify</button>
+        </form>
+
         <p class="login-footer-link">Need help? Contact IT Support</p>
       </div>
     </div>
@@ -69,6 +78,14 @@
             password: document.getElementById('password').value
           }
         });
+
+        if (result.requiresMfa) {
+          form.style.display = 'none';
+          document.getElementById('mfaForm').style.display = 'block';
+          document.getElementById('mfaCode').focus();
+          return;
+        }
+
         if (result.staff.mustChangePassword) {
           window.location.href = 'settings.html?forcePasswordChange=1';
         } else {
@@ -78,6 +95,33 @@
         showAlert(alertEl, err.message);
         submitBtn.disabled = false;
         submitBtn.textContent = 'Sign In';
+      }
+    });
+
+    const mfaForm = document.getElementById('mfaForm');
+    const mfaSubmitBtn = document.getElementById('mfaSubmitBtn');
+
+    mfaForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideAlert(alertEl);
+      mfaSubmitBtn.disabled = true;
+      mfaSubmitBtn.textContent = 'Verifying…';
+
+      try {
+        const result = await apiRequest('/auth/login-mfa', {
+          method: 'POST',
+          body: { code: document.getElementById('mfaCode').value.trim() }
+        });
+
+        if (result.staff.mustChangePassword) {
+          window.location.href = 'settings.html?forcePasswordChange=1';
+        } else {
+          window.location.href = 'dashboard.html';
+        }
+      } catch (err) {
+        showAlert(alertEl, err.message);
+        mfaSubmitBtn.disabled = false;
+        mfaSubmitBtn.textContent = 'Verify';
       }
     });
   </script>

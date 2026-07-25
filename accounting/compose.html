@@ -31,6 +31,7 @@
         <a href="settings.html" class="sidebar-link"><i class="ti ti-settings"></i> Settings</a>
       </nav>
       <div class="sidebar-logout">
+        <a href="help.html" class="sidebar-link" style="margin-bottom:6px;"><i class="ti ti-help-circle"></i> Help</a>
         <button id="logoutBtn"><i class="ti ti-logout"></i> Logout</button>
       </div>
     </div>
@@ -113,6 +114,12 @@
       if (prefillId && prefillName) {
         selectedRecipients.push({ id: prefillId, full_name: decodeURIComponent(prefillName) });
         renderChips();
+      }
+
+      const prefillSubject = params.get('subject');
+      if (prefillSubject) {
+        document.getElementById('subject').value = decodeURIComponent(prefillSubject);
+        document.getElementById('body').focus();
       }
     }
 

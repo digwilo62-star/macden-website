@@ -55,6 +55,7 @@
         <a href="settings.html" class="sidebar-link active"><i class="ti ti-settings"></i> Settings</a>
       </nav>
       <div class="sidebar-logout">
+        <a href="help.html" class="sidebar-link" style="margin-bottom:6px;"><i class="ti ti-help-circle"></i> Help</a>
         <button id="logoutBtn"><i class="ti ti-logout"></i> Logout</button>
       </div>
     </div>
@@ -142,6 +143,41 @@
             <input type="password" id="confirmPassword" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body);">
           </div>
           <button class="btn btn-primary" id="changePasswordBtn" style="width:auto; padding:9px 20px;">Update Password</button>
+
+          <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--border);">
+            <p style="font-size:12.5px; color:var(--text-secondary); margin-bottom:10px;">Signed in somewhere you don't recognize? Sign out everywhere at once.</p>
+            <button class="btn btn-ghost" id="logoutAllBtn" style="width:auto; padding:9px 20px; color:var(--error); border-color:var(--error);">Log out of all devices</button>
+          </div>
+
+          <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--border);">
+            <h3 style="font-size:13.5px; margin-bottom:4px;">Two-Factor Authentication</h3>
+            <p style="font-size:12.5px; color:var(--text-secondary); margin-bottom:12px;">Add an extra layer of security using an authenticator app (Google Authenticator, Authy, etc).</p>
+
+            <div id="mfaStatusOff">
+              <button class="btn btn-primary" id="mfaEnableBtn" style="width:auto; padding:9px 20px;">Enable Two-Factor Authentication</button>
+            </div>
+
+            <div id="mfaStatusOn" style="display:none;">
+              <div class="set-locked-note" style="display:inline-flex; align-items:center; gap:6px;"><i class="ti ti-shield-check"></i> Two-factor authentication is ON</div>
+              <div style="margin-top:12px;">
+                <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:6px;">Current Password (to disable)</label>
+                <input type="password" id="mfaDisablePassword" style="width:100%; max-width:280px; padding:9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body); margin-bottom:10px;">
+                <br>
+                <button class="btn btn-ghost" id="mfaDisableBtn" style="width:auto; padding:9px 20px; color:var(--error); border-color:var(--error);">Disable Two-Factor Authentication</button>
+              </div>
+            </div>
+
+            <div id="mfaSetupFlow" style="display:none; margin-top:14px;">
+              <div id="mfaSetupAlert" class="alert alert-error"></div>
+              <p style="font-size:12.5px; color:var(--text-secondary);">1. Open your authenticator app and add a new account manually using this key:</p>
+              <div style="background:var(--surface-raised); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px; font-family:var(--font-mono); font-size:14px; letter-spacing:1px; margin:8px 0; word-break:break-all;" id="mfaSecretDisplay"></div>
+              <p style="font-size:12.5px; color:var(--text-secondary); margin-top:14px;">2. Enter the 6-digit code your app generates:</p>
+              <input type="text" id="mfaVerifyCode" placeholder="000000" maxlength="6" inputmode="numeric" style="width:140px; padding:9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body); margin:6px 0 12px;">
+              <br>
+              <button class="btn btn-primary" id="mfaVerifyBtn" style="width:auto; padding:9px 20px;">Confirm &amp; Enable</button>
+              <button class="btn btn-ghost" id="mfaCancelBtn" style="width:auto; padding:9px 20px; margin-left:8px;">Cancel</button>
+            </div>
+          </div>
         </div>
 
         <!-- Appearance -->
@@ -194,6 +230,11 @@
         document.getElementById('profileEmail').textContent = p.email;
         document.getElementById('profileDate').textContent = new Date(p.dateJoined).toLocaleDateString();
         document.getElementById('bioInput').value = p.bio || '';
+
+        if (p.mfaEnabled) {
+          document.getElementById('mfaStatusOff').style.display = 'none';
+          document.getElementById('mfaStatusOn').style.display = 'block';
+        }
 
         if (p.notifyEmailBroadcasts) document.getElementById('toggleBroadcasts').classList.add('on');
         if (p.notifyEmailMessages) document.getElementById('toggleMessages').classList.add('on');
@@ -260,6 +301,71 @@
         showAlert(alertEl, err.message);
       } finally {
         btn.disabled = false;
+      }
+    });
+
+    document.getElementById('logoutAllBtn').addEventListener('click', async () => {
+      if (!confirm('This will sign you out on every device, including this one. Continue?')) return;
+      try {
+        await apiRequest('/settings/logout-all-devices', { method: 'POST' });
+      } catch (err) {
+        // Even if this errors, the safest move is still to send them to login
+      }
+      window.location.href = 'login.html';
+    });
+
+    document.getElementById('mfaEnableBtn').addEventListener('click', async () => {
+      try {
+        const result = await apiRequest('/settings/mfa/setup', { method: 'POST' });
+        document.getElementById('mfaSecretDisplay').textContent = result.secret;
+        document.getElementById('mfaStatusOff').style.display = 'none';
+        document.getElementById('mfaSetupFlow').style.display = 'block';
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    document.getElementById('mfaCancelBtn').addEventListener('click', () => {
+      document.getElementById('mfaSetupFlow').style.display = 'none';
+      document.getElementById('mfaStatusOff').style.display = 'block';
+      document.getElementById('mfaVerifyCode').value = '';
+    });
+
+    document.getElementById('mfaVerifyBtn').addEventListener('click', async () => {
+      const alertEl = document.getElementById('mfaSetupAlert');
+      hideAlert(alertEl);
+      const btn = document.getElementById('mfaVerifyBtn');
+      btn.disabled = true;
+
+      try {
+        await apiRequest('/settings/mfa/verify', {
+          method: 'POST',
+          body: { code: document.getElementById('mfaVerifyCode').value.trim() }
+        });
+        document.getElementById('mfaSetupFlow').style.display = 'none';
+        document.getElementById('mfaStatusOn').style.display = 'block';
+      } catch (err) {
+        showAlert(alertEl, err.message);
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById('mfaDisableBtn').addEventListener('click', async () => {
+      const password = document.getElementById('mfaDisablePassword').value;
+      if (!password) { alert('Enter your current password.'); return; }
+      if (!confirm('Disable two-factor authentication on your account?')) return;
+
+      try {
+        await apiRequest('/settings/mfa/disable', {
+          method: 'POST',
+          body: { currentPassword: password }
+        });
+        document.getElementById('mfaStatusOn').style.display = 'none';
+        document.getElementById('mfaStatusOff').style.display = 'block';
+        document.getElementById('mfaDisablePassword').value = '';
+      } catch (err) {
+        alert(err.message);
       }
     });
 

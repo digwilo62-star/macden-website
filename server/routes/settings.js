@@ -1,6 +1,8 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
+const { authenticator } = require('otplib');
 const supabase = require('../config/supabaseClient');
+const pgPool = require('../config/pgPool');
 
 const router = express.Router();
 
@@ -9,7 +11,7 @@ router.get('/me', async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('staff')
-      .select('id, full_name, username, email, role, bio, created_at, departments(name), notify_email_broadcasts, notify_email_messages, notify_desktop')
+      .select('id, full_name, username, email, role, bio, created_at, departments(name), notify_email_broadcasts, notify_email_messages, notify_desktop, mfa_enabled')
       .eq('id', req.session.staff.id)
       .single();
 
@@ -29,7 +31,8 @@ router.get('/me', async (req, res) => {
         dateJoined: data.created_at,
         notifyEmailBroadcasts: data.notify_email_broadcasts,
         notifyEmailMessages: data.notify_email_messages,
-        notifyDesktop: data.notify_desktop
+        notifyDesktop: data.notify_desktop,
+        mfaEnabled: data.mfa_enabled
       }
     });
   } catch (err) {
@@ -127,6 +130,117 @@ router.put('/password', async (req, res) => {
   } catch (err) {
     console.error('Password change unexpected error:', err);
     res.status(500).json({ error: 'Something went wrong changing your password.' });
+  }
+});
+
+// POST /api/accounting/settings/logout-all-devices
+// Deletes every session row belonging to this person from the Postgres
+// session store, forcing every logged-in device/browser to be signed out.
+// Their CURRENT session is deleted too, so they'll need to log back in here as well.
+router.post('/logout-all-devices', async (req, res) => {
+  try {
+    const staffId = req.session.staff.id;
+
+    await pgPool.query(
+      `DELETE FROM user_sessions WHERE sess::jsonb -> 'staff' ->> 'id' = $1`,
+      [staffId]
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Logout-all-devices unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong logging out other devices.' });
+  }
+});
+
+// POST /api/accounting/settings/mfa/setup — generates a new secret, not
+// active yet until confirmed with a real code via /mfa/verify
+router.post('/mfa/setup', async (req, res) => {
+  try {
+    const secret = authenticator.generateSecret();
+    const uri = authenticator.keyuri(req.session.staff.username, 'MACDEN Portal', secret);
+
+    // Store the pending secret temporarily in the session (not the DB yet) —
+    // it only becomes permanent once they prove they can generate a valid
+    // code from it in the next step. Prevents someone locking themselves
+    // out with a secret they never actually saved into their app.
+    req.session.pendingMfaSecret = secret;
+
+    res.json({ secret, uri });
+  } catch (err) {
+    console.error('MFA setup unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong setting up two-factor authentication.' });
+  }
+});
+
+// POST /api/accounting/settings/mfa/verify — confirms setup with a real code
+router.post('/mfa/verify', async (req, res) => {
+  try {
+    const { code } = req.body;
+    const pendingSecret = req.session.pendingMfaSecret;
+
+    if (!pendingSecret) {
+      return res.status(400).json({ error: 'Start MFA setup again first.' });
+    }
+    if (!code) {
+      return res.status(400).json({ error: 'Enter the 6-digit code from your authenticator app.' });
+    }
+
+    const isValid = authenticator.verify({ token: code, secret: pendingSecret });
+    if (!isValid) {
+      return res.status(400).json({ error: 'Incorrect code. Check your authenticator app and try again.' });
+    }
+
+    const { error } = await supabase
+      .from('staff')
+      .update({ mfa_secret: pendingSecret, mfa_enabled: true })
+      .eq('id', req.session.staff.id);
+
+    if (error) {
+      console.error('MFA enable error:', error);
+      return res.status(500).json({ error: 'Could not enable two-factor authentication.' });
+    }
+
+    delete req.session.pendingMfaSecret;
+    res.json({ success: true });
+  } catch (err) {
+    console.error('MFA verify unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong confirming two-factor authentication.' });
+  }
+});
+
+// POST /api/accounting/settings/mfa/disable — requires current password
+router.post('/mfa/disable', async (req, res) => {
+  try {
+    const { currentPassword } = req.body;
+    if (!currentPassword) {
+      return res.status(400).json({ error: 'Enter your current password to disable two-factor authentication.' });
+    }
+
+    const { data: staffMember } = await supabase
+      .from('staff')
+      .select('password_hash')
+      .eq('id', req.session.staff.id)
+      .single();
+
+    const matches = await bcrypt.compare(currentPassword, staffMember.password_hash);
+    if (!matches) {
+      return res.status(401).json({ error: 'Incorrect password.' });
+    }
+
+    const { error } = await supabase
+      .from('staff')
+      .update({ mfa_secret: null, mfa_enabled: false })
+      .eq('id', req.session.staff.id);
+
+    if (error) {
+      return res.status(500).json({ error: 'Could not disable two-factor authentication.' });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('MFA disable unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong.' });
   }
 });
 

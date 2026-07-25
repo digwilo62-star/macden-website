@@ -714,5 +714,61 @@ router.get('/broadcasts', async (req, res) => {
   }
 });
 
+// GET /api/accounting/messages/broadcasts/:id/reads — admin-only, exactly
+// who has and hasn't opened this specific broadcast, not just a percentage.
+router.get('/broadcasts/:id/reads', async (req, res) => {
+  try {
+    if (req.session.staff.role !== 'admin') {
+      return res.status(403).json({ error: 'Only admins can view this.' });
+    }
+
+    const { data: message } = await supabase
+      .from('messages')
+      .select('id')
+      .eq('conversation_id', req.params.id)
+      .eq('status', 'sent')
+      .limit(1)
+      .maybeSingle();
+
+    if (!message) {
+      return res.status(404).json({ error: 'Broadcast message not found.' });
+    }
+
+    const { data: reads, error } = await supabase
+      .from('message_reads')
+      .select('staff_id, read_at')
+      .eq('message_id', message.id);
+
+    if (error) {
+      console.error('Broadcast reads fetch error:', error);
+      return res.status(500).json({ error: 'Could not load read status.' });
+    }
+
+    const staffIds = reads.map(r => r.staff_id);
+    const { data: staffRows } = await supabase
+      .from('staff')
+      .select('id, full_name')
+      .in('id', staffIds.length > 0 ? staffIds : ['00000000-0000-0000-0000-000000000000']);
+    const nameById = {};
+    (staffRows || []).forEach(s => { nameById[s.id] = s.full_name; });
+
+    const recipients = reads
+      .map(r => ({
+        fullName: nameById[r.staff_id] || 'Unknown',
+        hasRead: r.read_at !== null,
+        readAt: r.read_at
+      }))
+      .sort((a, b) => {
+        if (a.hasRead !== b.hasRead) return a.hasRead ? 1 : -1; // unread first
+        return a.fullName.localeCompare(b.fullName);
+      });
+
+    res.json({ recipients });
+  } catch (err) {
+    console.error('Broadcast reads unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong loading read status.' });
+  }
+});
+
 module.exports = router;
 

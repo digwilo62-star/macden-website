@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const supabase = require('../config/supabaseClient');
 const { sendWelcomeEmail } = require('../utils/email');
+const { encrypt, decrypt } = require('../utils/encryption');
 
 const router = express.Router();
 
@@ -12,6 +13,24 @@ function requireAdmin(req, res, next) {
     return res.status(403).json({ error: 'Admin access only.' });
   }
   next();
+}
+
+// Logs sensitive admin actions (who did what, when, from where) — closes the
+// "who touched HR data" gap flagged when NIN/address fields were first added.
+// Fire-and-forget: a logging failure should never block the actual action.
+function logAdminAction(req, action, targetId, details) {
+  supabase
+    .from('admin_audit_log')
+    .insert({
+      staff_id: req.session.staff.id,
+      action,
+      target_id: targetId ? String(targetId) : null,
+      details: details || null,
+      ip_address: req.ip || req.headers['x-forwarded-for'] || null
+    })
+    .then(({ error }) => {
+      if (error) console.error('Audit log insert failed:', error);
+    });
 }
 
 router.use(requireAdmin);
@@ -90,8 +109,8 @@ router.post('/onboard-staff', async (req, res) => {
         role: role,
         department_id: departmentId,
         phone: phone || null,
-        nin: nin || null,
-        address: address || null,
+        nin: nin ? encrypt(nin) : null,
+        address: address ? encrypt(address) : null,
         branch: branch || null,
         reports_to: reportsTo || null,
         email_verified: true,  // HR-created accounts are trusted, skip the self-signup flow
@@ -118,6 +137,7 @@ router.post('/onboard-staff', async (req, res) => {
       });
     }
 
+    logAdminAction(req, 'onboard_staff', data.id, `Created account for ${fullName} (${email})`);
     res.json({ success: true, staff: data });
   } catch (err) {
     console.error('Onboard staff unexpected error:', err);
@@ -144,6 +164,7 @@ router.put('/staff/:id', async (req, res) => {
     if (error) {
       return res.status(500).json({ error: 'Could not update this account.' });
     }
+    logAdminAction(req, 'edit_staff', req.params.id, `Updated profile fields (role/department/phone/branch)`);
     res.json({ success: true });
   } catch (err) {
     console.error('Staff edit unexpected error:', err);
@@ -158,6 +179,7 @@ router.post('/staff/:id/reactivate', async (req, res) => {
     if (error) {
       return res.status(500).json({ error: 'Could not reactivate this account.' });
     }
+    logAdminAction(req, 'reactivate_staff', req.params.id, 'Reactivated account');
     res.json({ success: true });
   } catch (err) {
     console.error('Reactivate unexpected error:', err);
@@ -204,6 +226,7 @@ router.post('/approve-staff/:id', async (req, res) => {
       return res.status(400).json({ error: 'Could not approve this account.' });
     }
 
+    logAdminAction(req, 'approve_staff', id, `Approved ${data.full_name}`);
     res.json({ success: true, message: `${data.full_name} has been approved and can now log in.` });
   } catch (err) {
     console.error('Approve staff unexpected error:', err);
@@ -216,43 +239,84 @@ router.post('/approve-staff/:id', async (req, res) => {
 // messages and price edits stay intact) and clears any shared conversation
 // with the admin performing this action.
 router.delete('/staff/:id', async (req, res) => {
-  const { id } = req.params;
-  const adminId = req.session.staff.id;
+  try {
+    const { id } = req.params;
+    const adminId = req.session.staff.id;
 
-  if (id === adminId) {
-    return res.status(400).json({ error: 'You cannot deactivate your own account.' });
+    if (id === adminId) {
+      return res.status(400).json({ error: 'You cannot deactivate your own account.' });
+    }
+
+    const { data: targetMemberships } = await supabase
+      .from('conversation_members')
+      .select('conversation_id')
+      .eq('staff_id', id);
+
+    const { data: adminMemberships } = await supabase
+      .from('conversation_members')
+      .select('conversation_id')
+      .eq('staff_id', adminId);
+
+    const targetIds = new Set((targetMemberships || []).map(m => m.conversation_id));
+    const sharedConversationIds = (adminMemberships || [])
+      .map(m => m.conversation_id)
+      .filter(convId => targetIds.has(convId));
+
+    if (sharedConversationIds.length > 0) {
+      // Cascade delete handles conversation_members, messages, and message_reads automatically
+      await supabase.from('conversations').delete().in('id', sharedConversationIds);
+    }
+
+    const { error } = await supabase
+      .from('staff')
+      .update({ is_active: false })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Deactivate staff error:', error);
+      return res.status(500).json({ error: 'Could not deactivate this account.' });
+    }
+
+    logAdminAction(req, 'deactivate_staff', id, 'Deactivated account');
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Deactivate staff unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong deactivating this account.' });
   }
+});
 
-  const { data: targetMemberships } = await supabase
-    .from('conversation_members')
-    .select('conversation_id')
-    .eq('staff_id', id);
+// GET /api/accounting/admin/audit-log — recent sensitive admin actions
+router.get('/audit-log', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('admin_audit_log')
+      .select('id, staff_id, action, target_id, details, created_at')
+      .order('created_at', { ascending: false })
+      .limit(25);
 
-  const { data: adminMemberships } = await supabase
-    .from('conversation_members')
-    .select('conversation_id')
-    .eq('staff_id', adminId);
+    if (error) {
+      console.error('Audit log fetch error:', error);
+      return res.status(500).json({ error: 'Could not load the audit log.' });
+    }
 
-  const targetIds = new Set((targetMemberships || []).map(m => m.conversation_id));
-  const sharedConversationIds = (adminMemberships || [])
-    .map(m => m.conversation_id)
-    .filter(convId => targetIds.has(convId));
+    const staffIds = [...new Set(data.map(l => l.staff_id).filter(Boolean))];
+    const { data: staffRows } = await supabase
+      .from('staff')
+      .select('id, full_name')
+      .in('id', staffIds.length > 0 ? staffIds : ['00000000-0000-0000-0000-000000000000']);
+    const nameById = {};
+    (staffRows || []).forEach(s => { nameById[s.id] = s.full_name; });
 
-  if (sharedConversationIds.length > 0) {
-    // Cascade delete handles conversation_members, messages, and message_reads automatically
-    await supabase.from('conversations').delete().in('id', sharedConversationIds);
+    const entries = data.map(l => ({
+      ...l,
+      staffName: nameById[l.staff_id] || 'Unknown'
+    }));
+
+    res.json({ entries });
+  } catch (err) {
+    console.error('Audit log unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong loading the audit log.' });
   }
-
-  const { error } = await supabase
-    .from('staff')
-    .update({ is_active: false })
-    .eq('id', id);
-
-  if (error) {
-    return res.status(500).json({ error: 'Could not deactivate this account.' });
-  }
-
-  res.json({ success: true });
 });
 
 module.exports = router;

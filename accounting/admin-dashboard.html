@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Activity — MACDEN Portal</title>
+  <link rel="stylesheet" href="assets/portal-style.css">
+  <link rel="stylesheet" href="assets/portal-shell.css">
+  <link rel="stylesheet" href="assets/portal-inbox.css">
+  <style>
+    .ad-stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .ad-audit-list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+    .ad-audit-row { display: grid; grid-template-columns: 150px 160px 1fr 140px; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+    .ad-audit-row:last-child { border-bottom: none; }
+    .ad-audit-row.header { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
+    .ad-action-tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: var(--primary-dim); color: var(--primary); }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-brand"><img src="assets/logo.jpeg" alt="MACDEN"><span>MACDEN</span></div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="inbox.html" class="sidebar-link"><i class="ti ti-mail"></i> Inbox <span class="badge" id="unreadBadge" style="display:none;">0</span></a>
+        <a href="compose.html" class="sidebar-link"><i class="ti ti-pencil"></i> Compose</a>
+        <a href="broadcasts.html" class="sidebar-link"><i class="ti ti-speakerphone"></i> Broadcasts</a>
+        <a href="directory.html" class="sidebar-link"><i class="ti ti-users"></i> Directory</a>
+        <a href="leave.html" class="sidebar-link"><i class="ti ti-calendar-event"></i> Leave &amp; Requests</a>
+        <a href="documents.html" class="sidebar-link"><i class="ti ti-file-text"></i> Documents</a>
+        <a href="policies.html" class="sidebar-link"><i class="ti ti-book"></i> Policies</a>
+        <a href="settings.html" class="sidebar-link"><i class="ti ti-settings"></i> Settings</a>
+      </nav>
+      <div class="sidebar-logout">
+        <a href="help.html" class="sidebar-link" style="margin-bottom:6px;"><i class="ti ti-help-circle"></i> Help</a>
+        <button id="logoutBtn"><i class="ti ti-logout"></i> Logout</button>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-search"><input type="text" placeholder="Search messages, people, documents…"></div>
+        <div class="notif-wrap">
+          <button class="topbar-bell" id="notifBell" aria-label="Notifications"><i class="ti ti-bell"></i><span class="dot" id="notifDot" style="display:none;">0</span></button>
+          <div class="notif-dropdown" id="notifDropdown"></div>
+        </div>
+        <img class="topbar-avatar" src="assets/logo.jpeg" alt="You">
+      </div>
+
+      <div class="page-body">
+        <h1 class="page-greeting" style="font-size: 22px;">Admin Activity</h1>
+        <p class="page-greeting-sub" id="notAdminNote" style="display:none;">Admin access only.</p>
+        <p class="page-greeting-sub" id="pageSub"><a href="dashboard.html" style="color: var(--primary); text-decoration:none; font-weight:600;">← Back to dashboard</a></p>
+
+        <div id="content" style="display:none;">
+          <div class="ad-stat-grid">
+            <div class="stat-card"><div class="num" id="statBroadcasts">—</div><div class="lbl">Broadcasts (30 days)</div></div>
+            <div class="stat-card"><div class="num" id="statApproved">—</div><div class="lbl">Leave Approved (30 days)</div></div>
+            <div class="stat-card"><div class="num" id="statRejected">—</div><div class="lbl">Leave Rejected (30 days)</div></div>
+            <div class="stat-card"><div class="num" id="statTurnaround">—</div><div class="lbl">Avg. Approval Turnaround</div></div>
+          </div>
+
+          <h2 style="font-size: 15.5px; margin-bottom: 12px;">Recent Admin Activity</h2>
+          <div class="ad-audit-list">
+            <div class="ad-audit-row header"><div>Admin</div><div>Action</div><div>Details</div><div>When</div></div>
+            <div id="auditRows"><div class="doc-empty">Loading…</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script src="assets/presence.js"></script>
+  <script src="assets/notifications.js"></script>
+  <script>
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await apiRequest('/auth/logout', { method: 'POST' });
+      window.location.href = 'login.html';
+    });
+
+    const actionLabels = {
+      onboard_staff: 'Onboarded staff',
+      edit_staff: 'Edited staff',
+      deactivate_staff: 'Deactivated staff',
+      reactivate_staff: 'Reactivated staff',
+      approve_staff: 'Approved staff'
+    };
+
+    async function init() {
+      let staff;
+      try {
+        const result = await apiRequest('/dashboard-check');
+        staff = result.staff;
+      } catch (err) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      if (staff.role !== 'admin') {
+        document.getElementById('notAdminNote').style.display = 'block';
+        document.getElementById('pageSub').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('content').style.display = 'block';
+      loadUnreadBadge();
+      loadStats();
+      loadAuditLog();
+    }
+
+    async function loadStats() {
+      try {
+        const leaveStats = await apiRequest('/leave/stats');
+        document.getElementById('statApproved').textContent = leaveStats.approvedCount;
+        document.getElementById('statRejected').textContent = leaveStats.rejectedCount;
+        document.getElementById('statTurnaround').textContent = leaveStats.avgTurnaroundHours !== null ? leaveStats.avgTurnaroundHours + 'h' : '—';
+      } catch (err) {}
+
+      try {
+        const bc = await apiRequest('/messages/broadcasts');
+        const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+        const recent = bc.broadcasts.filter(b => new Date(b.sentAt).getTime() > thirtyDaysAgo);
+        document.getElementById('statBroadcasts').textContent = recent.length;
+      } catch (err) {}
+    }
+
+    async function loadAuditLog() {
+      const rows = document.getElementById('auditRows');
+      try {
+        const result = await apiRequest('/admin/audit-log');
+        if (result.entries.length === 0) {
+          rows.innerHTML = '<div class="doc-empty">No admin activity logged yet.</div>';
+          return;
+        }
+        rows.innerHTML = result.entries.map(e =>
+          '<div class="ad-audit-row">' +
+            '<div>' + e.staffName + '</div>' +
+            '<div><span class="ad-action-tag">' + (actionLabels[e.action] || e.action) + '</span></div>' +
+            '<div>' + (e.details || '—') + '</div>' +
+            '<div>' + new Date(e.created_at).toLocaleString() + '</div>' +
+          '</div>'
+        ).join('');
+      } catch (err) {
+        rows.innerHTML = '<div class="doc-empty">Could not load audit log.</div>';
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
+

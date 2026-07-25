@@ -51,6 +51,7 @@
         <a href="settings.html" class="sidebar-link"><i class="ti ti-settings"></i> Settings</a>
       </nav>
       <div class="sidebar-logout">
+        <a href="help.html" class="sidebar-link" style="margin-bottom:6px;"><i class="ti ti-help-circle"></i> Help</a>
         <button id="logoutBtn"><i class="ti ti-logout"></i> Logout</button>
       </div>
     </div>
@@ -71,7 +72,9 @@
 
         <div class="dir-toolbar">
           <input type="text" id="dirSearch" placeholder="Search by name or username…">
+          <a href="admin-dashboard.html" id="adminActivityLink" class="btn btn-ghost" style="width:auto; padding:10px 18px; text-decoration:none; display:none; align-items:center; gap:8px;"><i class="ti ti-chart-bar"></i> Admin Activity</a>
           <a href="manage-staff.html" class="btn btn-primary" id="manageStaffLink" style="width:auto; padding:10px 18px; text-decoration:none; display:none; align-items:center; gap:8px; margin-left:auto;"><i class="ti ti-settings"></i> Manage Staff</a>
+          <a href="orgchart.html" class="btn btn-ghost" style="width:auto; padding:10px 18px; text-decoration:none; display:inline-flex; align-items:center; gap:8px;"><i class="ti ti-sitemap"></i> Org Chart</a>
         </div>
 
         <div class="dir-list">
@@ -130,6 +133,7 @@
         const result = await apiRequest('/dashboard-check');
         if (result.staff.role === 'admin') {
           document.getElementById('manageStaffLink').style.display = 'inline-flex';
+          document.getElementById('adminActivityLink').style.display = 'inline-flex';
         }
       } catch (err) {
         window.location.href = 'login.html';

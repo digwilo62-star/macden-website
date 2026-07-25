@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
+const { authenticator } = require('otplib');
 const supabase = require('../config/supabaseClient');
 const { sendVerificationEmail } = require('../utils/email');
 
@@ -141,7 +142,7 @@ router.post('/login', authLimiter, async (req, res) => {
     const isEmail = username.includes('@');
     const { data: staffMember, error } = await supabase
       .from('staff')
-      .select('id, full_name, username, password_hash, role, can_edit_prices, is_active, email_verified, department_id, must_change_password')
+      .select('id, full_name, username, password_hash, role, can_edit_prices, is_active, email_verified, department_id, must_change_password, mfa_enabled')
       .eq(isEmail ? 'email' : 'username', username)
       .single();
 
@@ -161,6 +162,16 @@ router.post('/login', authLimiter, async (req, res) => {
 
     if (!staffMember.is_active) {
       return res.status(403).json({ error: 'Your account is awaiting admin approval.' });
+    }
+
+    // If this account has two-factor authentication enabled, don't complete
+    // the login yet — password is correct, but we still need a valid TOTP
+    // code before creating a real session. The pending staff ID lives in
+    // the session itself (not req.session.staff), so requireAuth still
+    // blocks access to everything until the second step succeeds.
+    if (staffMember.mfa_enabled) {
+      req.session.pendingMfaStaffId = staffMember.id;
+      return res.json({ success: true, requiresMfa: true });
     }
 
     // Regenerate the session ID on login (not just reuse whatever session
@@ -197,6 +208,67 @@ router.post('/login', authLimiter, async (req, res) => {
 });
 
 // POST /api/accounting/auth/logout
+// POST /api/accounting/auth/login-mfa — second step, completes login after
+// the password step returned requiresMfa: true
+router.post('/login-mfa', authLimiter, async (req, res) => {
+  try {
+    const { code } = req.body;
+    const pendingStaffId = req.session.pendingMfaStaffId;
+
+    if (!pendingStaffId) {
+      return res.status(400).json({ error: 'Please log in with your password first.' });
+    }
+    if (!code) {
+      return res.status(400).json({ error: 'Enter the 6-digit code from your authenticator app.' });
+    }
+
+    const { data: staffMember, error } = await supabase
+      .from('staff')
+      .select('id, full_name, username, role, can_edit_prices, department_id, must_change_password, mfa_secret')
+      .eq('id', pendingStaffId)
+      .single();
+
+    if (error || !staffMember) {
+      return res.status(401).json({ error: 'Something went wrong. Please log in again.' });
+    }
+
+    const isValid = authenticator.verify({ token: code, secret: staffMember.mfa_secret });
+    if (!isValid) {
+      return res.status(401).json({ error: 'Incorrect code. Check your authenticator app and try again.' });
+    }
+
+    delete req.session.pendingMfaStaffId;
+
+    req.session.regenerate((regenErr) => {
+      if (regenErr) {
+        console.error('MFA session regenerate error:', regenErr);
+        return res.status(500).json({ error: 'Something went wrong logging you in.' });
+      }
+
+      req.session.staff = {
+        id: staffMember.id,
+        fullName: staffMember.full_name,
+        username: staffMember.username,
+        role: staffMember.role,
+        canEditPrices: staffMember.can_edit_prices,
+        departmentId: staffMember.department_id,
+        mustChangePassword: staffMember.must_change_password
+      };
+
+      supabase
+        .from('staff')
+        .update({ last_seen: new Date().toISOString() })
+        .eq('id', staffMember.id)
+        .then(() => {
+          res.json({ success: true, staff: req.session.staff });
+        });
+    });
+  } catch (err) {
+    console.error('Login MFA unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong logging you in.' });
+  }
+});
+
 router.post('/logout', (req, res) => {
   try {
     req.session.destroy((err) => {

@@ -155,5 +155,43 @@ router.post('/:id/reject', async (req, res) => {
   }
 });
 
+// GET /api/accounting/leave/stats — admin-only, last 30 days summary
+router.get('/stats', async (req, res) => {
+  try {
+    if (req.session.staff.role !== 'admin') {
+      return res.status(403).json({ error: 'Only admins can view stats.' });
+    }
+
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { data, error } = await supabase
+      .from('leave_requests')
+      .select('status, requested_at, reviewed_at')
+      .not('reviewed_at', 'is', null)
+      .gte('reviewed_at', thirtyDaysAgo);
+
+    if (error) {
+      console.error('Leave stats fetch error:', error);
+      return res.status(500).json({ error: 'Could not load leave stats.' });
+    }
+
+    const approvedCount = data.filter(r => r.status === 'approved').length;
+    const rejectedCount = data.filter(r => r.status === 'rejected').length;
+
+    let avgTurnaroundHours = null;
+    if (data.length > 0) {
+      const totalHours = data.reduce((sum, r) => {
+        const hours = (new Date(r.reviewed_at) - new Date(r.requested_at)) / (1000 * 60 * 60);
+        return sum + hours;
+      }, 0);
+      avgTurnaroundHours = Math.round(totalHours / data.length);
+    }
+
+    res.json({ approvedCount, rejectedCount, avgTurnaroundHours });
+  } catch (err) {
+    console.error('Leave stats unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong loading leave stats.' });
+  }
+});
+
 module.exports = router;
 
