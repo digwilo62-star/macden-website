@@ -54,4 +54,9 @@ async function sendWelcomeEmail(toEmail, fullName, username, tempPassword) {
   );
 }
 
-module.exports = { sendVerificationEmail, sendWelcomeEmail };
+async function sendNotificationEmail(toEmail, toName, subject, textContent, htmlContent) {
+  await sendViaBrevoAPI(toEmail, toName, subject, textContent, htmlContent);
+}
+
+module.exports = { sendVerificationEmail, sendWelcomeEmail, sendNotificationEmail };
+

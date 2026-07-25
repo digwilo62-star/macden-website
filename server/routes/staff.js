@@ -51,6 +51,35 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/accounting/staff/orgchart — everyone can view, no sensitive fields
+router.get('/orgchart', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('staff')
+      .select('id, full_name, role, reports_to, departments(name)')
+      .eq('is_active', true)
+      .order('full_name', { ascending: true });
+
+    if (error) {
+      console.error('Org chart fetch error:', error);
+      return res.status(500).json({ error: 'Could not load the org chart.' });
+    }
+
+    const people = data.map(s => ({
+      id: s.id,
+      fullName: s.full_name,
+      role: s.role,
+      department: s.departments ? s.departments.name : null,
+      reportsTo: s.reports_to
+    }));
+
+    res.json({ people });
+  } catch (err) {
+    console.error('Org chart unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong loading the org chart.' });
+  }
+});
+
 module.exports = router;
 module.exports.isOnline = isOnline;
 

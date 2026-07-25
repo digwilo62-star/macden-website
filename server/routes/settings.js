@@ -112,12 +112,16 @@ router.put('/password', async (req, res) => {
     const newHash = await bcrypt.hash(newPassword, 10);
     const { error: updateError } = await supabase
       .from('staff')
-      .update({ password_hash: newHash })
+      .update({ password_hash: newHash, must_change_password: false })
       .eq('id', req.session.staff.id);
 
     if (updateError) {
       return res.status(500).json({ error: 'Could not update your password.' });
     }
+
+    // Clear the forced-change flag in the session too, so the frontend
+    // stops redirecting immediately without needing a fresh login.
+    req.session.staff.mustChangePassword = false;
 
     res.json({ success: true });
   } catch (err) {

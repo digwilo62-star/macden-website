@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const supabase = require('../config/supabaseClient');
 const { isOnline } = require('./staff');
+const { sendNotificationEmail } = require('../utils/email');
 
 const router = express.Router();
 
@@ -78,6 +79,38 @@ async function createReadRowsForRecipients(conversationId, messageId, senderId) 
 
   const rows = members.map(m => ({ message_id: messageId, staff_id: m.staff_id, read_at: null }));
   await supabase.from('message_reads').insert(rows);
+}
+
+// Sends a real email notification to each recipient who has the relevant
+// preference toggled on (Settings > Notifications). This actually wires up
+// those toggles for real, instead of them just being saved and ignored.
+// One failed send doesn't block the others — each is caught individually.
+async function notifyRecipientsByEmail(staffIds, prefColumn, senderName, subject, bodyPreview, link) {
+  if (!staffIds || staffIds.length === 0) return;
+
+  const { data: recipients } = await supabase
+    .from('staff')
+    .select('id, full_name, email, ' + prefColumn)
+    .in('id', staffIds)
+    .eq(prefColumn, true);
+
+  if (!recipients || recipients.length === 0) return;
+
+  const fullLink = 'https://macden.com.ng/accounting/' + link;
+
+  await Promise.allSettled(recipients.map(r =>
+    sendNotificationEmail(
+      r.email,
+      r.full_name,
+      subject,
+      `Hi ${r.full_name},\n\n${senderName ? senderName + ' sent you a message' : subject} on the MACDEN Portal:\n\n"${bodyPreview}"\n\nView it here: ${fullLink}\n\n(You can turn off these emails anytime in Settings > Notifications.)`,
+      `<p>Hi ${r.full_name},</p>
+       <p>${senderName ? senderName + ' sent you a message' : subject} on the MACDEN Portal:</p>
+       <p style="background:#f2f3f5; padding:12px 16px; border-radius:8px;">${bodyPreview}</p>
+       <p><a href="${fullLink}">View it on the portal</a></p>
+       <p style="font-size:12px; color:#888;">You can turn off these emails anytime in Settings &gt; Notifications.</p>`
+    ).catch(err => console.error('Notification email failed for', r.email, ':', err.message))
+  ));
 }
 
 async function getOtherParticipants(conversationId, excludeStaffId) {
@@ -331,6 +364,10 @@ router.post('/compose', async (req, res) => {
 
     if (isSent) {
       await createReadRowsForRecipients(conversation.id, message.id, staffId);
+      notifyRecipientsByEmail(
+        recipientIds, 'notify_email_messages', req.session.staff.fullName,
+        subject.trim(), (body || '').slice(0, 150), 'inbox.html?id=' + conversation.id
+      ).catch(err => console.error('Compose email notify error:', err));
     }
 
     res.json({ success: true, conversationId: conversation.id, messageId: message.id });
@@ -379,6 +416,11 @@ router.post('/conversations/:id/reply', async (req, res) => {
 
     if (isSent) {
       await createReadRowsForRecipients(id, message.id, staffId);
+      const otherParticipants = await getOtherParticipants(id, staffId);
+      notifyRecipientsByEmail(
+        otherParticipants.map(p => p.id), 'notify_email_messages', req.session.staff.fullName,
+        'New reply on the MACDEN Portal', (body || '').slice(0, 150), 'inbox.html?id=' + id
+      ).catch(err => console.error('Reply email notify error:', err));
     }
 
     res.json({ success: true, message });
@@ -602,6 +644,10 @@ router.post('/broadcast', async (req, res) => {
     }
 
     await createReadRowsForRecipients(conversation.id, message.id, staffId);
+    notifyRecipientsByEmail(
+      allActiveStaff.map(s => s.id), 'notify_email_broadcasts', null,
+      subject.trim(), body.trim().slice(0, 150), 'inbox.html?id=' + conversation.id
+    ).catch(err => console.error('Broadcast email notify error:', err));
 
     res.json({ success: true, conversationId: conversation.id, recipientCount: allActiveStaff.length });
   } catch (err) {

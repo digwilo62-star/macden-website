@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Help — MACDEN Portal</title>
+  <link rel="stylesheet" href="assets/portal-style.css">
+  <link rel="stylesheet" href="assets/portal-shell.css">
+  <link rel="stylesheet" href="assets/portal-inbox.css">
+  <style>
+    .help-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; margin-bottom: 16px; max-width: 720px; }
+    .help-section h2 { font-size: 15px; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+    .help-section h2 i { color: var(--primary); }
+    .help-section p { font-size: 13px; color: var(--text-primary); line-height: 1.7; margin: 8px 0; }
+    .help-section ol, .help-section ul { font-size: 13px; color: var(--text-primary); line-height: 1.8; padding-left: 20px; margin: 8px 0; }
+    .help-toc { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; max-width: 720px; }
+    .help-toc a { font-size: 12px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 999px; text-decoration: none; color: var(--text-primary); }
+    .help-toc a:hover { border-color: var(--primary); color: var(--primary); }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-brand"><img src="assets/logo.jpeg" alt="MACDEN"><span>MACDEN</span></div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="inbox.html" class="sidebar-link"><i class="ti ti-mail"></i> Inbox <span class="badge" id="unreadBadge" style="display:none;">0</span></a>
+        <a href="compose.html" class="sidebar-link"><i class="ti ti-pencil"></i> Compose</a>
+        <a href="broadcasts.html" class="sidebar-link"><i class="ti ti-speakerphone"></i> Broadcasts</a>
+        <a href="directory.html" class="sidebar-link"><i class="ti ti-users"></i> Directory</a>
+        <a href="leave.html" class="sidebar-link"><i class="ti ti-calendar-event"></i> Leave &amp; Requests</a>
+        <a href="documents.html" class="sidebar-link"><i class="ti ti-file-text"></i> Documents</a>
+        <a href="policies.html" class="sidebar-link"><i class="ti ti-book"></i> Policies</a>
+        <a href="settings.html" class="sidebar-link"><i class="ti ti-settings"></i> Settings</a>
+      </nav>
+      <div class="sidebar-logout"><button id="logoutBtn"><i class="ti ti-logout"></i> Logout</button></div>
+    </div>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-search"><input type="text" placeholder="Search messages, people, documents…"></div>
+        <div class="notif-wrap">
+          <button class="topbar-bell" id="notifBell" aria-label="Notifications"><i class="ti ti-bell"></i><span class="dot" id="notifDot" style="display:none;">0</span></button>
+          <div class="notif-dropdown" id="notifDropdown"></div>
+        </div>
+        <img class="topbar-avatar" src="assets/logo.jpeg" alt="You">
+      </div>
+
+      <div class="page-body">
+        <h1 class="page-greeting" style="font-size: 22px;">How to Use MACDEN Portal</h1>
+        <p class="page-greeting-sub">A quick guide to every part of the portal.</p>
+
+        <div class="help-toc">
+          <a href="#inbox">Inbox &amp; Messaging</a>
+          <a href="#directory">Staff Directory</a>
+          <a href="#leave">Leave Requests</a>
+          <a href="#documents">Documents &amp; Policies</a>
+          <a href="#settings">Account Settings</a>
+          <a href="#admin">For Admins/HR</a>
+        </div>
+
+        <div class="help-section" id="inbox">
+          <h2><i class="ti ti-mail"></i> Inbox &amp; Messaging</h2>
+          <p>Click <strong>Compose</strong> in the sidebar to write a new message. Search for the person's name, click them to add, write a subject and message, then hit <strong>Send</strong>.</p>
+          <p>Your <strong>Inbox</strong> shows every message you've sent or received, newest first. Unread messages appear in bold. Click any row to open the full conversation.</p>
+          <p>Inside a conversation, use <strong>Reply</strong> or <strong>Reply All</strong> to respond — both currently send your reply to everyone in that conversation.</p>
+          <p>You can attach a PDF or Excel file to any message using the paperclip icon.</p>
+        </div>
+
+        <div class="help-section" id="directory">
+          <h2><i class="ti ti-users"></i> Staff Directory</h2>
+          <p>Find anyone in the company under <strong>Directory</strong>. Search by name or username, and click a row to see their profile — role, department, email, and when they joined.</p>
+          <p>Click <strong>Message</strong> on someone's profile to start a conversation with them directly.</p>
+          <p>The green dot next to someone's name means they're currently active on the portal.</p>
+        </div>
+
+        <div class="help-section" id="leave">
+          <h2><i class="ti ti-calendar-event"></i> Requesting Leave</h2>
+          <ol>
+            <li>Go to <strong>Leave &amp; Requests</strong></li>
+            <li>Choose your leave type, start date, and end date</li>
+            <li>Write a short reason</li>
+            <li>Click <strong>Submit Request</strong></li>
+          </ol>
+          <p>You'll see your request under "My Requests" with a status: <strong>Pending</strong>, <strong>Approved</strong>, or <strong>Rejected</strong>. You'll also get a notification when it's reviewed.</p>
+        </div>
+
+        <div class="help-section" id="documents">
+          <h2><i class="ti ti-file-text"></i> Documents &amp; Policies</h2>
+          <p><strong>Documents</strong> is a shared file library — HR forms, branch reports, templates. Use the categories on the left to filter, and click <strong>Download</strong> on any file.</p>
+          <p><strong>Policies</strong> holds official company policies as readable pages — click <strong>Read Policy</strong> on any card to view the full text.</p>
+        </div>
+
+        <div class="help-section" id="settings">
+          <h2><i class="ti ti-settings"></i> Account Settings</h2>
+          <p>Under <strong>Settings</strong>, you can update your status/bio, choose which email notifications you receive, change your password, and sign out of every device at once if needed.</p>
+          <p>Your name, role, department, and join date are set by HR and can't be changed here — contact HR if any of that needs correcting.</p>
+        </div>
+
+        <div class="help-section" id="admin">
+          <h2><i class="ti ti-shield-lock"></i> For Admins &amp; HR</h2>
+          <p>If you're an admin, you'll see extra sidebar items: <strong>Broadcasts</strong> (send a message to everyone at once) and access to <strong>Manage Staff</strong> and <strong>Add New Staff</strong> from the Directory page.</p>
+          <p>New staff accounts you create will receive their login details by email automatically. If the email fails to send for any reason, the username and temporary password will be shown to you directly on screen instead — share those with the new staff member yourself in that case.</p>
+          <p>You're the only one who can approve leave requests and review the pending list under Leave &amp; Requests.</p>
+        </div>
+
+        <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 20px;">Still stuck on something? Message the IT/Admin team directly through Compose.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script src="assets/presence.js"></script>
+  <script src="assets/notifications.js"></script>
+  <script>
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await apiRequest('/auth/logout', { method: 'POST' });
+      window.location.href = 'login.html';
+    });
+
+    async function init() {
+      try {
+        await apiRequest('/dashboard-check');
+      } catch (err) {
+        window.location.href = 'login.html';
+        return;
+      }
+      loadUnreadBadge();
+    }
+
+    init();
+  </script>
+</body>
+</html>
+

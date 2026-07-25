@@ -75,7 +75,9 @@ router.post('/onboard-staff', async (req, res) => {
     // Generate a username from the name, and a random temporary password
     const baseUsername = fullName.toLowerCase().replace(/[^a-z]+/g, '.').replace(/^\.|\.$/g, '');
     const username = baseUsername + '.' + crypto.randomInt(100, 999);
-    const tempPassword = crypto.randomBytes(6).toString('base64').replace(/[^a-zA-Z0-9]/g, '').slice(0, 10);
+    // Longer temp password (was 10 chars, now 14) — generate extra bytes
+    // since base64/alphanumeric stripping shrinks the usable length.
+    const tempPassword = crypto.randomBytes(14).toString('base64').replace(/[^a-zA-Z0-9]/g, '').slice(0, 14);
     const passwordHash = await bcrypt.hash(tempPassword, 10);
 
     const { data, error } = await supabase
@@ -93,7 +95,8 @@ router.post('/onboard-staff', async (req, res) => {
         branch: branch || null,
         reports_to: reportsTo || null,
         email_verified: true,  // HR-created accounts are trusted, skip the self-signup flow
-        is_active: true
+        is_active: true,
+        must_change_password: true
       })
       .select()
       .single();

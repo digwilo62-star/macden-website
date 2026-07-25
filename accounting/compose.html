@@ -39,7 +39,7 @@
       <div class="topbar">
         <div class="topbar-search"><input type="text" placeholder="Search messages, people, documents…"></div>
         <div class="notif-wrap">
-          <button class="topbar-bell" id="notifBell"><i class="ti ti-bell"></i><span class="dot" id="notifDot" style="display:none;">0</span></button>
+          <button class="topbar-bell" id="notifBell" aria-label="Notifications"><i class="ti ti-bell"></i><span class="dot" id="notifDot" style="display:none;">0</span></button>
           <div class="notif-dropdown" id="notifDropdown"></div>
         </div>
         <img class="topbar-avatar" src="assets/logo.jpeg" alt="You">
@@ -73,7 +73,7 @@
           </div>
 
           <div class="compose-footer">
-            <button id="attachBtn" style="background:none;border:1px solid var(--border);border-radius:50%;width:38px;height:38px;color:var(--text-secondary);cursor:pointer;font-size:15px;"><i class="ti ti-paperclip"></i></button>
+            <button id="attachBtn" aria-label="Attach file" style="background:none;border:1px solid var(--border);border-radius:50%;width:38px;height:38px;color:var(--text-secondary);cursor:pointer;font-size:15px;"><i class="ti ti-paperclip"></i></button>
             <input type="file" id="fileInput" accept=".pdf,.xlsx" style="display:none;">
             <div style="display:flex; gap:8px;">
               <button class="btn btn-ghost" id="saveDraftBtn" style="width:auto; padding:10px 20px;">Save as Draft</button>

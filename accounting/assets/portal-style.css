@@ -23,7 +23,7 @@
 
   --text-primary: #2b2d31;
   --text-secondary: #6b7280;
-  --text-muted: #9ca3af;
+  --text-muted: #85899a;
 
   --success: #1e7a3e;
   --success-dim: rgba(30, 122, 62, 0.1);
@@ -53,6 +53,14 @@ body {
 }
 
 h1, h2, h3 { font-family: var(--font-heading); font-weight: 700; margin: 0; }
+
+/* Visible keyboard focus indicator on every interactive element — matches
+   WCAG 2.1.1 keyboard accessibility, since the browser default outline
+   was inconsistent across the custom-styled buttons/inputs in this app. */
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 2.5px solid var(--primary);
+  outline-offset: 2px;
+}
 
 /* ---------- Split-panel login shell ---------- */
 

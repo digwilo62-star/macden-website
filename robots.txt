@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /accounting/
+Disallow: /api/
+
+# The public storefront (everything else) remains indexable.
+

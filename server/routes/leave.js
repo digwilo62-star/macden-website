@@ -91,7 +91,7 @@ router.get('/pending', async (req, res) => {
     const staffIds = [...new Set(data.map(r => r.staff_id))];
     const { data: staffRows } = await supabase
       .from('staff')
-      .select('id, full_name, username')
+      .select('id, full_name, username, is_active')
       .in('id', staffIds.length > 0 ? staffIds : ['00000000-0000-0000-0000-000000000000']);
     const staffById = {};
     (staffRows || []).forEach(s => { staffById[s.id] = s; });
@@ -100,7 +100,8 @@ router.get('/pending', async (req, res) => {
       ...r,
       days: daysBetween(r.start_date, r.end_date),
       staffName: staffById[r.staff_id] ? staffById[r.staff_id].full_name : 'Unknown',
-      staffUsername: staffById[r.staff_id] ? staffById[r.staff_id].username : ''
+      staffUsername: staffById[r.staff_id] ? staffById[r.staff_id].username : '',
+      staffIsActive: staffById[r.staff_id] ? staffById[r.staff_id].is_active : true
     }));
 
     res.json({ requests: enriched });

@@ -141,7 +141,7 @@ router.post('/login', authLimiter, async (req, res) => {
     const isEmail = username.includes('@');
     const { data: staffMember, error } = await supabase
       .from('staff')
-      .select('id, full_name, username, password_hash, role, can_edit_prices, is_active, email_verified, department_id')
+      .select('id, full_name, username, password_hash, role, can_edit_prices, is_active, email_verified, department_id, must_change_password')
       .eq(isEmail ? 'email' : 'username', username)
       .single();
 
@@ -163,21 +163,33 @@ router.post('/login', authLimiter, async (req, res) => {
       return res.status(403).json({ error: 'Your account is awaiting admin approval.' });
     }
 
-    req.session.staff = {
-      id: staffMember.id,
-      fullName: staffMember.full_name,
-      username: staffMember.username,
-      role: staffMember.role,
-      canEditPrices: staffMember.can_edit_prices,
-      departmentId: staffMember.department_id
-    };
+    // Regenerate the session ID on login (not just reuse whatever session
+    // existed before authentication) — prevents session fixation attacks,
+    // where an attacker tricks someone into using a known session ID.
+    req.session.regenerate((regenErr) => {
+      if (regenErr) {
+        console.error('Session regenerate error:', regenErr);
+        return res.status(500).json({ error: 'Something went wrong logging you in.' });
+      }
 
-    await supabase
-      .from('staff')
-      .update({ last_seen: new Date().toISOString() })
-      .eq('id', staffMember.id);
+      req.session.staff = {
+        id: staffMember.id,
+        fullName: staffMember.full_name,
+        username: staffMember.username,
+        role: staffMember.role,
+        canEditPrices: staffMember.can_edit_prices,
+        departmentId: staffMember.department_id,
+        mustChangePassword: staffMember.must_change_password
+      };
 
-    res.json({ success: true, staff: req.session.staff });
+      supabase
+        .from('staff')
+        .update({ last_seen: new Date().toISOString() })
+        .eq('id', staffMember.id)
+        .then(() => {
+          res.json({ success: true, staff: req.session.staff });
+        });
+    });
   } catch (err) {
     console.error('Login unexpected error:', err);
     res.status(500).json({ error: 'Something went wrong logging you in.' });

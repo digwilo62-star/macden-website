@@ -6,6 +6,7 @@ const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const { Pool } = require('pg');
 const cors = require('cors');
+const helmet = require('helmet');
 
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
@@ -21,6 +22,14 @@ const notificationsRoutes = require('./routes/notifications');
 const requireAuth = require('./middleware/requireAuth');
 
 const app = express();
+
+// Adds standard security headers (X-Frame-Options, X-Content-Type-Options,
+// Strict-Transport-Security, etc). CSP is disabled because every page in
+// this app uses inline <script> blocks for page logic — a strict CSP would
+// break the whole app. Properly enabling CSP would mean moving all page
+// scripts to external files with nonces — a real future project, not a
+// quick toggle.
+app.use(helmet({ contentSecurityPolicy: false }));
 
 // Render (and most hosting platforms) sit in front of your app as a reverse proxy,
 // terminating HTTPS themselves and forwarding requests internally over plain HTTP.
