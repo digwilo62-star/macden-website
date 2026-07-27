@@ -6,6 +6,7 @@ const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
 const cors = require('cors');
 const helmet = require('helmet');
+const cron = require('node-cron');
 
 const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
@@ -128,5 +129,15 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Accounting backend running on port ${PORT}`);
+});
+
+// Checks every minute for scheduled broadcasts whose time has arrived and
+// sends them. Reliability depends on the app being awake at that moment —
+// on Render's free tier, the app can sleep when idle, so a scheduled send
+// might land a few minutes late (until the next UptimeRobot ping wakes it)
+// rather than firing at the exact second. Good enough for "send this
+// tomorrow morning," not appropriate for anything needing second-level precision.
+cron.schedule('* * * * *', () => {
+  messageRoutes.publishDueScheduledBroadcasts();
 });
 

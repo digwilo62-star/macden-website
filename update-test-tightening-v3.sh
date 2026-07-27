@@ -1,3 +1,12 @@
+#!/usr/bin/env bash
+# Updates test-tightening.js in place with the latest version (v3 - now
+# also includes scheduled broadcasts checks). This is a NEW filename
+# (update-test-tightening-v3.sh), not a reused one -- avoids the
+# browser-caching confusion from before.
+# Run this from inside your server/ folder, in Git Bash.
+set -e
+
+cat > test-tightening.js << 'EOF_TEST_JS'
 // Tests every backend feature added across the tightening batches, against
 // a REAL running server. Run from your terminal:
 //
@@ -195,3 +204,6 @@ run().catch(err => {
   console.error('\nTest script crashed:', err.message);
   process.exit(1);
 });
+EOF_TEST_JS
+
+echo "test-tightening.js updated to the latest version (v3)."
