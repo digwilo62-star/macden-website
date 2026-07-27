@@ -1,3 +1,11 @@
+#!/usr/bin/env bash
+# Updates test-tightening.js in place with the latest version (now also
+# includes company-wide search checks). Overwrites whatever was there
+# before -- no browser download needed.
+# Run this from inside your server/ folder, in Git Bash.
+set -e
+
+cat > test-tightening.js << 'EOF_TEST_JS'
 // Tests every backend feature added across the tightening batches, against
 // a REAL running server. Run from your terminal:
 //
@@ -190,3 +198,6 @@ run().catch(err => {
   console.error('\nTest script crashed:', err.message);
   process.exit(1);
 });
+EOF_TEST_JS
+
+echo "test-tightening.js updated to the latest version."
