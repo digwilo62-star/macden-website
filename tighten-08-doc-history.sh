@@ -1,3 +1,16 @@
+#!/usr/bin/env bash
+# BACKEND ITEM #29: Document version history. New POST /documents/:id/replace
+# uploads a new version linked back to the old one via previous_version_id;
+# the old version drops off the main list (is_current=false) but stays
+# retrievable via GET /documents/:id/history. BACKEND ONLY - a 'Replace'
+# button and history viewer in the UI are frontend work, saved for later.
+# RUN THE SQL MIGRATION FIRST in Supabase before running this script.
+# Run this from the ROOT of your macden-website repo, in Git Bash.
+set -e
+
+mkdir -p server/routes
+
+cat > server/routes/documents.js << 'EOF_SERVER_ROUTES_DOCUMENTS_JS'
 const express = require('express');
 const multer = require('multer');
 const supabase = require('../config/supabaseClient');
@@ -300,3 +313,6 @@ router.get('/:id/history', async (req, res) => {
 
 module.exports = router;
 
+EOF_SERVER_ROUTES_DOCUMENTS_JS
+
+echo "Document version history backend complete (#29). 21 of 40 items now done."

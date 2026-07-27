@@ -1,3 +1,19 @@
+#!/usr/bin/env bash
+# BACKEND ITEM #25: Photo upload support. Adds POST /settings/photo
+# (self-upload only, 3MB limit, JPG/PNG/WEBP), and exposes photo_url in
+# both the profile fetch and staff directory listing. BACKEND ONLY -
+# frontend display (showing photos instead of initials) is deliberately
+# saved for the frontend phase.
+# YOU MUST create a Supabase Storage bucket named 'staff-photos' (Public)
+# before this works - same steps as the 'attachments' and 'documents'
+# buckets from earlier.
+# RUN THE SQL MIGRATION FIRST in Supabase before running this script.
+# Run this from the ROOT of your macden-website repo, in Git Bash.
+set -e
+
+mkdir -p server/routes
+
+cat > server/routes/settings.js << 'EOF_SERVER_ROUTES_SETTINGS_JS'
 const express = require('express');
 const bcrypt = require('bcrypt');
 const multer = require('multer');
@@ -303,3 +319,95 @@ router.post('/photo', (req, res) => {
 
 module.exports = router;
 
+EOF_SERVER_ROUTES_SETTINGS_JS
+
+cat > server/routes/staff.js << 'EOF_SERVER_ROUTES_STAFF_JS'
+const express = require('express');
+const supabase = require('../config/supabaseClient');
+
+const router = express.Router();
+
+const ONLINE_THRESHOLD_MS = 40 * 1000; // last_seen within 40s counts as online
+
+function isOnline(lastSeen) {
+  if (!lastSeen) return false;
+  return Date.now() - new Date(lastSeen).getTime() < ONLINE_THRESHOLD_MS;
+}
+
+// GET /api/accounting/staff?search=amara — searchable directory, excludes yourself
+router.get('/', async (req, res) => {
+  try {
+    const search = (req.query.search || '').trim();
+
+    let query = supabase
+      .from('staff')
+      .select('id, full_name, username, email, role, last_seen, created_at, photo_url, departments(name)')
+      .eq('is_active', true)
+      .neq('id', req.session.staff.id)
+      .order('full_name', { ascending: true });
+
+    if (search) {
+      query = query.or(`full_name.ilike.%${search}%,username.ilike.%${search}%`);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Staff search error:', error);
+      return res.status(500).json({ error: 'Could not load staff directory: ' + error.message });
+    }
+
+    const staff = data.map(s => ({
+      id: s.id,
+      full_name: s.full_name,
+      username: s.username,
+      email: s.email,
+      role: s.role,
+      department: s.departments ? s.departments.name : null,
+      dateStarted: s.created_at,
+      photoUrl: s.photo_url,
+      isOnline: isOnline(s.last_seen)
+    }));
+
+    res.json({ staff });
+  } catch (err) {
+    console.error('Staff search unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong loading staff.' });
+  }
+});
+
+// GET /api/accounting/staff/orgchart — everyone can view, no sensitive fields
+router.get('/orgchart', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('staff')
+      .select('id, full_name, role, reports_to, departments(name)')
+      .eq('is_active', true)
+      .order('full_name', { ascending: true });
+
+    if (error) {
+      console.error('Org chart fetch error:', error);
+      return res.status(500).json({ error: 'Could not load the org chart.' });
+    }
+
+    const people = data.map(s => ({
+      id: s.id,
+      fullName: s.full_name,
+      role: s.role,
+      department: s.departments ? s.departments.name : null,
+      reportsTo: s.reports_to
+    }));
+
+    res.json({ people });
+  } catch (err) {
+    console.error('Org chart unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong loading the org chart.' });
+  }
+});
+
+module.exports = router;
+module.exports.isOnline = isOnline;
+
+EOF_SERVER_ROUTES_STAFF_JS
+
+echo "Photo upload backend complete (#25). 20 of 40 items now done."

@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
 
     let query = supabase
       .from('staff')
-      .select('id, full_name, username, email, role, last_seen, created_at, departments(name)')
+      .select('id, full_name, username, email, role, last_seen, created_at, photo_url, departments(name)')
       .eq('is_active', true)
       .neq('id', req.session.staff.id)
       .order('full_name', { ascending: true });
@@ -41,6 +41,7 @@ router.get('/', async (req, res) => {
       role: s.role,
       department: s.departments ? s.departments.name : null,
       dateStarted: s.created_at,
+      photoUrl: s.photo_url,
       isOnline: isOnline(s.last_seen)
     }));
 
