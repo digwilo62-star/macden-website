@@ -1,3 +1,13 @@
+
+#!/usr/bin/env bash
+# Adds two shorter URLs for staff to remember:
+#   macden.com.ng/portal      -> redirects to the login page
+#   macden.com.ng/accounting  -> now also serves the login page directly
+#                                 (previously needed /accounting/login.html)
+# Tested behaviorally (actual HTTP requests against a running server),
+# not just syntax-checked.
+set -e
+cat > server/server.js << 'EOF_SERVER_JS'
 require('dotenv').config();
 
 const path = require('path');
@@ -148,3 +158,7 @@ cron.schedule('* * * * *', () => {
   messageRoutes.publishDueScheduledBroadcasts();
 });
 
+EOF_SERVER_JS
+echo "Done. Restart your server, then test both:"
+echo "  http://localhost:3000/portal"
+echo "  http://localhost:3000/accounting"
