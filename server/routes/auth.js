@@ -142,7 +142,7 @@ router.post('/login', authLimiter, async (req, res) => {
     const isEmail = username.includes('@');
     const { data: staffMember, error } = await supabase
       .from('staff')
-      .select('id, full_name, username, password_hash, role, can_edit_prices, is_active, email_verified, department_id, must_change_password, mfa_enabled')
+      .select('id, full_name, username, password_hash, role, can_edit_prices, is_active, email_verified, department_id, must_change_password, mfa_enabled, photo_url')
       .eq(isEmail ? 'email' : 'username', username)
       .single();
 
@@ -190,7 +190,8 @@ router.post('/login', authLimiter, async (req, res) => {
         role: staffMember.role,
         canEditPrices: staffMember.can_edit_prices,
         departmentId: staffMember.department_id,
-        mustChangePassword: staffMember.must_change_password
+        mustChangePassword: staffMember.must_change_password,
+        photoUrl: staffMember.photo_url
       };
 
       supabase
@@ -224,7 +225,7 @@ router.post('/login-mfa', authLimiter, async (req, res) => {
 
     const { data: staffMember, error } = await supabase
       .from('staff')
-      .select('id, full_name, username, role, can_edit_prices, department_id, must_change_password, mfa_secret')
+      .select('id, full_name, username, role, can_edit_prices, department_id, must_change_password, mfa_secret, photo_url')
       .eq('id', pendingStaffId)
       .single();
 
@@ -252,7 +253,8 @@ router.post('/login-mfa', authLimiter, async (req, res) => {
         role: staffMember.role,
         canEditPrices: staffMember.can_edit_prices,
         departmentId: staffMember.department_id,
-        mustChangePassword: staffMember.must_change_password
+        mustChangePassword: staffMember.must_change_password,
+        photoUrl: staffMember.photo_url
       };
 
       supabase

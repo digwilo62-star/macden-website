@@ -1,3 +1,10 @@
+#!/usr/bin/env bash
+# Fixes: (1) duplicate logo -- topbar now shows initials instead of a
+# second MACDEN logo when no photo is uploaded, (2) Broadcasts sidebar
+# link now hidden for non-admin staff instead of dead-ending.
+set -e
+mkdir -p accounting/assets
+cat > accounting/assets/api.js << 'EOF_API_JS'
 // Shared fetch helper -- always sends cookies, always parses JSON,
 // throws a readable error message so pages can show it directly.
 async function apiRequest(path, options = {}) {
@@ -79,3 +86,5 @@ async function loadUnreadBadge() {
   }
 }
 
+EOF_API_JS
+echo "Fixed. Restart your server and hard-refresh (Ctrl+F5)."

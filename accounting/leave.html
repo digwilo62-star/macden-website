@@ -5,6 +5,7 @@
   <title>Leave & Requests — MACDEN Portal</title>
   <link rel="stylesheet" href="assets/portal-style.css">
   <link rel="stylesheet" href="assets/portal-shell.css">
+  <link rel="stylesheet" href="assets/search.css">
   <link rel="stylesheet" href="assets/portal-inbox.css">
   <style>
     .lv-grid { display: grid; grid-template-columns: 380px 1fr; gap: 20px; margin-bottom: 24px; }
@@ -55,18 +56,19 @@
         <a href="settings.html" class="sidebar-link"><i class="ti ti-settings"></i> Settings</a>
       </nav>
       <div class="sidebar-logout">
+        <a href="help.html" class="sidebar-link" style="margin-bottom:6px;"><i class="ti ti-help-circle"></i> Help</a>
         <button id="logoutBtn"><i class="ti ti-logout"></i> Logout</button>
       </div>
     </div>
 
     <div class="main-content">
       <div class="topbar">
-        <div class="topbar-search"><input type="text" placeholder="Search messages, people, documents…"></div>
+        <div class="topbar-search"><input type="text" id="globalSearchInput" placeholder="Search messages, people, documents…"><div class="search-dropdown" id="globalSearchDropdown"></div></div>
         <div class="notif-wrap">
           <button class="topbar-bell" id="notifBell" aria-label="Notifications"><i class="ti ti-bell"></i><span class="dot" id="notifDot" style="display:none;">0</span></button>
           <div class="notif-dropdown" id="notifDropdown"></div>
         </div>
-        <img class="topbar-avatar" src="assets/logo.jpeg" alt="You">
+        <img class="topbar-avatar" id="topbarAvatarImg" src="assets/logo.jpeg" alt="You">
       </div>
 
       <div class="page-body">
@@ -132,6 +134,7 @@
 
   <script src="assets/api.js"></script>
   <script src="assets/notifications.js"></script>
+  <script src="assets/search.js"></script>
   <script src="assets/presence.js"></script>
   <script>
     document.getElementById('logoutBtn').addEventListener('click', async () => {
@@ -194,7 +197,7 @@
         }
         rows.innerHTML = result.requests.map(r =>
           '<div class="lv-row" style="grid-template-columns: 160px 100px 100px 100px 1fr 160px;">' +
-          '<div>' + r.staffName + '</div>' +
+          '<div>' + r.staffName + (r.staffIsActive === false ? ' <span class="status-badge status-rejected" style="margin-left:4px;">Deactivated</span>' : '') + '</div>' +
           '<div>' + r.leave_type + '</div>' +
           '<div>' + new Date(r.start_date).toLocaleDateString() + '</div>' +
           '<div>' + new Date(r.end_date).toLocaleDateString() + '</div>' +

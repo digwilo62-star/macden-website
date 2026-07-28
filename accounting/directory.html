@@ -5,6 +5,7 @@
   <title>Staff Directory — MACDEN Portal</title>
   <link rel="stylesheet" href="assets/portal-style.css">
   <link rel="stylesheet" href="assets/portal-shell.css">
+  <link rel="stylesheet" href="assets/search.css">
   <link rel="stylesheet" href="assets/portal-inbox.css">
   <style>
     .dir-toolbar { display: flex; gap: 12px; margin-bottom: 18px; }
@@ -19,7 +20,7 @@
     .dir-row:last-child { border-bottom: none; }
     .dir-row:hover { background: var(--surface-raised); }
     .dir-name-cell { display: flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 600; color: var(--text-primary); }
-    .dir-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); color: #a17a00; display: flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 700; flex-shrink: 0; position: relative; }
+    .dir-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--gold-dim); color: #a17a00; display: flex; align-items: center; justify-content: center; font-size: 11.5px; font-weight: 700; flex-shrink: 0; position: relative; overflow: hidden; }
     .dir-cell { font-size: 12.5px; color: var(--text-secondary); }
     .dir-role-badge { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; background: var(--primary-dim); color: var(--primary); }
     .dir-empty { padding: 60px 20px; text-align: center; color: var(--text-muted); font-size: 13px; }
@@ -29,7 +30,7 @@
     .profile-field-label { color: var(--text-secondary); }
     .profile-field-value { color: var(--text-primary); font-weight: 500; }
     .profile-field-value.muted { color: var(--text-muted); font-style: italic; font-weight: 400; }
-    .profile-avatar-large { width: 72px; height: 72px; border-radius: 50%; background: var(--gold-dim); color: #a17a00; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; margin: 0 auto 14px; }
+    .profile-avatar-large { width: 72px; height: 72px; border-radius: 50%; background: var(--gold-dim); color: #a17a00; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; margin: 0 auto 14px; overflow: hidden; }
   </style>
 </head>
 <body>
@@ -58,12 +59,12 @@
 
     <div class="main-content">
       <div class="topbar">
-        <div class="topbar-search"><input type="text" placeholder="Search messages, people, documents…"></div>
+        <div class="topbar-search"><input type="text" id="globalSearchInput" placeholder="Search messages, people, documents…"><div class="search-dropdown" id="globalSearchDropdown"></div></div>
         <div class="notif-wrap">
           <button class="topbar-bell" id="notifBell" aria-label="Notifications"><i class="ti ti-bell"></i><span class="dot" id="notifDot" style="display:none;">0</span></button>
           <div class="notif-dropdown" id="notifDropdown"></div>
         </div>
-        <img class="topbar-avatar" src="assets/logo.jpeg" alt="You">
+        <img class="topbar-avatar" id="topbarAvatarImg" src="assets/logo.jpeg" alt="You">
       </div>
 
       <div class="page-body">
@@ -113,6 +114,7 @@
 
   <script src="assets/api.js"></script>
   <script src="assets/notifications.js"></script>
+  <script src="assets/search.js"></script>
   <script src="assets/presence.js"></script>
   <script>
     document.getElementById('logoutBtn').addEventListener('click', async () => {
@@ -157,7 +159,7 @@
         rows.innerHTML = result.staff.map(s => {
           const statusDot = s.isOnline ? '<span style="color:var(--primary-light); font-size:11px;">● Online</span>' : '<span style="color:var(--text-muted); font-size:11px;">○ Offline</span>';
           return '<div class="dir-row" onclick="openProfile(\'' + s.id + '\')">' +
-            '<div class="dir-name-cell"><span class="dir-avatar">' + initials(s.full_name) + '</span>' + s.full_name + '</div>' +
+            '<div class="dir-name-cell"><span class="dir-avatar">' + (s.photoUrl ? '<img src="' + s.photoUrl + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">' : initials(s.full_name)) + '</span>' + s.full_name + '</div>' +
             '<div class="dir-cell"><span class="dir-role-badge">' + s.role + '</span></div>' +
             '<div class="dir-cell">' + (s.department || '—') + '</div>' +
             '<div class="dir-cell">' + s.email + '</div>' +
@@ -178,7 +180,9 @@
       const person = staffCache.find(s => s.id === id);
       if (!person) return;
 
-      document.getElementById('profileAvatar').textContent = initials(person.full_name);
+      document.getElementById('profileAvatar').innerHTML = person.photoUrl
+        ? '<img src="' + person.photoUrl + '" style="width:100%;height:100%;object-fit:cover;">'
+        : initials(person.full_name);
       document.getElementById('profileName').textContent = person.full_name;
       document.getElementById('profileRole').textContent = person.role + (person.department ? ' · ' + person.department : '');
       document.getElementById('profileDept').textContent = person.department || '—';

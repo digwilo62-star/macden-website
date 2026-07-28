@@ -5,6 +5,7 @@
   <title>Admin Activity — MACDEN Portal</title>
   <link rel="stylesheet" href="assets/portal-style.css">
   <link rel="stylesheet" href="assets/portal-shell.css">
+  <link rel="stylesheet" href="assets/search.css">
   <link rel="stylesheet" href="assets/portal-inbox.css">
   <style>
     .ad-stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
@@ -38,12 +39,12 @@
 
     <div class="main-content">
       <div class="topbar">
-        <div class="topbar-search"><input type="text" placeholder="Search messages, people, documents…"></div>
+        <div class="topbar-search"><input type="text" id="globalSearchInput" placeholder="Search messages, people, documents…"><div class="search-dropdown" id="globalSearchDropdown"></div></div>
         <div class="notif-wrap">
           <button class="topbar-bell" id="notifBell" aria-label="Notifications"><i class="ti ti-bell"></i><span class="dot" id="notifDot" style="display:none;">0</span></button>
           <div class="notif-dropdown" id="notifDropdown"></div>
         </div>
-        <img class="topbar-avatar" src="assets/logo.jpeg" alt="You">
+        <img class="topbar-avatar" id="topbarAvatarImg" src="assets/logo.jpeg" alt="You">
       </div>
 
       <div class="page-body">
@@ -72,6 +73,7 @@
   <script src="assets/api.js"></script>
   <script src="assets/presence.js"></script>
   <script src="assets/notifications.js"></script>
+  <script src="assets/search.js"></script>
   <script>
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       await apiRequest('/auth/logout', { method: 'POST' });

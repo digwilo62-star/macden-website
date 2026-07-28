@@ -5,6 +5,7 @@
   <title>Settings — MACDEN Portal</title>
   <link rel="stylesheet" href="assets/portal-style.css">
   <link rel="stylesheet" href="assets/portal-shell.css">
+  <link rel="stylesheet" href="assets/search.css">
   <link rel="stylesheet" href="assets/portal-inbox.css">
   <style>
     .set-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; margin-bottom: 20px; max-width: 640px; }
@@ -62,12 +63,12 @@
 
     <div class="main-content">
       <div class="topbar">
-        <div class="topbar-search"><input type="text" placeholder="Search messages, people, documents…"></div>
+        <div class="topbar-search"><input type="text" id="globalSearchInput" placeholder="Search messages, people, documents…"><div class="search-dropdown" id="globalSearchDropdown"></div></div>
         <div class="notif-wrap">
           <button class="topbar-bell" id="notifBell" aria-label="Notifications"><i class="ti ti-bell"></i><span class="dot" id="notifDot" style="display:none;">0</span></button>
           <div class="notif-dropdown" id="notifDropdown"></div>
         </div>
-        <img class="topbar-avatar" src="assets/logo.jpeg" alt="You">
+        <img class="topbar-avatar" id="topbarAvatarImg" src="assets/logo.jpeg" alt="You">
       </div>
 
       <div class="page-body">
@@ -84,10 +85,16 @@
           <p class="sub">View and update your personal information.</p>
 
           <div class="set-avatar-row">
-            <div class="set-avatar" id="profileAvatar">—</div>
+            <div style="position:relative;">
+              <div class="set-avatar" id="profileAvatar" style="overflow:hidden; padding:0;">—</div>
+              <img id="profileAvatarImg" style="display:none; width:64px; height:64px; border-radius:50%; object-fit:cover; position:absolute; top:0; left:0;" alt="Your photo">
+              <button id="changePhotoBtn" aria-label="Change photo" style="position:absolute; bottom:-2px; right:-2px; width:24px; height:24px; border-radius:50%; background:var(--primary); border:2px solid var(--surface); color:#fff; cursor:pointer; font-size:11px; display:flex; align-items:center; justify-content:center;"><i class="ti ti-camera"></i></button>
+              <input type="file" id="photoFileInput" accept="image/jpeg,image/png,image/webp" style="display:none;">
+            </div>
             <div>
               <div style="font-weight:700; font-size:15px;" id="profileName">—</div>
               <div style="font-size:12.5px; color:var(--text-secondary);" id="profileRoleDept">—</div>
+              <div id="photoUploadAlert" class="alert alert-error" style="margin-top:8px; font-size:11.5px;"></div>
             </div>
           </div>
 
@@ -196,6 +203,7 @@
 
   <script src="assets/api.js"></script>
   <script src="assets/notifications.js"></script>
+  <script src="assets/search.js"></script>
   <script src="assets/presence.js"></script>
   <script>
     document.getElementById('logoutBtn').addEventListener('click', async () => {
@@ -224,6 +232,11 @@
         const p = result.profile;
 
         document.getElementById('profileAvatar').textContent = initials(p.fullName);
+        if (p.photoUrl) {
+          const img = document.getElementById('profileAvatarImg');
+          img.src = p.photoUrl;
+          img.style.display = 'block';
+        }
         document.getElementById('profileName').textContent = p.fullName;
         document.getElementById('profileRoleDept').textContent = p.role + (p.department ? ' · ' + p.department : '');
         document.getElementById('profileUsername').textContent = p.username;
@@ -367,6 +380,39 @@
       } catch (err) {
         alert(err.message);
       }
+    });
+
+    document.getElementById('changePhotoBtn').addEventListener('click', () => {
+      document.getElementById('photoFileInput').click();
+    });
+
+    document.getElementById('photoFileInput').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const alertEl = document.getElementById('photoUploadAlert');
+      hideAlert(alertEl);
+
+      const formData = new FormData();
+      formData.append('photo', file);
+
+      try {
+        const res = await fetch('/api/accounting/settings/photo', {
+          method: 'POST',
+          credentials: 'include',
+          body: formData
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Upload failed.');
+
+        const img = document.getElementById('profileAvatarImg');
+        img.src = data.photoUrl;
+        img.style.display = 'block';
+        applyTopbarAvatar(data.photoUrl); // updates the topbar avatar on this page too, right now
+      } catch (err) {
+        showAlert(alertEl, err.message);
+      }
+      e.target.value = '';
     });
 
     init();

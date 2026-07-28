@@ -293,6 +293,10 @@ router.post('/photo', (req, res) => {
         return res.status(500).json({ error: 'Could not save your photo.' });
       }
 
+      // Update the session too, so the new photo shows up immediately on
+      // every page without needing to log out and back in.
+      req.session.staff.photoUrl = publicUrlData.publicUrl;
+
       res.json({ success: true, photoUrl: publicUrlData.publicUrl });
     } catch (err) {
       console.error('Photo upload unexpected error:', err);
