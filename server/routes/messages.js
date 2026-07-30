@@ -96,7 +96,7 @@ async function notifyRecipientsByEmail(staffIds, prefColumn, senderName, subject
 
   if (!recipients || recipients.length === 0) return;
 
-  const fullLink = 'https://macden.com.ng/accounting/' + link;
+  const fullLink = 'https://macden.com.ng/portal/' + link;
 
   await Promise.allSettled(recipients.map(r =>
     sendNotificationEmail(
