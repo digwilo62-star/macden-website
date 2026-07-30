@@ -2,135 +2,123 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Sign up — MACDEN Accounting</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <title>Register — MACDEN Portal</title>
+  <link rel="stylesheet" href="assets/portal-style.css">
+  <style>
+    .reg-shell { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 40px 20px; }
+    .reg-card { width: 100%; max-width: 440px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 36px; }
+    .reg-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 24px; }
+    .reg-logo img { width: 36px; height: 36px; border-radius: 8px; }
+    .reg-logo span { font-family: var(--font-heading); font-weight: 800; font-size: 15px; }
+    .reg-field { margin-bottom: 16px; }
+    .reg-field label { display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; }
+    .reg-field input, .reg-field select {
+      width: 100%; background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+      padding: 11px 14px; font-size: 13.5px; font-family: var(--font-body); color: var(--text-primary);
+    }
+    .reg-field input:focus, .reg-field select:focus { outline: none; border-color: var(--primary); }
+    .reg-success { text-align: center; padding: 20px 0; }
+    .reg-success i { font-size: 40px; color: var(--success); }
+  </style>
 </head>
 <body>
-  <div class="auth-shell">
-    <div class="auth-card">
-      <div class="auth-logo-row">
+  <div class="reg-shell">
+    <div class="reg-card">
+      <div class="reg-logo">
         <img src="assets/logo.jpeg" alt="MACDEN">
-        <span>MACDEN ACCOUNTING</span>
+        <span>MACDEN Staff Registration</span>
       </div>
 
-      <!-- Step 1: registration form -->
-      <div id="registerStep">
-        <h1 class="auth-title">Create account</h1>
-        <p class="auth-subtitle">For accounting department staff only.</p>
+      <div id="formView">
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:20px;">Fill this in to request an account. HR will review your submission and email your login details once approved.</p>
 
-        <div id="registerAlert" class="alert alert-error"></div>
+        <div id="alert" class="alert alert-error"></div>
 
-        <form id="registerForm">
-          <div class="field">
-            <label for="fullName">Full name</label>
-            <input type="text" id="fullName" placeholder="e.g. Amara Okoye" required>
-          </div>
-          <div class="field">
-            <label for="username">Username</label>
-            <input type="text" id="username" placeholder="e.g. amara.accounts" required>
-          </div>
-          <div class="field">
-            <label for="email">Email</label>
-            <input type="email" id="email" placeholder="you@macden.com.ng" required>
-          </div>
-          <div class="field">
-            <label for="password">Password</label>
-            <input type="password" id="password" placeholder="At least 8 characters" required minlength="8">
-          </div>
-          <button type="submit" class="btn btn-primary" id="registerBtn">Create account</button>
-        </form>
+        <div class="reg-field">
+          <label>Full Name</label>
+          <input type="text" id="fullName" placeholder="Your full name">
+        </div>
+        <div class="reg-field">
+          <label>Branch</label>
+          <input type="text" id="branch" placeholder="e.g. Ikeja Branch">
+        </div>
+        <div class="reg-field">
+          <label>Department</label>
+          <select id="departmentId"><option value="">Loading…</option></select>
+        </div>
+        <div class="reg-field">
+          <label>Phone Number</label>
+          <input type="text" id="phone" placeholder="080...">
+        </div>
+        <div class="reg-field">
+          <label>Business Email</label>
+          <input type="text" id="email" placeholder="you@macden.com.ng">
+        </div>
+
+        <button class="btn btn-primary" id="submitBtn" style="margin-top:8px;">Submit Registration</button>
       </div>
 
-      <!-- Step 2: verify code (hidden until registration succeeds) -->
-      <div id="verifyStep" style="display: none;">
-        <h1 class="auth-title">Check your email</h1>
-        <p class="auth-subtitle">Enter the 6-digit code we just sent you.</p>
-
-        <div id="verifyAlert" class="alert alert-error"></div>
-        <div id="verifySuccess" class="alert alert-success"></div>
-
-        <form id="verifyForm">
-          <div class="field">
-            <label for="code">Verification code</label>
-            <input type="text" id="code" class="code-input" maxlength="6" placeholder="000000" required>
-          </div>
-          <button type="submit" class="btn btn-primary" id="verifyBtn">Verify</button>
-        </form>
-      </div>
-
-      <div class="auth-footer-link">
-        Already have an account? <a href="login.html">Log in</a>
+      <div id="successView" style="display:none;" class="reg-success">
+        <i class="ti ti-circle-check"></i>
+        <h2 style="font-size:16px; margin-top:12px;">Registration Submitted</h2>
+        <p style="font-size:13px; color:var(--text-secondary); margin-top:8px;">HR will review your request and email your login details once approved.</p>
       </div>
     </div>
   </div>
 
-  <script src="assets/api.js"></script>
-  <script src="assets/search.js"></script>
   <script>
-    const registerStep = document.getElementById('registerStep');
-    const verifyStep = document.getElementById('verifyStep');
-    const registerForm = document.getElementById('registerForm');
-    const verifyForm = document.getElementById('verifyForm');
-    const registerAlert = document.getElementById('registerAlert');
-    const verifyAlert = document.getElementById('verifyAlert');
-    const verifySuccess = document.getElementById('verifySuccess');
-    const registerBtn = document.getElementById('registerBtn');
-    const verifyBtn = document.getElementById('verifyBtn');
+    async function loadDepartments() {
+      try {
+        const res = await fetch('/api/accounting/public/departments');
+        const data = await res.json();
+        const select = document.getElementById('departmentId');
+        select.innerHTML = '<option value="">Select your department…</option>' +
+          data.departments.map(d => '<option value="' + d.id + '">' + d.name + '</option>').join('');
+      } catch (err) {
+        document.getElementById('departmentId').innerHTML = '<option value="">Could not load departments</option>';
+      }
+    }
 
-    let pendingEmail = '';
+    document.getElementById('submitBtn').addEventListener('click', async () => {
+      const alertEl = document.getElementById('alert');
+      alertEl.className = 'alert';
 
-    registerForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      hideAlert(registerAlert);
-      registerBtn.disabled = true;
-      registerBtn.textContent = 'Creating account…';
-
+      const fullName = document.getElementById('fullName').value.trim();
+      const branch = document.getElementById('branch').value.trim();
+      const departmentId = document.getElementById('departmentId').value;
+      const phone = document.getElementById('phone').value.trim();
       const email = document.getElementById('email').value.trim();
 
-      try {
-        await apiRequest('/auth/register', {
-          method: 'POST',
-          body: {
-            fullName: document.getElementById('fullName').value.trim(),
-            username: document.getElementById('username').value.trim(),
-            email: email,
-            password: document.getElementById('password').value
-          }
-        });
+      if (!fullName || !branch || !departmentId || !phone || !email) {
+        alertEl.textContent = 'Please fill in every field.';
+        alertEl.className = 'alert alert-error visible';
+        return;
+      }
 
-        pendingEmail = email;
-        registerStep.style.display = 'none';
-        verifyStep.style.display = 'block';
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting…';
+
+      try {
+        const res = await fetch('/api/accounting/public/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fullName, branch, departmentId, phone, email })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+
+        document.getElementById('formView').style.display = 'none';
+        document.getElementById('successView').style.display = 'block';
       } catch (err) {
-        showAlert(registerAlert, err.message);
-        registerBtn.disabled = false;
-        registerBtn.textContent = 'Create account';
+        alertEl.textContent = err.message;
+        alertEl.className = 'alert alert-error visible';
+        btn.disabled = false;
+        btn.textContent = 'Submit Registration';
       }
     });
 
-    verifyForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      hideAlert(verifyAlert);
-      verifyBtn.disabled = true;
-      verifyBtn.textContent = 'Verifying…';
-
-      try {
-        const result = await apiRequest('/auth/verify-email', {
-          method: 'POST',
-          body: {
-            email: pendingEmail,
-            code: document.getElementById('code').value.trim()
-          }
-        });
-
-        showAlert(verifySuccess, result.message, 'success');
-        verifyForm.style.display = 'none';
-      } catch (err) {
-        showAlert(verifyAlert, err.message);
-        verifyBtn.disabled = false;
-        verifyBtn.textContent = 'Verify';
-      }
-    });
+    loadDepartments();
   </script>
 </body>
 </html>

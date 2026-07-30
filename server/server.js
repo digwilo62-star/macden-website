@@ -20,6 +20,8 @@ const policiesRoutes = require('./routes/policies');
 const settingsRoutes = require('./routes/settings');
 const notificationsRoutes = require('./routes/notifications');
 const searchRoutes = require('./routes/search');
+const publicRegisterRoutes = require('./routes/publicRegister');
+const registrationApprovalRoutes = require('./routes/registrationApproval');
 const requireAuth = require('./middleware/requireAuth');
 
 const app = express();
@@ -43,8 +45,6 @@ app.set('trust proxy', 1);
 app.use(express.json());
 
 // CORS — allow requests from your actual site only.
-// If the accounting pages are served from the same domain (macden.com.ng/accounting),
-// this can be tightened further. Update the origin below to match your real domain.
 app.use(cors({
   origin: 'https://macden.com.ng',
   credentials: true
@@ -67,9 +67,9 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // HTTPS required only in production
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    maxAge: 1000 * 60 * 60 * 8   // 8-hour session, adjust as needed
+    maxAge: 1000 * 60 * 60 * 8
   }
 }));
 
@@ -78,33 +78,31 @@ app.use(session({
 app.get('/portal', (req, res) => res.redirect('/accounting/login.html'));
 
 // Serve the accounting frontend pages (login, register, dashboard, etc.)
-// Lives in a sibling folder: macden-website/accounting
-// "index: 'login.html'" means visiting macden.com.ng/accounting alone
-// (no filename) now serves the login page directly -- same reasoning as
-// the /portal shortcut above.
 app.use('/accounting', express.static(path.join(__dirname, '../accounting'), {
   index: 'login.html'
 }));
 
 // SECURITY: block direct access to the backend source folder and git internals
-// before the general static server below, which would otherwise happily serve
-// server.js, .env, and everything else in /server to anyone who requests it.
 app.use('/server', (req, res) => res.status(404).send('Not found'));
 app.use('/.git', (req, res) => res.status(404).send('Not found'));
 
-// Serve the main storefront (index.html, about.html, products.html, etc.)
-// Lives at the repo root, one level up from /server
+// Serve the main storefront
 app.use(express.static(path.join(__dirname, '..'), {
-  dotfiles: 'deny' // extra safety net: never serve any dotfile (.env, .git, .gitignore, etc.)
+  dotfiles: 'deny'
 }));
 
-// Health check — useful for confirming Render deploy is alive
+// Health check
 app.get('/api/accounting/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Auth routes (login/logout/me) — not behind requireAuth, obviously
+// Auth routes — not behind requireAuth, obviously
 app.use('/api/accounting/auth', authRoutes);
+
+// PUBLIC staff self-registration form (Name/Branch/Department/Phone/Email)
+// -- not behind requireAuth, since nobody has an account yet at this point.
+// Submissions sit pending until HR reviews and approves them.
+app.use('/api/accounting/public', publicRegisterRoutes);
 
 // Everything below this line will require a logged-in session.
 app.use('/api/accounting', requireAuth);
@@ -119,15 +117,13 @@ app.use('/api/accounting/policies', policiesRoutes);
 app.use('/api/accounting/settings', settingsRoutes);
 app.use('/api/accounting/notifications', notificationsRoutes);
 app.use('/api/accounting/search', searchRoutes);
+app.use('/api/accounting/registrations', registrationApprovalRoutes);
 
 app.get('/api/accounting/dashboard-check', (req, res) => {
-  // Simple proof that requireAuth is working — returns the logged-in staff's info
   res.json({ message: `Welcome, ${req.session.staff.fullName}`, staff: req.session.staff });
 });
 
-// Safety net: if anything else throws unexpectedly, always send JSON back —
-// never Express's default HTML error page, which is what breaks the frontend
-// (it expects to parse every API response as JSON).
+// Safety net: if anything else throws unexpectedly, always send JSON back
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({ error: 'Something went wrong on the server.' });
@@ -139,11 +135,7 @@ app.listen(PORT, () => {
 });
 
 // Checks every minute for scheduled broadcasts whose time has arrived and
-// sends them. Reliability depends on the app being awake at that moment —
-// on Render's free tier, the app can sleep when idle, so a scheduled send
-// might land a few minutes late (until the next UptimeRobot ping wakes it)
-// rather than firing at the exact second. Good enough for "send this
-// tomorrow morning," not appropriate for anything needing second-level precision.
+// sends them.
 cron.schedule('* * * * *', () => {
   messageRoutes.publishDueScheduledBroadcasts();
 });

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pending Registrations — MACDEN Portal</title>
+  <link rel="stylesheet" href="assets/portal-style.css">
+  <link rel="stylesheet" href="assets/portal-shell.css">
+  <style>
+    .pr-list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+    .pr-header-row { display: grid; grid-template-columns: 180px 140px 130px 130px 1fr 170px; gap: 12px; padding: 12px 18px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    .pr-row { display: grid; grid-template-columns: 180px 140px 130px 130px 1fr 170px; gap: 12px; align-items: center; padding: 13px 18px; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+    .pr-row:last-child { border-bottom: none; }
+    .pr-empty { padding: 50px 18px; text-align: center; color: var(--text-muted); font-size: 13px; }
+    .pr-approve-btn { background: var(--success-dim); color: var(--success); border: none; border-radius: var(--radius-sm); padding: 6px 12px; font-size: 11.5px; font-weight: 700; cursor: pointer; font-family: var(--font-body); }
+    .pr-reject-btn { background: var(--error-dim); color: var(--error); border: none; border-radius: var(--radius-sm); padding: 6px 12px; font-size: 11.5px; font-weight: 700; cursor: pointer; font-family: var(--font-body); margin-left: 6px; }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-brand"><img src="assets/logo.jpeg" alt="MACDEN"><span>MACDEN</span></div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="inbox.html" class="sidebar-link"><i class="ti ti-mail"></i> Inbox <span class="badge" id="unreadBadge" style="display:none;">0</span></a>
+        <a href="compose.html" class="sidebar-link"><i class="ti ti-pencil"></i> Compose</a>
+        <a href="broadcasts.html" class="sidebar-link"><i class="ti ti-speakerphone"></i> Broadcasts</a>
+        <a href="directory.html" class="sidebar-link active"><i class="ti ti-users"></i> Directory</a>
+        <a href="leave.html" class="sidebar-link"><i class="ti ti-calendar-event"></i> Leave &amp; Requests</a>
+        <a href="documents.html" class="sidebar-link"><i class="ti ti-file-text"></i> Documents</a>
+        <a href="policies.html" class="sidebar-link"><i class="ti ti-book"></i> Policies</a>
+        <a href="settings.html" class="sidebar-link"><i class="ti ti-settings"></i> Settings</a>
+      </nav>
+      <div class="sidebar-logout">
+        <a href="help.html" class="sidebar-link" style="margin-bottom:6px;"><i class="ti ti-help-circle"></i> Help</a>
+        <button id="logoutBtn"><i class="ti ti-logout"></i> Logout</button>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-search"><input type="text" placeholder="Search messages, people, documents…"></div>
+        <img class="topbar-avatar" id="topbarAvatarImg" src="assets/logo.jpeg" alt="You">
+      </div>
+
+      <div class="page-body">
+        <h1 class="page-greeting" style="font-size: 22px;">Pending Registrations</h1>
+        <p class="page-greeting-sub"><a href="directory.html" style="color: var(--primary); text-decoration:none; font-weight:600;">← Back to Directory</a></p>
+        <p style="font-size:13px; color:var(--text-secondary); margin-bottom:20px;">Staff who submitted the registration form, waiting for your review. Share this link with staff who need an account: <strong id="regLinkDisplay"></strong></p>
+
+        <div class="pr-list">
+          <div class="pr-header-row"><div>Name</div><div>Branch</div><div>Department</div><div>Phone</div><div>Email</div><div>Actions</div></div>
+          <div id="prRows"><div class="pr-empty">Loading…</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script>
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await apiRequest('/auth/logout', { method: 'POST' });
+      window.location.href = 'login.html';
+    });
+
+    document.getElementById('regLinkDisplay').textContent = window.location.origin + '/accounting/register.html';
+
+    async function init() {
+      let staff;
+      try {
+        const result = await apiRequest('/dashboard-check');
+        staff = result.staff;
+      } catch (err) {
+        window.location.href = 'login.html';
+        return;
+      }
+      if (staff.role !== 'admin') {
+        document.body.innerHTML = '<div style="padding:40px; font-family:sans-serif;">Admin access only.</div>';
+        return;
+      }
+      loadPending();
+    }
+
+    async function loadPending() {
+      const rows = document.getElementById('prRows');
+      try {
+        const result = await apiRequest('/registrations/pending');
+        if (result.pending.length === 0) {
+          rows.innerHTML = '<div class="pr-empty">No pending registrations right now.</div>';
+          return;
+        }
+        rows.innerHTML = result.pending.map(p =>
+          '<div class="pr-row">' +
+            '<div>' + p.fullName + '</div>' +
+            '<div>' + p.branch + '</div>' +
+            '<div>' + (p.department || '—') + '</div>' +
+            '<div>' + p.phone + '</div>' +
+            '<div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + p.email + '</div>' +
+            '<div>' +
+              '<button class="pr-approve-btn" onclick="approveReg(\'' + p.id + '\')">Approve</button>' +
+              '<button class="pr-reject-btn" onclick="rejectReg(\'' + p.id + '\')">Reject</button>' +
+            '</div>' +
+          '</div>'
+        ).join('');
+      } catch (err) {
+        rows.innerHTML = '<div class="pr-empty">' + err.message + '</div>';
+      }
+    }
+
+    async function approveReg(id) {
+      if (!confirm('Approve this registration? They will be emailed their login details.')) return;
+      try {
+        const result = await apiRequest('/registrations/' + id + '/approve', { method: 'POST' });
+        if (result.warning) alert(result.warning);
+        loadPending();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function rejectReg(id) {
+      if (!confirm('Reject this registration? This cannot be undone.')) return;
+      try {
+        await apiRequest('/registrations/' + id + '/reject', { method: 'POST' });
+        loadPending();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
+
