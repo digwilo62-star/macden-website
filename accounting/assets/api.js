@@ -11,12 +11,20 @@ async function apiRequest(path, options = {}) {
   if (!res.ok) {
     throw new Error(data.error || 'Something went wrong.');
   }
-  if (data.staff) {
-    applyTopbarAvatar(data.staff.photoUrl, data.staff.fullName);
-    applyRoleBasedNav(data.staff.role);
-  }
-  if (data.profile) {
-    applyTopbarAvatar(data.profile.photoUrl, data.profile.fullName);
+  // Only apply the topbar avatar/nav from endpoints that describe the
+  // CURRENTLY LOGGED IN person -- checking the request PATH here (not just
+  // the response shape) is what prevents someone else's photo (e.g. from
+  // viewing a staff profile in Directory) from leaking into your own
+  // avatar spot.
+  const isSelfInfoEndpoint = path === '/dashboard-check' || path === '/settings/me';
+  if (isSelfInfoEndpoint) {
+    if (data.staff) {
+      applyTopbarAvatar(data.staff.photoUrl, data.staff.fullName);
+      applyRoleBasedNav(data.staff.role);
+    }
+    if (data.profile) {
+      applyTopbarAvatar(data.profile.photoUrl, data.profile.fullName);
+    }
   }
   return data;
 }
