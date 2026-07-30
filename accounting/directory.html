@@ -109,6 +109,9 @@
       <button class="btn btn-primary" id="messageProfileBtn" style="margin-top:18px; display:inline-flex; align-items:center; justify-content:center; gap:8px; width:auto; padding:10px 24px;">
         <i class="ti ti-mail"></i> Message
       </button>
+      <button class="btn btn-ghost" id="deactivateProfileBtn" style="display:none; margin-top:10px; align-items:center; justify-content:center; gap:8px; width:auto; padding:10px 24px; color:var(--error); border-color:var(--error);">
+        <i class="ti ti-user-off"></i> Deactivate
+      </button>
     </div>
   </div>
 
@@ -128,12 +131,14 @@
     }
 
     let staffCache = [];
+    let isAdmin = false;
     let searchTimeout = null;
 
     async function init() {
       try {
         const result = await apiRequest('/dashboard-check');
-        if (result.staff.role === 'admin') {
+        isAdmin = result.staff.role === 'admin';
+        if (isAdmin) {
           document.getElementById('manageStaffLink').style.display = 'inline-flex';
           document.getElementById('adminActivityLink').style.display = 'inline-flex';
         }
@@ -190,11 +195,26 @@
       document.getElementById('profileEmail').textContent = person.email;
       document.getElementById('profileDate').textContent = person.dateStarted ? new Date(person.dateStarted).toLocaleDateString() : '—';
 
+      document.getElementById('deactivateProfileBtn').style.display = isAdmin ? 'inline-flex' : 'none';
+      document.getElementById('deactivateProfileBtn').onclick = () => deactivateFromDirectory(person.id, person.full_name);
+
       document.getElementById('messageProfileBtn').onclick = () => {
         window.location.href = 'compose.html?to=' + person.id + '&name=' + encodeURIComponent(person.full_name);
       };
 
       document.getElementById('profileModalBackdrop').classList.add('visible');
+    }
+
+    
+    async function deactivateFromDirectory(id, name) {
+      if (!confirm('Deactivate ' + name + '? They will no longer be able to log in. This can be undone later from Manage Staff.')) return;
+      try {
+        await apiRequest('/admin/staff/' + id, { method: 'DELETE' });
+        closeProfileModal();
+        loadDirectory(document.getElementById('dirSearch').value.trim());
+      } catch (err) {
+        alert(err.message);
+      }
     }
 
     function closeProfileModal() {
