@@ -249,3 +249,47 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .alert-success { background: var(--success-dim); color: var(--success); border: 1px solid rgba(30,122,62,0.2); }
 .alert.visible { display: block; }
 
+
+/* ============================================================
+   Hover states — appended in a targeted pass to fix missing/weak
+   hover feedback across the portal.
+   ============================================================ */
+
+/* Directory profile modal's Deactivate/Reactivate button — this one
+   gets its red/green color set dynamically via inline styles in JS
+   (depending on current status), so it needs its own hover rule rather
+   than relying on the generic .btn-ghost hover, which would clash. */
+#deactivateProfileBtn:hover {
+  opacity: 0.85;
+}
+
+/* Documents: download/delete action buttons */
+.doc-download-btn:hover { border-color: var(--primary); color: var(--primary); }
+.doc-delete-btn:hover { color: var(--error); }
+
+/* Policies: Read Policy button, Edit/Delete actions */
+.pol-read-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-dim); }
+
+/* Leave & Requests: Approve/Reject buttons */
+.approve-btn:hover { background: var(--success); color: #fff; }
+.reject-btn:hover { background: var(--error); color: #fff; }
+
+/* Broadcasts: "Who's read this?" button */
+.bc-row button:hover { border-color: var(--primary); color: var(--primary); }
+
+/* Org chart nodes — subtle lift on hover to show they're informational, not dead */
+.org-node { transition: box-shadow 0.15s ease, transform 0.15s ease; }
+.org-node:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-1px); }
+
+/* Notification dropdown items */
+.notif-item:hover { background: var(--surface-raised); }
+
+/* Search dropdown results */
+.search-result-row:hover { background: var(--surface-raised); }
+
+/* Directory rows and Manage Staff rows — subtle highlight to show clickability */
+.dir-row:hover { background: var(--surface-raised); cursor: pointer; }
+
+/* Compose recipient chip remove (x) button */
+.compose-chip button:hover { opacity: 0.7; }
+
