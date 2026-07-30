@@ -118,6 +118,7 @@
   </div>
 
   <script src="assets/api.js"></script>
+  <script src="assets/confirm-modal.js"></script>
   <script src="assets/notifications.js"></script>
   <script src="assets/search.js"></script>
   <script src="assets/presence.js"></script>
@@ -231,7 +232,7 @@
     });
 
     async function deletePolicy(id) {
-      if (!confirm('Delete this policy? This cannot be undone.')) return;
+      if (!(await confirmModal('Delete this policy? This cannot be undone.', { title: 'Delete policy?', confirmLabel: 'Delete' }))) return;
       try {
         await apiRequest('/policies/' + id, { method: 'DELETE' });
         window.location.href = 'policies.html';

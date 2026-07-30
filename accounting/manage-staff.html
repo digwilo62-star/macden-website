@@ -70,6 +70,7 @@
   </div>
 
   <script src="assets/api.js"></script>
+  <script src="assets/confirm-modal.js"></script>
   <script src="assets/notifications.js"></script>
   <script src="assets/search.js"></script>
   <script src="assets/presence.js"></script>
@@ -122,7 +123,7 @@
     }
 
     async function deactivate(id) {
-      if (!confirm('Deactivate this staff member? They will no longer be able to log in.')) return;
+      if (!(await confirmModal('Deactivate this staff member? They will no longer be able to log in.', { title: 'Deactivate staff member?', confirmLabel: 'Deactivate' }))) return;
       try {
         await apiRequest('/admin/staff/' + id, { method: 'DELETE' });
         loadStaff();

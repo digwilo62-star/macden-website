@@ -122,6 +122,7 @@
   </div>
 
   <script src="assets/api.js"></script>
+  <script src="assets/confirm-modal.js"></script>
   <script src="assets/notifications.js"></script>
   <script src="assets/search.js"></script>
   <script src="assets/presence.js"></script>
@@ -187,7 +188,7 @@
     }
 
     async function deleteDocument(id) {
-      if (!confirm('Delete this document? This cannot be undone.')) return;
+      if (!(await confirmModal('Delete this document? This cannot be undone.', { title: 'Delete document?', confirmLabel: 'Delete' }))) return;
       try {
         await apiRequest('/documents/' + id, { method: 'DELETE' });
         loadDocuments();

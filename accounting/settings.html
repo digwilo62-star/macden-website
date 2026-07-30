@@ -202,6 +202,7 @@
   </div>
 
   <script src="assets/api.js"></script>
+  <script src="assets/confirm-modal.js"></script>
   <script src="assets/notifications.js"></script>
   <script src="assets/search.js"></script>
   <script src="assets/presence.js"></script>
@@ -318,7 +319,7 @@
     });
 
     document.getElementById('logoutAllBtn').addEventListener('click', async () => {
-      if (!confirm('This will sign you out on every device, including this one. Continue?')) return;
+      if (!(await confirmModal('This will sign you out on every device, including this one. Continue?', { title: 'Log out everywhere?', confirmLabel: 'Log Out' }))) return;
       try {
         await apiRequest('/settings/logout-all-devices', { method: 'POST' });
       } catch (err) {
@@ -367,7 +368,7 @@
     document.getElementById('mfaDisableBtn').addEventListener('click', async () => {
       const password = document.getElementById('mfaDisablePassword').value;
       if (!password) { alert('Enter your current password.'); return; }
-      if (!confirm('Disable two-factor authentication on your account?')) return;
+      if (!(await confirmModal('Disable two-factor authentication on your account?', { title: 'Disable 2FA?', confirmLabel: 'Disable' }))) return;
 
       try {
         await apiRequest('/settings/mfa/disable', {

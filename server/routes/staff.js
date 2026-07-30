@@ -14,13 +14,20 @@ function isOnline(lastSeen) {
 router.get('/', async (req, res) => {
   try {
     const search = (req.query.search || '').trim();
+    // Only admins requesting explicitly (?includeInactive=true) see
+    // deactivated staff -- Compose/Broadcast never pass this, so they keep
+    // seeing active-only staff exactly as before, unaffected by this change.
+    const includeInactive = req.query.includeInactive === 'true' && req.session.staff.role === 'admin';
 
     let query = supabase
       .from('staff')
-      .select('id, full_name, username, email, role, last_seen, created_at, photo_url, departments(name)')
-      .eq('is_active', true)
+      .select('id, full_name, username, email, role, is_active, last_seen, created_at, photo_url, departments(name)')
       .neq('id', req.session.staff.id)
       .order('full_name', { ascending: true });
+
+    if (!includeInactive) {
+      query = query.eq('is_active', true);
+    }
 
     if (search) {
       query = query.or(`full_name.ilike.%${search}%,username.ilike.%${search}%`);
@@ -42,6 +49,7 @@ router.get('/', async (req, res) => {
       department: s.departments ? s.departments.name : null,
       dateStarted: s.created_at,
       photoUrl: s.photo_url,
+      isActive: s.is_active,
       isOnline: isOnline(s.last_seen)
     }));
 
