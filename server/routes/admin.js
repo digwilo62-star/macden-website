@@ -216,9 +216,15 @@ router.post('/approve-staff/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Generate a fresh password (overwriting whatever they set during
+    // self-registration) and force them to change it on first login --
+    // same pattern already used for HR-onboarded accounts.
+    const tempPassword = crypto.randomBytes(14).toString('base64').replace(/[^a-zA-Z0-9]/g, '').slice(0, 14);
+    const newPasswordHash = await bcrypt.hash(tempPassword, 10);
+
     const { data, error } = await supabase
       .from('staff')
-      .update({ is_active: true })
+      .update({ is_active: true, password_hash: newPasswordHash, must_change_password: true })
       .eq('id', id)
       .select()
       .single();
@@ -228,7 +234,21 @@ router.post('/approve-staff/:id', async (req, res) => {
     }
 
     logAdminAction(req, 'approve_staff', id, `Approved ${data.full_name}`);
-    res.json({ success: true, message: `${data.full_name} has been approved and can now log in.` });
+    console.log('[APPROVE-DEBUG] Account approved in database. About to email:', data.email);
+
+    try {
+      await sendWelcomeEmail(data.email, data.full_name, data.username, tempPassword);
+      console.log('[APPROVE-DEBUG] sendWelcomeEmail() completed with NO error thrown.');
+    } catch (emailErr) {
+      console.error('[APPROVE-DEBUG] Approval welcome email FAILED:', emailErr);
+      return res.json({
+        success: true,
+        message: `${data.full_name} has been approved, but the email failed to send.`,
+        warning: 'Email failed. Username: ' + data.username + ', temporary password: ' + tempPassword
+      });
+    }
+
+    res.json({ success: true, message: `${data.full_name} has been approved and emailed their login details.` });
   } catch (err) {
     console.error('Approve staff unexpected error:', err);
     res.status(500).json({ error: 'Something went wrong approving this account.' });
