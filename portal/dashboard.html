@@ -156,7 +156,17 @@
       btn.textContent = 'Approving…';
       try {
         await apiRequest('/admin/approve-staff/' + id, { method: 'POST' });
-        loadPendingStaff();
+        // Give the button immediate, guaranteed feedback instead of relying
+        // entirely on a second re-fetch (loadPendingStaff) to make it
+        // disappear -- if that re-fetch has ANY timing hiccup, the old
+        // button used to just sit there stuck forever even though the
+        // approval itself had already genuinely succeeded.
+        btn.textContent = 'Approved ✓';
+        const row = btn.closest('div');
+        if (row && row.parentElement) {
+          setTimeout(() => row.remove(), 600);
+        }
+        loadPendingStaff(); // still refresh in the background, for accuracy
       } catch (err) {
         alert(err.message);
         btn.disabled = false;
