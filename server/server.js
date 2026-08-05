@@ -26,6 +26,13 @@ const requireAuth = require('./middleware/requireAuth');
 
 const app = express();
 
+// TEMPORARY diagnostic: logs every single request that reaches this
+// server, before any routing. Remove once the approve-staff mystery is solved.
+app.use((req, res, next) => {
+  console.log('[GLOBAL-REQUEST-LOG]', req.method, req.originalUrl);
+  next();
+});
+
 app.use(helmet({ contentSecurityPolicy: false }));
 
 // Any request that hangs for more than 15 seconds (a stuck database
