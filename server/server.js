@@ -27,6 +27,21 @@ const requireAuth = require('./middleware/requireAuth');
 const app = express();
 
 app.use(helmet({ contentSecurityPolicy: false }));
+
+// Any request that hangs for more than 15 seconds (a stuck database
+// connection, an unresolved promise, etc.) now fails with a real, visible
+// JSON error instead of hanging forever with no error at all -- which is
+// exactly what a frozen button with zero console errors looks like.
+const REQUEST_TIMEOUT_MS = 15000;
+app.use((req, res, next) => {
+  res.setTimeout(REQUEST_TIMEOUT_MS, () => {
+    if (!res.headersSent) {
+      console.error('Request timed out after ' + REQUEST_TIMEOUT_MS + 'ms:', req.method, req.originalUrl);
+      res.status(504).json({ error: 'This is taking too long. Please try again.' });
+    }
+  });
+  next();
+});
 app.set('trust proxy', 1);
 app.use(express.json());
 
