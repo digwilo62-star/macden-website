@@ -212,6 +212,7 @@ router.get('/pending-staff', async (req, res) => {
 
 // POST /api/accounting/admin/approve-staff/:id
 router.post('/approve-staff/:id', async (req, res) => {
+  console.log('[APPROVE-DEBUG] Request received for id:', req.params.id);
   try {
     const { id } = req.params;
 
