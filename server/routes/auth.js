@@ -21,26 +21,46 @@ function generateCode() {
 }
 
 // POST /api/accounting/auth/register
+// GET /api/accounting/auth/departments -- public, needed so the
+// registration form (used before anyone is logged in) can show real
+// department choices, not just a hardcoded one.
+router.get('/departments', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('departments').select('id, name').order('name');
+    if (error) {
+      console.error('Public departments fetch error:', error);
+      return res.status(500).json({ error: 'Could not load departments.' });
+    }
+    res.json({ departments: data });
+  } catch (err) {
+    console.error('Public departments unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong.' });
+  }
+});
+
 router.post('/register', authLimiter, async (req, res) => {
   try {
-    const { fullName, username, email, password } = req.body;
+    const { fullName, username, email, password, departmentId, branch, phone } = req.body;
 
-    if (!fullName || !username || !email || !password) {
-      return res.status(400).json({ error: 'All fields are required.' });
+    if (!fullName || !username || !email || !password || !departmentId) {
+      return res.status(400).json({ error: 'Name, username, email, password, and department are required.' });
     }
 
     if (password.length < 8) {
       return res.status(400).json({ error: 'Password must be at least 8 characters.' });
     }
 
+    // Use the department the person actually selected, not a hardcoded one --
+    // now that 5 real departments exist (Sales, Accounting, Logistics,
+    // Purchases, Reconciliation), self-registration needs to respect that.
     const { data: dept, error: deptError } = await supabase
       .from('departments')
       .select('id')
-      .eq('slug', 'accounting')
+      .eq('id', departmentId)
       .single();
 
     if (deptError || !dept) {
-      return res.status(500).json({ error: 'Setup error — accounting department not found.' });
+      return res.status(400).json({ error: 'Please select a valid department.' });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
@@ -54,6 +74,8 @@ router.post('/register', authLimiter, async (req, res) => {
         full_name: fullName,
         username: username,
         email: email,
+        phone: phone || null,
+        branch: branch || null,
         password_hash: passwordHash,
         email_verified: false,
         is_active: false,
