@@ -88,8 +88,8 @@ router.post('/onboard-staff', async (req, res) => {
   try {
     const { fullName, email, phone, nin, address, role, departmentId, branch, dateStarted, reportsTo } = req.body;
 
-    if (!fullName || !email || !role || !departmentId) {
-      return res.status(400).json({ error: 'Full name, email, role, and department are required.' });
+    if (!fullName || !email || !role) {
+      return res.status(400).json({ error: 'Full name, email, and role are required.' });
     }
 
     // Generate a username from the name, and a random temporary password
@@ -108,7 +108,7 @@ router.post('/onboard-staff', async (req, res) => {
         email: email,
         password_hash: passwordHash,
         role: role,
-        department_id: departmentId,
+        department_id: departmentId || null,
         phone: phone || null,
         nin: nin ? encrypt(nin) : null,
         address: address ? encrypt(address) : null,

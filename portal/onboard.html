@@ -105,7 +105,7 @@
                 <option value="admin">Admin</option>
               </select>
             </div>
-              <div class="onb-field"><label>Department *</label><select id="departmentId"></select></div>
+              <div class="onb-field"><label>Department</label><select id="departmentId"></select></div>
             </div>
             <div class="onb-field-row">
               <div class="onb-field"><label>Branch</label><input type="text" id="branch" placeholder="e.g. Ikeja Branch"></div>
@@ -198,7 +198,7 @@
 
       try {
         const result = await apiRequest('/admin/departments');
-        document.getElementById('departmentId').innerHTML = result.departments.map(d => '<option value="' + d.id + '">' + d.name + '</option>').join('');
+        document.getElementById('departmentId').innerHTML = '<option value="">None</option>' + result.departments.map(d => '<option value="' + d.id + '">' + d.name + '</option>').join('');
       } catch (err) {}
     }
 
