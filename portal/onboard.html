@@ -257,8 +257,8 @@
       const role = document.getElementById('role').value.trim();
       const departmentId = document.getElementById('departmentId').value;
 
-      if (!fullName || !email || !role || !departmentId) {
-        showAlert(alertEl, 'Full name, email, role, and department are required.');
+      if (!fullName || !email || !role) {
+        showAlert(alertEl, 'Full name, email, and role are required.');
         goToStep(1);
         return;
       }
