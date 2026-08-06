@@ -197,6 +197,7 @@ router.get('/pending-staff', async (req, res) => {
       .select('id, full_name, username, email, created_at')
       .eq('email_verified', true)
       .eq('is_active', false)
+      .is('deleted_at', null)
       .order('created_at', { ascending: true });
 
     if (error) {
