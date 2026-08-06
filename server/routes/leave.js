@@ -31,7 +31,8 @@ router.post('/', async (req, res) => {
         leave_type: leaveType,
         start_date: startDate,
         end_date: endDate,
-        reason: reason || null
+        reason: reason || null,
+        status: 'pending'
       })
       .select()
       .single();
