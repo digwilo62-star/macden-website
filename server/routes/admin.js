@@ -146,6 +146,28 @@ router.post('/onboard-staff', async (req, res) => {
   }
 });
 
+// GET /api/accounting/admin/staff/:id -- single staff record with the
+// raw department_id (not just the joined name), needed to accurately
+// pre-fill the Edit form before submitting changes back.
+router.get('/staff/:id', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('staff')
+      .select('id, full_name, role, department_id, phone, branch')
+      .eq('id', req.params.id)
+      .single();
+
+    if (error || !data) {
+      return res.status(404).json({ error: 'Staff member not found.' });
+    }
+
+    res.json({ staff: data });
+  } catch (err) {
+    console.error('Single staff fetch error:', err);
+    res.status(500).json({ error: 'Something went wrong.' });
+  }
+});
+
 // PUT /api/accounting/admin/staff/:id — edit an existing staff member
 router.put('/staff/:id', async (req, res) => {
   try {
