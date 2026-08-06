@@ -85,7 +85,17 @@ app.use(session({
 // express.static's "index" option should handle serving login.html here
 // automatically, but doesn't reliably in this Express version. This
 // sidesteps that entirely with a direct, guaranteed route.
+// [PORTAL-TRAILING-SLASH-FIX-V2] Single handler, checking req.path itself
+// -- Express's default routing treats '/portal' and '/portal/' as the SAME
+// route (non-strict routing), so two separate app.get() calls for each
+// collided with each other. This checks the actual path directly instead,
+// redirecting only when the trailing slash is genuinely missing. Matters
+// because every page's CSS/JS uses relative paths (assets/portal-style.css)
+// which only resolve correctly when the browser's address bar has the slash.
 app.get(['/portal', '/portal/'], (req, res) => {
+  if (req.path === '/portal') {
+    return res.redirect(301, '/portal/');
+  }
   res.sendFile(path.join(__dirname, '../portal/login.html'));
 });
 
