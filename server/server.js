@@ -86,10 +86,10 @@ app.use(session({
 // automatically, but doesn't reliably in this Express version. This
 // sidesteps that entirely with a direct, guaranteed route.
 app.get(['/portal', '/portal/'], (req, res) => {
-  res.sendFile(path.join(__dirname, '../accounting/login.html'));
+  res.sendFile(path.join(__dirname, '../portal/login.html'));
 });
 
-app.use('/portal', express.static(path.join(__dirname, '../accounting'), {
+app.use('/portal', express.static(path.join(__dirname, '../portal'), {
   index: 'login.html'
 }));
 
