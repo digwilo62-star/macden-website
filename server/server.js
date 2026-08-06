@@ -81,6 +81,14 @@ app.use(session({
 // tool; the project outgrew that name. The actual files stay in the
 // "accounting" folder on disk (renaming every file wasn't necessary, only
 // the public-facing URL needed to change).
+// [PORTAL-ROOT-FIX] Explicit routes for the bare /portal and /portal/ paths --
+// express.static's "index" option should handle serving login.html here
+// automatically, but doesn't reliably in this Express version. This
+// sidesteps that entirely with a direct, guaranteed route.
+app.get(['/portal', '/portal/'], (req, res) => {
+  res.sendFile(path.join(__dirname, '../accounting/login.html'));
+});
+
 app.use('/portal', express.static(path.join(__dirname, '../accounting'), {
   index: 'login.html'
 }));
