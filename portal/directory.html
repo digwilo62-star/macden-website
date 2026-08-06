@@ -112,6 +112,9 @@
       <button class="btn btn-ghost" id="deactivateProfileBtn" style="display:none; margin-top:10px; align-items:center; justify-content:center; gap:8px; width:auto; padding:10px 24px; color:var(--error); border-color:var(--error);">
         <i class="ti ti-user-off"></i> Deactivate
       </button>
+      <button class="btn btn-ghost" id="deletePermanentlyBtn" style="display:none; margin-top:10px; align-items:center; justify-content:center; gap:8px; width:auto; padding:10px 24px; color:#fff; background:var(--error); border-color:var(--error);">
+        <i class="ti ti-trash"></i> Delete Permanently
+      </button>
     </div>
   </div>
 
@@ -205,6 +208,8 @@
         actionBtn.style.color = 'var(--success)';
         actionBtn.style.borderColor = 'var(--success)';
         actionBtn.onclick = () => reactivateFromDirectory(person.id, person.full_name);
+        document.getElementById('deletePermanentlyBtn').style.display = 'inline-flex';
+        document.getElementById('deletePermanentlyBtn').onclick = () => deletePermanentlyFromDirectory(person.id, person.full_name);
       } else {
         actionBtn.innerHTML = '<i class="ti ti-user-off"></i> Deactivate';
         actionBtn.style.color = 'var(--error)';
@@ -235,6 +240,21 @@
     async function reactivateFromDirectory(id, name) {
       try {
         await apiRequest('/admin/staff/' + id + '/reactivate', { method: 'POST' });
+        closeProfileModal();
+        loadDirectory(document.getElementById('dirSearch').value.trim());
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    
+    async function deletePermanentlyFromDirectory(id, name) {
+      if (!(await confirmModal(
+        'Permanently delete ' + name + '\'s account? This CANNOT be undone. Their username and email will be freed up, and they can never log in again. Their message and leave history will be kept.',
+        { title: 'Permanently delete this account?', confirmLabel: 'Delete Permanently' }
+      ))) return;
+      try {
+        await apiRequest('/admin/staff/' + id + '/permanent', { method: 'DELETE' });
         closeProfileModal();
         loadDirectory(document.getElementById('dirSearch').value.trim());
       } catch (err) {

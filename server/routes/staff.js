@@ -23,6 +23,7 @@ router.get('/', async (req, res) => {
       .from('staff')
       .select('id, full_name, username, email, role, is_active, last_seen, created_at, photo_url, departments(name)')
       .neq('id', req.session.staff.id)
+      .is('deleted_at', null)
       .order('full_name', { ascending: true });
 
     if (!includeInactive) {

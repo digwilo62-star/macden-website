@@ -54,7 +54,8 @@ router.get('/all-staff', async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('staff')
-      .select('id, full_name, username, email, role, phone, branch, is_active, created_at, departments(name)')
+      .select('id, full_name, username, email, role, phone, branch, is_active, created_at, deleted_at, departments(name)')
+      .is('deleted_at', null)
       .order('full_name');
 
     if (error) {
@@ -337,6 +338,57 @@ router.get('/audit-log', async (req, res) => {
   } catch (err) {
     console.error('Audit log unexpected error:', err);
     res.status(500).json({ error: 'Something went wrong loading the audit log.' });
+  }
+});
+
+// DELETE /api/accounting/admin/staff/:id/permanent
+// Requires the account to already be deactivated first -- a real
+// server-side safety gate, not just a UI suggestion. Doesn't remove the
+// row (their ID is referenced by messages, leave requests, etc. -- doing
+// so could fail on foreign key constraints or destroy that history).
+// Instead scrubs their login credentials permanently: they can never log
+// in again, and their email/username become free for someone else to use.
+router.delete('/staff/:id/permanent', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { data: target, error: fetchError } = await supabase
+      .from('staff')
+      .select('id, full_name, is_active, deleted_at')
+      .eq('id', id)
+      .single();
+
+    if (fetchError || !target) {
+      return res.status(404).json({ error: 'Account not found.' });
+    }
+    if (target.deleted_at) {
+      return res.status(400).json({ error: 'This account has already been permanently deleted.' });
+    }
+    if (target.is_active) {
+      return res.status(400).json({ error: 'Deactivate this account first before permanently deleting it.' });
+    }
+
+    const scrubSuffix = id.slice(0, 8);
+    const { error } = await supabase
+      .from('staff')
+      .update({
+        username: 'deleted-' + scrubSuffix,
+        email: 'deleted-' + scrubSuffix + '@deleted.macden.local',
+        password_hash: 'DELETED-ACCOUNT-NO-LOGIN-POSSIBLE',
+        deleted_at: new Date().toISOString()
+      })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Permanent delete error:', error);
+      return res.status(500).json({ error: 'Could not permanently delete this account.' });
+    }
+
+    logAdminAction(req, 'permanent_delete_staff', id, `Permanently deleted ${target.full_name}`);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Permanent delete unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong.' });
   }
 });
 
