@@ -132,6 +132,38 @@
     </div>
   </div>
 
+  
+  <div class="modal-backdrop" id="leaveDetailBackdrop">
+    <div class="modal" style="width: 440px;">
+      <div style="text-align:center; padding-bottom:16px; border-bottom:1px solid var(--border); margin-bottom:16px;">
+        <h3 style="margin-bottom:2px;">Leave Request</h3>
+        <p style="font-size:11.5px; color:var(--text-muted);">MACDEN Portal — Official Record</p>
+      </div>
+      <div class="review-row" style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px;">
+        <span style="color:var(--text-secondary);">Staff Member</span><strong id="ldStaffName">—</strong>
+      </div>
+      <div class="review-row" style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px;">
+        <span style="color:var(--text-secondary);">Leave Type</span><strong id="ldType">—</strong>
+      </div>
+      <div class="review-row" style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px;">
+        <span style="color:var(--text-secondary);">Start Date</span><strong id="ldStart">—</strong>
+      </div>
+      <div class="review-row" style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px;">
+        <span style="color:var(--text-secondary);">End Date</span><strong id="ldEnd">—</strong>
+      </div>
+      <div class="review-row" style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:13px;">
+        <span style="color:var(--text-secondary);">Total Days</span><strong id="ldDays">—</strong>
+      </div>
+      <div style="padding:12px 0;">
+        <div style="color:var(--text-secondary); font-size:13px; margin-bottom:6px;">Reason</div>
+        <div id="ldReason" style="font-size:13px; background:var(--surface-raised); border-radius:var(--radius-sm); padding:10px 12px; min-height:40px;">—</div>
+      </div>
+      <div class="modal-actions" id="leaveDetailActions">
+        <button class="btn btn-ghost" id="leaveDetailCloseBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script src="assets/api.js"></script>
   <script src="assets/notifications.js"></script>
   <script src="assets/search.js"></script>
@@ -187,16 +219,44 @@
       }
     }
 
+    
+    let pendingRequestsCache = [];
+
+    function openLeaveDetail(id) {
+      const r = pendingRequestsCache.find(req => req.id === id);
+      if (!r) return;
+
+      document.getElementById('ldStaffName').textContent = r.staffName + (r.staffIsActive === false ? ' (Deactivated)' : '');
+      document.getElementById('ldType').textContent = r.leave_type;
+      document.getElementById('ldStart').textContent = new Date(r.start_date).toLocaleDateString();
+      document.getElementById('ldEnd').textContent = new Date(r.end_date).toLocaleDateString();
+      document.getElementById('ldDays').textContent = r.days;
+      document.getElementById('ldReason').textContent = r.reason || 'No reason given.';
+
+      document.getElementById('leaveDetailActions').innerHTML =
+        '<button class="btn btn-ghost" id="leaveDetailCloseBtn">Close</button>' +
+        '<button class="approve-btn" style="padding:8px 16px; font-size:12.5px;" onclick="reviewRequest(\'' + r.id + '\', \'approve\'); closeLeaveDetail();">Approve</button>' +
+        '<button class="reject-btn" style="padding:8px 16px; font-size:12.5px;" onclick="reviewRequest(\'' + r.id + '\', \'reject\'); closeLeaveDetail();">Reject</button>';
+      document.getElementById('leaveDetailCloseBtn').addEventListener('click', closeLeaveDetail);
+
+      document.getElementById('leaveDetailBackdrop').classList.add('visible');
+    }
+
+    function closeLeaveDetail() {
+      document.getElementById('leaveDetailBackdrop').classList.remove('visible');
+    }
+
     async function loadPending() {
       const rows = document.getElementById('pendingRows');
       try {
         const result = await apiRequest('/leave/pending');
+        pendingRequestsCache = result.requests;
         if (result.requests.length === 0) {
           rows.innerHTML = '<div class="lv-empty">No pending requests.</div>';
           return;
         }
         rows.innerHTML = result.requests.map(r =>
-          '<div class="lv-row" style="grid-template-columns: minmax(120px, 160px) minmax(80px, 100px) minmax(80px, 100px) minmax(80px, 100px) minmax(120px, 1fr) minmax(130px, 160px);">' +
+          '<div class="lv-row" style="grid-template-columns: minmax(120px, 160px) minmax(80px, 100px) minmax(80px, 100px) minmax(80px, 100px) minmax(120px, 1fr) minmax(130px, 160px); cursor:pointer;" onclick="openLeaveDetail(\'' + r.id + '\')">' +
           '<div>' + r.staffName + (r.staffIsActive === false ? ' <span class="status-badge status-rejected" style="margin-left:4px;">Deactivated</span>' : '') + '</div>' +
           '<div>' + r.leave_type + '</div>' +
           '<div>' + new Date(r.start_date).toLocaleDateString() + '</div>' +

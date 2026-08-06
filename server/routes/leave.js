@@ -1,7 +1,43 @@
 const express = require('express');
 const supabase = require('../config/supabaseClient');
+const { sendNotificationEmail } = require('../utils/email');
 
 const router = express.Router();
+
+// Emails every active admin when a new leave request comes in, so they
+// don't have to be actively checking Pending Approvals to know about it.
+// Fire-and-forget: a notification failure should never block the actual
+// submission from succeeding.
+async function notifyAdminsOfNewRequest(staffId, leaveType, startDate, endDate, reason) {
+  try {
+    const { data: staffMember } = await supabase
+      .from('staff')
+      .select('full_name')
+      .eq('id', staffId)
+      .single();
+
+    const { data: admins } = await supabase
+      .from('staff')
+      .select('email, full_name')
+      .eq('role', 'admin')
+      .eq('is_active', true);
+
+    if (!admins || admins.length === 0) return;
+
+    const requesterName = staffMember ? staffMember.full_name : 'A staff member';
+    const subject = 'New leave request from ' + requesterName;
+    const bodyText = requesterName + ' has submitted a ' + leaveType + ' request from ' +
+      new Date(startDate).toLocaleDateString() + ' to ' + new Date(endDate).toLocaleDateString() +
+      (reason ? '.\n\nReason: ' + reason : '.') +
+      '\n\nReview it in Leave & Requests on the portal.';
+
+    await Promise.allSettled(
+      admins.map(admin => sendNotificationEmail(admin.email, admin.full_name, subject, bodyText))
+    );
+  } catch (err) {
+    console.error('Admin leave-notification error:', err);
+  }
+}
 
 function daysBetween(startDate, endDate) {
   const start = new Date(startDate);
@@ -42,6 +78,7 @@ router.post('/', async (req, res) => {
       return res.status(500).json({ error: 'Could not submit leave request.' });
     }
 
+    notifyAdminsOfNewRequest(staffId, leaveType, startDate, endDate, reason).catch(err => console.error('Leave notify error:', err));
     res.json({ success: true, request: data });
   } catch (err) {
     console.error('Leave submit unexpected error:', err);
