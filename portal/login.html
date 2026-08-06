@@ -30,12 +30,17 @@
 
         <form id="loginForm">
           <div class="field">
-            <label for="email">Email</label>
-            <input type="text" id="email" name="email" placeholder="name@macden.com" required>
+            <label for="email">Username or Email</label>
+            <input type="text" id="email" name="email" placeholder="Your username or email" required>
           </div>
           <div class="field">
             <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="••••••••" required>
+            <div style="position:relative;">
+              <input type="password" id="password" name="password" placeholder="••••••••" required style="padding-right:42px; width:100%; box-sizing:border-box;">
+              <button type="button" id="togglePasswordBtn" aria-label="Show password" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--text-muted); padding:4px; display:flex; align-items:center;">
+                <i class="ti ti-eye" id="togglePasswordIcon"></i>
+              </button>
+            </div>
           </div>
           <div class="login-row-between">
             <label><input type="checkbox" id="rememberMe"> Remember me</label>
@@ -63,6 +68,18 @@
     const form = document.getElementById('loginForm');
     const alertEl = document.getElementById('alert');
     const submitBtn = document.getElementById('submitBtn');
+
+    document.getElementById('togglePasswordBtn').addEventListener('click', () => {
+      const input = document.getElementById('password');
+      const icon = document.getElementById('togglePasswordIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'ti ti-eye-off';
+      } else {
+        input.type = 'password';
+        icon.className = 'ti ti-eye';
+      }
+    });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
