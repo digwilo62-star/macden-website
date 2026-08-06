@@ -1,3 +1,14 @@
+#!/usr/bin/env bash
+# Fixes 'MACDEN Accounting' branding (sender name AND subject lines --
+# it was hardcoded in more than just the sender field) to 'MACDEN
+# Portal', and replaces plain unstyled paragraphs with a real designed
+# HTML template: branded green header with your logo, organized
+# credential display, a real login button, consistent footer. Tested
+# with a real captured API payload (not just syntax-checked) --
+# confirmed no 'Accounting' text remains anywhere, and all dynamic
+# values (code/username/password/link) interpolate correctly.
+set -e
+cat > server/utils/email.js << 'EOF_EMAIL_JS'
 // Uses Brevo's HTTP API instead of raw SMTP. This is the fix for Render's
 // free-tier policy that blocks all outbound SMTP ports (25, 465, 587) to
 // prevent spam abuse -- HTTPS (port 443) is never blocked, so the API works
@@ -101,3 +112,5 @@ async function sendNotificationEmail(toEmail, toName, subject, textContent, html
 
 module.exports = { sendVerificationEmail, sendWelcomeEmail, sendNotificationEmail };
 
+EOF_EMAIL_JS
+echo "Done. Restart your server (or push + wait for Render)."
