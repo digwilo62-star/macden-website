@@ -139,15 +139,30 @@
           <div id="passwordSuccess" class="alert alert-success"></div>
           <div style="margin-bottom:12px;">
             <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:6px;">Current Password</label>
-            <input type="password" id="currentPassword" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body);">
+            <div style="position:relative;">
+              <input type="password" id="currentPassword" style="width:100%; padding:9px 42px 9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body); box-sizing:border-box;">
+              <button type="button" class="pw-toggle-btn" data-target="currentPassword" aria-label="Show password" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--text-muted); padding:4px; display:flex; align-items:center;">
+                <i class="ti ti-eye"></i>
+              </button>
+            </div>
           </div>
           <div style="margin-bottom:12px;">
             <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:6px;">New Password</label>
-            <input type="password" id="newPassword" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body);">
+            <div style="position:relative;">
+              <input type="password" id="newPassword" style="width:100%; padding:9px 42px 9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body); box-sizing:border-box;">
+              <button type="button" class="pw-toggle-btn" data-target="newPassword" aria-label="Show password" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--text-muted); padding:4px; display:flex; align-items:center;">
+                <i class="ti ti-eye"></i>
+              </button>
+            </div>
           </div>
           <div style="margin-bottom:16px;">
             <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:6px;">Confirm New Password</label>
-            <input type="password" id="confirmPassword" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body);">
+            <div style="position:relative;">
+              <input type="password" id="confirmPassword" style="width:100%; padding:9px 42px 9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body); box-sizing:border-box;">
+              <button type="button" class="pw-toggle-btn" data-target="confirmPassword" aria-label="Show password" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--text-muted); padding:4px; display:flex; align-items:center;">
+                <i class="ti ti-eye"></i>
+              </button>
+            </div>
           </div>
           <button class="btn btn-primary" id="changePasswordBtn" style="width:auto; padding:9px 20px;">Update Password</button>
 
@@ -217,7 +232,21 @@
       return name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
     }
 
-    function toggleSwitch(btn) {
+    document.querySelectorAll('.pw-toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = document.getElementById(btn.dataset.target);
+      const icon = btn.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'ti ti-eye-off';
+      } else {
+        input.type = 'password';
+        icon.className = 'ti ti-eye';
+      }
+    });
+  });
+
+  function toggleSwitch(btn) {
       btn.classList.toggle('on');
     }
 
