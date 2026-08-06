@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="assets/search.css">
   <link rel="stylesheet" href="assets/portal-inbox.css">
   <style>
-    .lv-grid { display: grid; grid-template-columns: 380px 1fr; gap: 20px; margin-bottom: 24px; }
+    .lv-grid { display: grid; grid-template-columns: minmax(280px, 380px) minmax(300px, 1fr); gap: 20px; margin-bottom: 24px; }
     .lv-form-field { margin-bottom: 16px; }
     .lv-form-field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
     .lv-form-field input, .lv-form-field select, .lv-form-field textarea {
@@ -20,8 +20,8 @@
     .lv-form-row .lv-form-field { flex: 1; }
 
     .lv-table { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
-    .lv-header-row { display: grid; grid-template-columns: 100px 100px 100px 1fr 100px 130px; gap: 12px; padding: 12px 18px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); border-bottom: 1px solid var(--border); }
-    .lv-row { display: grid; grid-template-columns: 100px 100px 100px 1fr 100px 130px; gap: 12px; align-items: center; padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 12.5px; }
+    .lv-header-row { display: grid; min-width: 620px; grid-template-columns: minmax(80px, 100px) minmax(80px, 100px) minmax(80px, 100px) minmax(120px, 1fr) minmax(60px, 100px) minmax(100px, 130px); gap: 12px; padding: 12px 18px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    .lv-row { display: grid; min-width: 620px; grid-template-columns: minmax(80px, 100px) minmax(80px, 100px) minmax(80px, 100px) minmax(120px, 1fr) minmax(60px, 100px) minmax(100px, 130px); gap: 12px; align-items: center; padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 12.5px; }
     .lv-row:last-child { border-bottom: none; }
     .lv-empty { padding: 40px 18px; text-align: center; color: var(--text-muted); font-size: 13px; }
 
@@ -121,7 +121,7 @@
             <p class="page-greeting-sub">Requests from all staff awaiting your review.</p>
           </div>
           <div class="lv-table">
-            <div class="lv-header-row" style="grid-template-columns: 160px 100px 100px 100px 1fr 160px;">
+            <div class="lv-header-row" style="grid-template-columns: minmax(120px, 160px) minmax(80px, 100px) minmax(80px, 100px) minmax(80px, 100px) minmax(120px, 1fr) minmax(130px, 160px);">
               <div>Staff Member</div><div>Type</div><div>Start</div><div>End</div><div>Reason</div><div>Actions</div>
             </div>
             <div id="pendingRows"><div class="lv-empty">Loading…</div></div>
@@ -196,7 +196,7 @@
           return;
         }
         rows.innerHTML = result.requests.map(r =>
-          '<div class="lv-row" style="grid-template-columns: 160px 100px 100px 100px 1fr 160px;">' +
+          '<div class="lv-row" style="grid-template-columns: minmax(120px, 160px) minmax(80px, 100px) minmax(80px, 100px) minmax(80px, 100px) minmax(120px, 1fr) minmax(130px, 160px);">' +
           '<div>' + r.staffName + (r.staffIsActive === false ? ' <span class="status-badge status-rejected" style="margin-left:4px;">Deactivated</span>' : '') + '</div>' +
           '<div>' + r.leave_type + '</div>' +
           '<div>' + new Date(r.start_date).toLocaleDateString() + '</div>' +
