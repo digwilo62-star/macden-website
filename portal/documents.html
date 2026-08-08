@@ -17,8 +17,8 @@
 
     .doc-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
     .doc-list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
-    .doc-header-row { display: grid; grid-template-columns: 1fr 140px 110px 90px 90px; gap: 14px; padding: 12px 18px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); border-bottom: 1px solid var(--border); }
-    .doc-row { display: grid; grid-template-columns: 1fr 140px 110px 90px 90px; gap: 14px; align-items: center; padding: 13px 18px; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .doc-header-row { display: grid; min-width: 600px; grid-template-columns: minmax(160px, 1fr) minmax(100px, 140px) minmax(80px, 110px) minmax(70px, 90px) minmax(70px, 90px); gap: 14px; padding: 12px 18px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    .doc-row { display: grid; min-width: 600px; grid-template-columns: minmax(160px, 1fr) minmax(100px, 140px) minmax(80px, 110px) minmax(70px, 90px) minmax(70px, 90px); gap: 14px; align-items: center; padding: 13px 18px; border-bottom: 1px solid var(--border); font-size: 13px; }
     .doc-row:last-child { border-bottom: none; }
     .doc-name-cell { display: flex; align-items: center; gap: 10px; font-weight: 500; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .doc-icon { font-size: 17px; flex-shrink: 0; }
