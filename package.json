@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "express-rate-limit": "^8.6.2"
+    "express-rate-limit": "^8.6.2",
+    "qrcode": "^1.5.4"
   }
 }

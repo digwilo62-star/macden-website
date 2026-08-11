@@ -112,6 +112,17 @@
           </div>
         </div>
 
+        
+        <!-- Staff ID Card -->
+        <div class="set-panel">
+          <h2>Staff ID Card</h2>
+          <p class="sub">Request a printable MACDEN staff ID card using your profile photo.</p>
+          <div id="idCardStatusText" style="font-size:13px; color:var(--text-secondary); margin-bottom:14px;">Checking your request status…</div>
+          <button class="btn btn-primary" id="idCardRequestBtn" style="width:auto; padding:9px 20px; display:none;">Request ID Card</button>
+          <a class="btn btn-primary" id="idCardViewLink" href="#" target="_blank" style="width:auto; padding:9px 20px; display:none; text-decoration:none; align-items:center; justify-content:center;">View / Print My ID Card</a>
+        </div>
+
+
         <!-- Notifications -->
         <div class="set-panel">
           <h2>Notifications</h2>
@@ -446,6 +457,55 @@
     });
 
     init();
+  </script>
+  <script>
+  (function(){
+    const statusText = document.getElementById('idCardStatusText');
+    const requestBtn = document.getElementById('idCardRequestBtn');
+    const viewLink = document.getElementById('idCardViewLink');
+
+    function refreshIdCardStatus(){
+      fetch('/api/id-card/request/status', { credentials: 'include' })
+        .then(r => r.json())
+        .then(({ request }) => {
+          if (!request) {
+            statusText.textContent = "You haven't requested a staff ID card yet.";
+            requestBtn.style.display = 'inline-flex';
+            viewLink.style.display = 'none';
+            return;
+          }
+          if (request.status === 'pending') {
+            statusText.textContent = 'Your ID card request is pending admin approval.';
+            requestBtn.style.display = 'none';
+            viewLink.style.display = 'none';
+          } else if (request.status === 'approved') {
+            statusText.textContent = 'Your ID card has been approved.';
+            requestBtn.style.display = 'none';
+            viewLink.style.display = 'inline-flex';
+            viewLink.href = 'id-card-view.html?requestId=' + request.id;
+          } else if (request.status === 'rejected') {
+            statusText.textContent = 'Your last request was not approved.' + (request.rejection_reason ? ' Reason: ' + request.rejection_reason : '');
+            requestBtn.style.display = 'inline-flex';
+            viewLink.style.display = 'none';
+          }
+        })
+        .catch(() => { statusText.textContent = 'Could not check ID card status right now.'; });
+    }
+
+    requestBtn.addEventListener('click', function(){
+      requestBtn.disabled = true;
+      fetch('/api/id-card/request', { method: 'POST', credentials: 'include' })
+        .then(r => r.json().then(data => ({ ok: r.ok, data })))
+        .then(({ ok, data }) => {
+          requestBtn.disabled = false;
+          if (!ok) { alert(data.error || 'Could not submit request.'); return; }
+          refreshIdCardStatus();
+        })
+        .catch(() => { requestBtn.disabled = false; alert('Something went wrong submitting your request.'); });
+    });
+
+    refreshIdCardStatus();
+  })();
   </script>
 </body>
 </html>

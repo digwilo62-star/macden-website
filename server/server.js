@@ -126,6 +126,11 @@ const verifyRoutes = require('./routes/verify');
 app.use(verifyRoutes);
 // --- end staff verification block ---
 
+// --- MACDEN ID Card Requests (auth required, checked inside the route file) ---
+const idCardRoutes = require('./routes/idCardRequests');
+app.use(idCardRoutes);
+// --- end ID card requests block ---
+
 app.use('/api/accounting', requireAuth);
 app.use('/api/accounting/admin', adminRoutes);
 app.use('/api/accounting/prices', priceRoutes);

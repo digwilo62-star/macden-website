@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ID Card Requests — MACDEN Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#0d5c2f; --green-deep:#0a4a25; --maroon:#6b1f1f;
+    --bg:#fbfaf6; --ink:#1a1a1a; --ink-soft:#5a5a5a;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ font-family:'Inter', sans-serif; background:#f2f0ea; padding:32px; }
+  .wrap{ max-width:820px; margin:0 auto; }
+  h1{ font-family:'Manrope', sans-serif; font-weight:800; font-size:22px; color:var(--green-deep); margin-bottom:4px; }
+  .sub{ color:var(--ink-soft); font-size:13.5px; margin-bottom:24px; }
+  .empty{ background:#fff; border-radius:10px; padding:40px 20px; text-align:center; color:var(--ink-soft); font-size:14px; }
+  .request-card{
+    background:#fff; border-radius:10px; padding:16px 18px; margin-bottom:12px;
+    display:flex; align-items:center; gap:14px;
+    box-shadow:0 1px 4px rgba(0,0,0,0.06);
+  }
+  .avatar{
+    width:44px; height:44px; border-radius:8px; flex-shrink:0;
+    background:linear-gradient(155deg, var(--green), var(--maroon));
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-family:'Manrope', sans-serif; font-weight:800; font-size:15px;
+    overflow:hidden;
+  }
+  .avatar img{ width:100%; height:100%; object-fit:cover; }
+  .req-info{ flex:1; min-width:0; }
+  .req-name{ font-family:'Manrope', sans-serif; font-weight:700; font-size:15px; color:var(--ink); }
+  .req-meta{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
+  .req-warn{ font-size:12px; color:#8a1f1f; font-weight:600; margin-top:4px; }
+  .actions{ display:flex; gap:8px; flex-shrink:0; }
+  button{
+    font-family:'Inter', sans-serif; font-weight:600; font-size:13px;
+    padding:8px 14px; border-radius:7px; border:none; cursor:pointer;
+  }
+  .approve-btn{ background:var(--green); color:#fff; }
+  .approve-btn:hover{ background:var(--green-deep); }
+  .reject-btn{ background:#f2e7e7; color:#8a1f1f; }
+  .reject-btn:hover{ background:#e8d5d5; }
+  button:disabled{ opacity:0.5; cursor:not-allowed; }
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    background:var(--ink); color:#fff; padding:10px 18px; border-radius:8px;
+    font-size:13.5px; display:none;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>ID Card Requests</h1>
+  <div class="sub">Pending staff requests for a printable MACDEN staff ID card.</div>
+  <div id="list"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+
+  function initials(name){
+    return (name || '?').split(' ').filter(Boolean).slice(0,2).map(w => w[0].toUpperCase()).join('');
+  }
+
+  function showToast(msg){
+    const t = $('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(() => { t.style.display = 'none'; }, 3000);
+  }
+
+  function renderRequests(requests){
+    const list = $('list');
+    if (!requests.length) {
+      list.innerHTML = '<div class="empty">No pending ID card requests right now.</div>';
+      return;
+    }
+
+    list.innerHTML = requests.map(r => {
+      const staff = r.staff || {};
+      const dept = staff.departments ? staff.departments.name : '—';
+      const hasStaffId = !!staff.staff_id;
+      const avatarContent = staff.photo_url
+        ? '<img src="' + staff.photo_url + '" alt="">'
+        : initials(staff.full_name);
+
+      return '<div class="request-card" data-id="' + r.id + '">' +
+        '<div class="avatar">' + avatarContent + '</div>' +
+        '<div class="req-info">' +
+          '<div class="req-name">' + (staff.full_name || 'Unknown') + '</div>' +
+          '<div class="req-meta">' + (staff.role || '') + ' · ' + dept + '</div>' +
+          (hasStaffId ? '' : '<div class="req-warn">No staff ID assigned yet — assign one via Edit Staff before approving.</div>') +
+        '</div>' +
+        '<div class="actions">' +
+          '<button class="reject-btn" data-action="reject" data-id="' + r.id + '">Reject</button>' +
+          '<button class="approve-btn" data-action="approve" data-id="' + r.id + '"' + (hasStaffId ? '' : ' disabled') + '>Approve</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  function loadRequests(){
+    fetch('/api/id-card/requests')
+      .then(r => r.json().then(data => ({ ok: r.ok, data })))
+      .then(({ ok, data }) => {
+        if (!ok) {
+          $('list').innerHTML = '<div class="empty">' + (data.error || 'Could not load requests.') + '</div>';
+          return;
+        }
+        renderRequests(data.requests || []);
+      })
+      .catch(() => {
+        $('list').innerHTML = '<div class="empty">Something went wrong loading requests.</div>';
+      });
+  }
+
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+    const card = btn.closest('.request-card');
+    const allButtons = card.querySelectorAll('button');
+    allButtons.forEach(b => b.disabled = true);
+
+    const url = '/api/id-card/requests/' + id + '/' + action;
+    fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'} })
+      .then(r => r.json().then(data => ({ ok: r.ok, data })))
+      .then(({ ok, data }) => {
+        if (!ok) {
+          showToast(data.error || 'Action failed.');
+          allButtons.forEach(b => b.disabled = false);
+          return;
+        }
+        showToast(action === 'approve' ? 'Card approved.' : 'Request rejected.');
+        loadRequests();
+      })
+      .catch(() => {
+        showToast('Something went wrong.');
+        allButtons.forEach(b => b.disabled = false);
+      });
+  });
+
+  loadRequests();
+})();
+</script>
+
+</body>
+</html>
