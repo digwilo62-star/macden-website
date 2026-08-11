@@ -7,14 +7,9 @@
 // (with a live QR code) whenever someone with permission opens the view
 // page, using portal/id-card-view.html.
 //
-// *** FLAGGED ASSUMPTION -- PLEASE VERIFY ***
-// This file assumes:
-//   - req.session.staffId holds the logged-in user's staff.id (UUID)
-//   - req.session.role holds their role, and the admin role string is 'admin'
-// If your actual session shape is different (e.g. req.session.user.id,
-// or req.user from a different auth strategy), update getSessionStaffId()
-// and isAdmin() below -- those two functions are the only places this
-// assumption is used.
+// Auth shape verified against server/middleware/requireAuth.js and
+// portal/manage-staff.html -- req.session.staff is the object, .role
+// is confirmed present. See getSessionStaffId() / isAdmin() below.
 
 const express = require('express');
 const router = express.Router();
@@ -24,14 +19,14 @@ const { supabase } = require('../config/supabaseClient');
 
 router.use(requireAuth);
 
-// --- adjust these two if the session shape is different ---
+// Auth shape fully confirmed against your codebase (leave.js, settings.js,
+// messages.js, etc. all use req.session.staff.id and req.session.staff.role).
 function getSessionStaffId(req) {
-  return req.session && req.session.staffId;
+  return req.session && req.session.staff && req.session.staff.id;
 }
 function isAdmin(req) {
-  return !!(req.session && req.session.role === 'admin');
+  return !!(req.session && req.session.staff && req.session.staff.role === 'admin');
 }
-// ------------------------------------------------------------
 
 // Staff: submit a new request
 router.post('/api/id-card/request', async (req, res) => {
