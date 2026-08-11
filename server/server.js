@@ -121,6 +121,11 @@ app.get('/api/accounting/health', (req, res) => {
 app.use('/api/accounting/auth', authRoutes);
 app.use('/api/accounting/public', publicRegisterRoutes);
 
+// --- MACDEN Staff Verification (public, no auth) ---
+const verifyRoutes = require('./routes/verify');
+app.use(verifyRoutes);
+// --- end staff verification block ---
+
 app.use('/api/accounting', requireAuth);
 app.use('/api/accounting/admin', adminRoutes);
 app.use('/api/accounting/prices', priceRoutes);

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>MACDEN Staff Verification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#0d5c2f;
+    --green-deep:#0a4a25;
+    --maroon:#6b1f1f;
+    --bg:#fbfaf6;
+    --ink:#1a1a1a;
+    --ink-soft:#5a5a5a;
+    --ok:#0d5c2f;
+    --fail:#8a1f1f;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Inter', sans-serif;
+    background:linear-gradient(160deg, #0a4a25 0%, #1a1a1a 70%);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .panel{
+    width:100%;
+    max-width:380px;
+    background:var(--bg);
+    border-radius:14px;
+    overflow:hidden;
+    box-shadow:0 20px 50px rgba(0,0,0,0.35);
+  }
+  .panel-header{
+    background:linear-gradient(90deg, var(--green-deep), var(--green) 65%, var(--maroon));
+    padding:20px 22px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .panel-header img{
+    width:34px; height:34px;
+    border-radius:50%;
+    background:#fff;
+    padding:2px;
+  }
+  .panel-header .brand-name{
+    font-family:'Manrope', sans-serif;
+    font-weight:800;
+    font-size:17px;
+    color:#fff;
+  }
+  .panel-header .brand-sub{
+    font-family:'Inter', sans-serif;
+    font-weight:500;
+    font-size:10.5px;
+    color:rgba(255,255,255,0.82);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+
+  .panel-body{
+    padding:26px 22px 22px 22px;
+  }
+
+  #state-loading, #state-error, #state-invalid{
+    text-align:center;
+    padding:20px 4px;
+    color:var(--ink-soft);
+    font-size:14px;
+  }
+
+  .status-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family:'Manrope', sans-serif;
+    font-weight:800;
+    font-size:13px;
+    letter-spacing:0.04em;
+    padding:6px 12px;
+    border-radius:20px;
+    margin-bottom:16px;
+  }
+  .status-badge.active{ background:rgba(13,92,47,0.12); color:var(--ok); }
+  .status-badge.inactive{ background:rgba(138,31,31,0.12); color:var(--fail); }
+  .status-badge .dot{
+    width:8px; height:8px; border-radius:50%;
+    background:currentColor;
+  }
+
+  .staff-row{
+    display:flex;
+    gap:14px;
+    align-items:center;
+    margin-bottom:18px;
+  }
+  .staff-photo{
+    width:56px; height:56px;
+    border-radius:10px;
+    background:linear-gradient(155deg, var(--green), var(--maroon));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-family:'Manrope', sans-serif;
+    font-weight:800;
+    font-size:20px;
+    flex-shrink:0;
+    overflow:hidden;
+  }
+  .staff-photo img{ width:100%; height:100%; object-fit:cover; }
+  .staff-name{
+    font-family:'Manrope', sans-serif;
+    font-weight:800;
+    font-size:18px;
+    color:var(--green-deep);
+    line-height:1.2;
+  }
+  .staff-role{
+    font-family:'Inter', sans-serif;
+    font-weight:500;
+    font-size:13px;
+    color:var(--ink-soft);
+  }
+
+  .detail-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px 14px;
+    padding:14px 0;
+    border-top:1px solid rgba(107,31,31,0.14);
+  }
+  .detail-grid .label{
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:10.5px;
+    color:var(--maroon);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+  .detail-grid .value{
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    color:var(--ink);
+    margin-top:2px;
+  }
+
+  .footer-note{
+    text-align:center;
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-top:16px;
+    line-height:1.5;
+  }
+
+  .inactive-warning{
+    background:rgba(138,31,31,0.08);
+    border:1px solid rgba(138,31,31,0.25);
+    color:var(--fail);
+    font-size:12.5px;
+    font-weight:600;
+    padding:10px 12px;
+    border-radius:8px;
+    margin-bottom:16px;
+    line-height:1.4;
+  }
+
+  .hidden{ display:none; }
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <div class="panel-header">
+    <img src="/portal/assets/logo.jpeg" alt="MACDEN">
+    <div>
+      <div class="brand-name">MACDEN</div>
+      <div class="brand-sub">Staff Verification</div>
+    </div>
+  </div>
+
+  <div class="panel-body">
+    <div id="state-loading">Checking staff record…</div>
+
+    <div id="state-invalid" class="hidden">
+      This verification code is not recognized. If you're checking a physical
+      MACDEN staff card, please contact the address printed on the card directly.
+    </div>
+
+    <div id="state-error" class="hidden">
+      Verification is temporarily unavailable. Please try again shortly.
+    </div>
+
+    <div id="state-result" class="hidden">
+      <div id="badge-active" class="status-badge active hidden">
+        <span class="dot"></span> ACTIVE STAFF MEMBER
+      </div>
+      <div id="badge-inactive" class="status-badge inactive hidden">
+        <span class="dot"></span> NOT CURRENTLY ACTIVE
+      </div>
+
+      <div id="inactive-warning" class="inactive-warning hidden">
+        This card is not currently associated with an active staff member.
+        Please do not treat it as valid identification.
+      </div>
+
+      <div class="staff-row">
+        <div class="staff-photo" id="photo-box">
+          <span id="photo-initials"></span>
+        </div>
+        <div>
+          <div class="staff-name" id="staff-name"></div>
+          <div class="staff-role" id="staff-role"></div>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <div>
+          <div class="label">Staff ID</div>
+          <div class="value" id="staff-id"></div>
+        </div>
+        <div>
+          <div class="label">Department</div>
+          <div class="value" id="staff-dept"></div>
+        </div>
+        <div id="branch-row" class="hidden">
+          <div class="label">Branch</div>
+          <div class="value" id="staff-branch"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      Verified against the live MACDEN staff directory.<br>
+      MACDEN Communications Ltd &middot; Ogba, Wemco Road, Lagos, Nigeria
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const token = new URLSearchParams(window.location.search).get('token');
+  const $ = (id) => document.getElementById(id);
+
+  function show(id){ $(id).classList.remove('hidden'); }
+  function hide(id){ $(id).classList.add('hidden'); }
+
+  function initials(name){
+    return name.split(' ').filter(Boolean).slice(0,2).map(w => w[0].toUpperCase()).join('');
+  }
+
+  if (!token) {
+    hide('state-loading');
+    show('state-invalid');
+    return;
+  }
+
+  fetch('/api/verify/' + encodeURIComponent(token))
+    .then(r => r.json().then(data => ({ ok: r.ok, data })))
+    .then(({ ok, data }) => {
+      hide('state-loading');
+
+      if (!ok || !data.valid) {
+        show('state-invalid');
+        return;
+      }
+
+      show('state-result');
+      $('staff-name').textContent = data.full_name;
+      $('staff-role').textContent = data.role;
+      $('staff-id').textContent = data.staff_id;
+      $('staff-dept').textContent = data.department;
+
+      if (data.branch) {
+        $('staff-branch').textContent = data.branch;
+        show('branch-row');
+      }
+
+      if (data.photo_url) {
+        $('photo-box').innerHTML = '<img src="' + data.photo_url + '" alt="">';
+      } else {
+        $('photo-initials').textContent = initials(data.full_name || '?');
+      }
+
+      if (data.active) {
+        show('badge-active');
+      } else {
+        show('badge-inactive');
+        show('inactive-warning');
+      }
+    })
+    .catch(() => {
+      hide('state-loading');
+      show('state-error');
+    });
+})();
+</script>
+
+</body>
+</html>
