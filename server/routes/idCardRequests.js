@@ -15,7 +15,7 @@ const express = require('express');
 const router = express.Router();
 const QRCode = require('qrcode');
 const requireAuth = require('../middleware/requireAuth');
-const { supabase } = require('../config/supabaseClient');
+const supabase = require('../config/supabaseClient');
 
 router.use(requireAuth);
 

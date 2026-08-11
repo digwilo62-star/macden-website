@@ -11,7 +11,7 @@
 const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
-const { supabase } = require('../config/supabaseClient'); // adjust destructure if supabaseClient exports differently (module.exports = supabase vs { supabase })
+const supabase = require('../config/supabaseClient'); // adjust destructure if supabaseClient exports differently (module.exports = supabase vs { supabase })
 
 // Basic abuse protection: this is a public, unauthenticated endpoint,
 // so throttle it independently of your normal API rate limits.
