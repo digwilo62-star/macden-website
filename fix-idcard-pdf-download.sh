@@ -1,3 +1,24 @@
+#!/bin/bash
+# fix-idcard-pdf-download.sh
+#
+# Upgrades portal/id-card-view.html:
+#   1. Fixes the ghost-photo watermark (was rendering as a solid blob with
+#      dark photos due to mix-blend-mode -- now uses grayscale+opacity,
+#      which works reliably regardless of the source photo's brightness)
+#   2. Adds a real "Download PDF" button -- generates an actual CR80-sized
+#      PDF client-side (html2canvas + jsPDF via CDN), not a print dialog
+#   3. Adds crossorigin="anonymous" to the staff photo <img> tags, needed
+#      for the PDF capture to actually include the photo instead of a
+#      blank/tainted canvas
+#
+# This is a full, safe overwrite -- the file is fully known/controlled,
+# no anchor-matching risk like the other patches. Safe to re-run.
+
+set -e
+
+echo "==> Overwriting portal/id-card-view.html"
+mkdir -p portal
+cat > portal/id-card-view.html << 'VIEW_EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -285,3 +306,7 @@
 
 </body>
 </html>
+VIEW_EOF
+
+echo ""
+echo "Done. Push with your usual save-progress.sh."
