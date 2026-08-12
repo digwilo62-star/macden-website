@@ -115,7 +115,7 @@
             '<div>' + (s.department || '—') + '</div>' +
             '<div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + s.email + '</div>' +
             '<div>' + statusHtml + '</div>' +
-            '<div>' + actionBtn + '</div>' +
+            '<div>' + actionBtn + ' <button class="ms-action-btn" onclick="generateIdCard(\'' + s.id + '\')">ID Card</button>' + '</div>' +
             '</div>';
         }).join('');
       } catch (err) {
@@ -137,6 +137,19 @@
       try {
         await apiRequest('/admin/staff/' + id + '/reactivate', { method: 'POST' });
         loadStaff();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // Uses raw fetch (not apiRequest) because this route lives at
+    // /api/id-card/... , not under the /api/accounting prefix apiRequest adds.
+    async function generateIdCard(id) {
+      try {
+        const res = await fetch('/api/id-card/admin-generate/' + id, { method: 'POST', credentials: 'include' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not generate ID card.');
+        window.open('id-card-view.html?requestId=' + data.requestId, '_blank');
       } catch (err) {
         alert(err.message);
       }

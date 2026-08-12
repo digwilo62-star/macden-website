@@ -1,3 +1,21 @@
+#!/bin/bash
+# fix-idcard-admin-generate-v1.sh
+#
+# Adds two things to server/routes/idCardRequests.js:
+#   1. generateUniqueStaffId() -- random MAC-YYYY-NNNN generator with
+#      collision retry against the DB's unique constraint
+#   2. POST /api/id-card/admin-generate/:staffRefId -- lets an admin
+#      generate an approved ID card directly for any staff member,
+#      skipping the request/approval flow entirely. Auto-assigns a
+#      random staff_id if they don't already have one.
+#
+# Full, safe overwrite -- this file is fully known/controlled. Safe to re-run.
+
+set -e
+
+echo "==> Overwriting server/routes/idCardRequests.js"
+mkdir -p server/routes
+cat > server/routes/idCardRequests.js << 'ROUTE_EOF'
 // server/routes/idCardRequests.js
 //
 // Staff ID card request + approval flow, same shape as your existing
@@ -295,3 +313,7 @@ router.post('/api/id-card/admin-generate/:staffRefId', async (req, res) => {
 });
 
 module.exports = router;
+ROUTE_EOF
+
+echo ""
+echo "Done. Push with your usual save-progress.sh."
