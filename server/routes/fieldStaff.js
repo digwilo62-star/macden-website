@@ -33,6 +33,26 @@ function isAdmin(req) {
   return !!(req.session && req.session.staff && req.session.staff.role === 'admin');
 }
 
+// Same normalizer as idCardRequests.js -- Nigerian phone numbers show up
+// in several formats (080..., +234..., etc), this makes them consistent
+// for display on the card.
+function normalizeNigerianPhone(raw) {
+  if (!raw) return null;
+  const digits = raw.replace(/\D/g, '');
+  if (!digits) return null;
+
+  if (digits.startsWith('234') && digits.length === 13) {
+    return '+' + digits;
+  }
+  if (digits.startsWith('0') && digits.length === 11) {
+    return '+234' + digits.slice(1);
+  }
+  if (digits.length === 10) {
+    return '+234' + digits;
+  }
+  return raw;
+}
+
 async function generateUniqueStaffId(fieldStaffId) {
   const year = new Date().getFullYear();
   const MAX_ATTEMPTS = 8;
@@ -152,6 +172,21 @@ router.post('/api/field-staff/:id/reactivate', async (req, res) => {
   }
 });
 
+// Permanent delete -- unlike deactivate, this actually removes the record.
+// Their QR code stops working immediately since the row (and its
+// verification_token) no longer exists at all.
+router.delete('/api/field-staff/:id', async (req, res) => {
+  if (!isAdmin(req)) return res.status(403).json({ error: 'Admin access required.' });
+  try {
+    const { error } = await supabase.from('field_staff').delete().eq('id', req.params.id);
+    if (error) throw error;
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('[FIELD-STAFF-DELETE-ERROR]', err);
+    return res.status(500).json({ error: 'Could not delete this field staff member.' });
+  }
+});
+
 // Generate/assign a staff_id if missing -- no request/approval concept
 // here, the admin adding them IS the approval.
 router.post('/api/field-staff/:id/generate-id', async (req, res) => {
@@ -183,7 +218,7 @@ router.get('/api/field-staff/:id/card', async (req, res) => {
   try {
     const { data: person, error } = await supabase
       .from('field_staff')
-      .select('full_name, staff_id, role, branch, photo_url, department_id, departments(name), verification_token, is_active')
+      .select('full_name, staff_id, role, branch, phone, photo_url, department_id, departments(name), verification_token, is_active')
       .eq('id', req.params.id)
       .single();
 
@@ -203,6 +238,7 @@ router.get('/api/field-staff/:id/card', async (req, res) => {
       role: person.role,
       branch: person.branch || null,
       photo_url: person.photo_url || null,
+      employee_phone: normalizeNigerianPhone(person.phone),
       qr_data_url: qrDataUrl
     });
   } catch (err) {

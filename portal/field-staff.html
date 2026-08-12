@@ -172,6 +172,7 @@
               '<button class="fs-action-btn" onclick="editFS(\'' + p.id + '\')">Edit</button>' +
               '<button class="fs-action-btn" onclick="generateCard(\'' + p.id + '\')">ID Card</button>' +
               toggleBtn +
+              '<button class="fs-action-btn danger" onclick="deleteFS(\'' + p.id + '\', ' + JSON.stringify(p.full_name) + ')">Delete</button>' +
             '</div>' +
           '</div>';
         }).join('');
@@ -312,6 +313,18 @@
       try {
         const res = await fetch('/api/field-staff/' + id + '/reactivate', { method: 'POST', credentials: 'include' });
         if (!res.ok) throw new Error('Could not reactivate.');
+        loadFieldStaff();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function deleteFS(id, name) {
+      if (!confirm('Permanently delete ' + name + '? This cannot be undone -- their record and QR code will stop working immediately. If you just want to disable their card temporarily, use Deactivate instead.')) return;
+      try {
+        const res = await fetch('/api/field-staff/' + id, { method: 'DELETE', credentials: 'include' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not delete.');
         loadFieldStaff();
       } catch (err) {
         alert(err.message);

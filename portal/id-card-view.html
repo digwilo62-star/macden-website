@@ -167,6 +167,7 @@
       <div>
         <div class="block-label">Emergency Contact</div>
         <div class="block-value">Company: +234 807 990 7796</div>
+        <div class="block-value" id="b-employee-phone" style="display:none;"></div>
       </div>
       <div class="property-line">
         Property of MACDEN Communications Ltd.<br>
@@ -228,6 +229,12 @@
       $('f-role').textContent = data.role;
       $('f-staffid').textContent = data.staff_id;
       $('qr-img').src = data.qr_data_url;
+
+      if (data.employee_phone) {
+        const phoneEl = $('b-employee-phone');
+        phoneEl.textContent = 'Employee: ' + data.employee_phone;
+        phoneEl.style.display = 'block';
+      }
 
       const mainPhoto = $('main-photo');
       const ghostPhoto = $('ghost-photo');

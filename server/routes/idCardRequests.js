@@ -28,6 +28,28 @@ function isAdmin(req) {
   return !!(req.session && req.session.staff && req.session.staff.role === 'admin');
 }
 
+// Nigerian phone numbers show up in several formats depending on who typed
+// them in (080..., 0803..., +234..., 234..., or just the 10 digits). This
+// normalizes any of those to a consistent +234XXXXXXXXXX for display on
+// the card. Falls back to returning the original string unchanged if it
+// can't confidently parse it, rather than guessing wrong.
+function normalizeNigerianPhone(raw) {
+  if (!raw) return null;
+  const digits = raw.replace(/\D/g, '');
+  if (!digits) return null;
+
+  if (digits.startsWith('234') && digits.length === 13) {
+    return '+' + digits;
+  }
+  if (digits.startsWith('0') && digits.length === 11) {
+    return '+234' + digits.slice(1);
+  }
+  if (digits.length === 10) {
+    return '+234' + digits;
+  }
+  return raw;
+}
+
 // Generates a random, collision-checked staff_id like MAC-2026-4831.
 // Retries a few times against the DB's unique constraint if unlucky.
 async function generateUniqueStaffId(staffRefId) {
@@ -192,7 +214,7 @@ router.get('/api/id-card/card/:requestId', async (req, res) => {
   try {
     const { data: reqRow, error: reqErr } = await supabase
       .from('id_card_requests')
-      .select('id, status, staff_ref_id, staff:staff_ref_id (id, full_name, staff_id, role, branch, photo_url, department_id, departments(name), verification_token)')
+      .select('id, status, staff_ref_id, staff:staff_ref_id (id, full_name, staff_id, role, branch, phone, photo_url, department_id, departments(name), verification_token)')
       .eq('id', req.params.requestId)
       .single();
 
@@ -218,6 +240,7 @@ router.get('/api/id-card/card/:requestId', async (req, res) => {
       role: staff.role,
       branch: staff.branch || null,
       photo_url: staff.photo_url || null,
+      employee_phone: normalizeNigerianPhone(staff.phone),
       qr_data_url: qrDataUrl
     });
   } catch (err) {
