@@ -1,3 +1,18 @@
+#!/bin/bash
+# fix-fieldstaff-default-dept-v1.sh
+#
+# Add Field Worker now defaults the Department dropdown to "Inventory"
+# (looked up by name from the real departments list, not hardcoded --
+# works correctly regardless of that department's actual ID). Editing an
+# existing person still shows their real current department, untouched.
+#
+# Full, safe overwrite -- fully known/controlled.
+
+set -e
+
+echo "==> Overwriting portal/field-staff.html"
+mkdir -p portal
+cat > portal/field-staff.html << 'PAGE_EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -364,3 +379,7 @@
   </script>
 </body>
 </html>
+PAGE_EOF
+
+echo ""
+echo "Done. Push with your usual save-progress.sh."
