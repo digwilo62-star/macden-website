@@ -9,10 +9,25 @@
 const express = require('express');
 const router = express.Router();
 const QRCode = require('qrcode');
+const multer = require('multer');
+const sharp = require('sharp');
 const requireAuth = require('../middleware/requireAuth');
 const supabase = require('../config/supabaseClient');
 
 router.use(requireAuth);
+
+const photoUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 3 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only JPG, PNG, or WEBP images are allowed.'));
+    }
+  }
+});
 
 function isAdmin(req) {
   return !!(req.session && req.session.staff && req.session.staff.role === 'admin');
@@ -194,6 +209,53 @@ router.get('/api/field-staff/:id/card', async (req, res) => {
     console.error('[FIELD-STAFF-CARD-ERROR]', err);
     return res.status(500).json({ error: 'Could not load card data.' });
   }
+});
+
+// Admin uploads a photo on behalf of a field staff member -- they can't
+// do this themselves (no login). Same resize/compress pipeline as the
+// regular staff self-upload route.
+router.post('/api/field-staff/:id/photo', (req, res) => {
+  if (!isAdmin(req)) return res.status(403).json({ error: 'Admin access required.' });
+
+  photoUpload.single('photo')(req, res, async (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    if (!req.file) return res.status(400).json({ error: 'No image provided.' });
+
+    try {
+      const processedBuffer = await sharp(req.file.buffer)
+        .rotate()
+        .resize({ width: 1200, height: 1200, fit: 'inside', withoutEnlargement: true })
+        .jpeg({ quality: 82 })
+        .toBuffer();
+
+      const storagePath = `field-${req.params.id}-${Date.now()}.jpg`;
+      const { error: uploadError } = await supabase.storage
+        .from('staff-photos')
+        .upload(storagePath, processedBuffer, { contentType: 'image/jpeg', upsert: true });
+
+      if (uploadError) {
+        console.error('Field staff photo upload error:', uploadError);
+        return res.status(500).json({ error: 'Upload failed: ' + uploadError.message });
+      }
+
+      const { data: publicUrlData } = supabase.storage.from('staff-photos').getPublicUrl(storagePath);
+
+      const { error: updateError } = await supabase
+        .from('field_staff')
+        .update({ photo_url: publicUrlData.publicUrl })
+        .eq('id', req.params.id);
+
+      if (updateError) {
+        console.error('Field staff photo URL save error:', updateError);
+        return res.status(500).json({ error: 'Could not save photo.' });
+      }
+
+      res.json({ success: true, photoUrl: publicUrlData.publicUrl });
+    } catch (err) {
+      console.error('Field staff photo upload unexpected error:', err);
+      res.status(500).json({ error: 'Something went wrong uploading the photo.' });
+    }
+  });
 });
 
 module.exports = router;
