@@ -1,3 +1,22 @@
+#!/bin/bash
+# fix-fieldstaff-layout-delete-v1.sh
+#
+# Two fixes for portal/field-staff.html:
+#   1. Delete was broken -- the row button built its onclick attribute
+#      using JSON.stringify() for the name, which produces double quotes
+#      that collided with the onclick="..." attribute's own double quotes,
+#      silently mangling the HTML. Delete now lives inside the Edit modal
+#      as a normal button (no more string-building through HTML attributes).
+#   2. Removing that row button also fixes the cramped 2-row action layout --
+#      3 buttons (Edit, ID Card, Deactivate/Reactivate) now fit on one line.
+#
+# Full, safe overwrite -- fully known/controlled.
+
+set -e
+
+echo "==> Overwriting portal/field-staff.html"
+mkdir -p portal
+cat > portal/field-staff.html << 'PAGE_EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -361,3 +380,7 @@
   </script>
 </body>
 </html>
+PAGE_EOF
+
+echo ""
+echo "Done. Push with your usual save-progress.sh."
