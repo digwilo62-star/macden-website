@@ -59,6 +59,7 @@
             <p class="page-greeting-sub" style="margin:0;"><a href="directory.html" style="color: var(--primary); text-decoration:none; font-weight:600;">← Back to Directory</a></p>
           </div>
           <a href="id-card-requests.html" class="btn btn-primary" style="width:auto; padding:10px 20px; text-decoration:none; display:inline-flex; align-items:center; gap:8px; margin-right:10px; background:var(--surface); color:var(--text-primary); border:1px solid var(--border);"><i class="ti ti-id-badge-2"></i> ID Card Requests</a>
+          <a href="field-staff.html" class="btn btn-primary" style="width:auto; padding:10px 20px; text-decoration:none; display:inline-flex; align-items:center; gap:8px; margin-right:10px; background:var(--surface); color:var(--text-primary); border:1px solid var(--border);"><i class="ti ti-id-badge-2"></i> Field Staff</a>
           <a href="onboard.html" class="btn btn-primary" style="width:auto; padding:10px 20px; text-decoration:none; display:inline-flex; align-items:center; gap:8px;"><i class="ti ti-user-plus"></i> Add New Staff</a>
         </div>
 
@@ -115,7 +116,7 @@
             '<div>' + (s.department || '—') + '</div>' +
             '<div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + s.email + '</div>' +
             '<div>' + statusHtml + '</div>' +
-            '<div>' + actionBtn + ' <button class="ms-action-btn" onclick="generateIdCard(\'' + s.id + '\')">ID Card</button>' + '</div>' +
+            '<div>' + actionBtn + '</div>' +
             '</div>';
         }).join('');
       } catch (err) {
@@ -137,19 +138,6 @@
       try {
         await apiRequest('/admin/staff/' + id + '/reactivate', { method: 'POST' });
         loadStaff();
-      } catch (err) {
-        alert(err.message);
-      }
-    }
-
-    // Uses raw fetch (not apiRequest) because this route lives at
-    // /api/id-card/... , not under the /api/accounting prefix apiRequest adds.
-    async function generateIdCard(id) {
-      try {
-        const res = await fetch('/api/id-card/admin-generate/' + id, { method: 'POST', credentials: 'include' });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Could not generate ID card.');
-        window.open('id-card-view.html?requestId=' + data.requestId, '_blank');
       } catch (err) {
         alert(err.message);
       }

@@ -1,3 +1,17 @@
+#!/bin/bash
+# fix-idcardview-fieldstaff-v1.sh
+#
+# Updates portal/id-card-view.html to support ?fieldId=... as well as
+# ?requestId=..., so field staff cards render the same way regular
+# staff cards do.
+#
+# Full, safe overwrite -- this file is fully known/controlled.
+
+set -e
+
+echo "==> Overwriting portal/id-card-view.html"
+mkdir -p portal
+cat > portal/id-card-view.html << 'VIEW_EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -291,3 +305,7 @@
 
 </body>
 </html>
+VIEW_EOF
+
+echo ""
+echo "Done. Push with your usual save-progress.sh."

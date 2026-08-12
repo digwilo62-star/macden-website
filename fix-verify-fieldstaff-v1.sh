@@ -1,3 +1,17 @@
+#!/bin/bash
+# fix-verify-fieldstaff-v1.sh
+#
+# Updates server/routes/verify.js so QR scans also recognize field staff
+# (people with no login account), not just regular staff. Checks the
+# staff table first, falls back to field_staff if not found there.
+#
+# Full, safe overwrite -- this file is fully known/controlled.
+
+set -e
+
+echo "==> Overwriting server/routes/verify.js"
+mkdir -p server/routes
+cat > server/routes/verify.js << 'VERIFY_EOF'
 // server/routes/verify.js
 //
 // Public staff verification endpoint. Scanned from the QR code on the back
@@ -84,3 +98,7 @@ router.get('/api/verify/:token', verifyLimiter, async (req, res) => {
 });
 
 module.exports = router;
+VERIFY_EOF
+
+echo ""
+echo "Done. Push with your usual save-progress.sh."

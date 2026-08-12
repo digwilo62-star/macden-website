@@ -131,6 +131,11 @@ const idCardRoutes = require('./routes/idCardRequests');
 app.use(idCardRoutes);
 // --- end ID card requests block ---
 
+// --- MACDEN Field Staff (auth required, checked inside the route file) ---
+const fieldStaffRoutes = require('./routes/fieldStaff');
+app.use(fieldStaffRoutes);
+// --- end field staff block ---
+
 app.use('/api/accounting', requireAuth);
 app.use('/api/accounting/admin', adminRoutes);
 app.use('/api/accounting/prices', priceRoutes);
