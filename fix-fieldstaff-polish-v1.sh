@@ -1,3 +1,20 @@
+#!/bin/bash
+# fix-fieldstaff-polish-v1.sh
+#
+# Visual polish pass on portal/field-staff.html:
+#   - Deactivate now only turns red on hover, matching the rest of the
+#     portal's convention (was red by default on every row -- too alarming)
+#   - Circular avatars instead of square, matching the rest of the portal
+#   - Subtle row hover highlight
+#   - Slightly more row padding now that actions fit on one line
+#
+# Full, safe overwrite -- fully known/controlled.
+
+set -e
+
+echo "==> Overwriting portal/field-staff.html"
+mkdir -p portal
+cat > portal/field-staff.html << 'PAGE_EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -361,3 +378,7 @@
   </script>
 </body>
 </html>
+PAGE_EOF
+
+echo ""
+echo "Done. Push with your usual save-progress.sh."
