@@ -131,6 +131,10 @@
         <input type="text" id="editFullName" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body); box-sizing:border-box;">
       </div>
       <div style="margin-bottom:12px;">
+        <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:6px;">Staff ID (for ID card)</label>
+        <input type="text" id="editStaffId" placeholder="e.g. MAC-2026-0001" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body); box-sizing:border-box;">
+      </div>
+      <div style="margin-bottom:12px;">
         <label style="display:block; font-size:12.5px; font-weight:600; margin-bottom:6px;">Account Type</label>
         <select id="editRole" style="width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body); box-sizing:border-box;">
           <option value="staff">Staff</option>
@@ -320,6 +324,7 @@
           deptResult.departments.map(d => '<option value="' + d.id + '">' + d.name + '</option>').join('');
 
         document.getElementById('editFullName').value = s.full_name || '';
+        document.getElementById('editStaffId').value = s.staff_id || '';
         document.getElementById('editRole').value = s.role || 'staff';
         document.getElementById('editDepartmentId').value = s.department_id || '';
         document.getElementById('editPhone').value = s.phone || '';
@@ -343,6 +348,7 @@
           method: 'PUT',
           body: {
             fullName: document.getElementById('editFullName').value.trim(),
+            staffId: document.getElementById('editStaffId').value.trim() || null,
             role: document.getElementById('editRole').value,
             departmentId: document.getElementById('editDepartmentId').value || null,
             phone: document.getElementById('editPhone').value.trim(),

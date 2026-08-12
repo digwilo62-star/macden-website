@@ -153,7 +153,7 @@ router.get('/staff/:id', async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('staff')
-      .select('id, full_name, role, department_id, phone, branch')
+      .select('id, full_name, role, department_id, phone, branch, staff_id')
       .eq('id', req.params.id)
       .single();
 
@@ -171,8 +171,7 @@ router.get('/staff/:id', async (req, res) => {
 // PUT /api/accounting/admin/staff/:id — edit an existing staff member
 router.put('/staff/:id', async (req, res) => {
   try {
-    const { fullName, role, departmentId, phone, branch } = req.body;
-
+    const { fullName, role, departmentId, phone, branch, staffId } = req.body;
     const { error } = await supabase
       .from('staff')
       .update({
@@ -180,11 +179,14 @@ router.put('/staff/:id', async (req, res) => {
         role: role,
         department_id: departmentId,
         phone: phone || null,
-        branch: branch || null
+        branch: branch || null,
+        staff_id: staffId || null
       })
       .eq('id', req.params.id);
-
     if (error) {
+      if (error.code === '23505') {
+        return res.status(409).json({ error: 'This Staff ID is already assigned to another staff member.' });
+      }
       return res.status(500).json({ error: 'Could not update this account.' });
     }
     logAdminAction(req, 'edit_staff', req.params.id, `Updated profile fields (role/department/phone/branch)`);
