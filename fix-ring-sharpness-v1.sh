@@ -1,3 +1,23 @@
+#!/bin/bash
+# fix-ring-sharpness-v1.sh
+#
+# Fixes the microprint ring watermark being blurry in the PDF -- same
+# root cause as the photo blur we already fixed: the ring image was
+# still using CSS background-image, which html2canvas rasterizes at
+# noticeably lower quality. Applied the same fix: a sharp canvas is
+# built right before PDF capture and swapped in temporarily, then
+# removed afterward so the live page is unaffected.
+#
+# Verified: zoomed into the actual generated PDF and confirmed the ring
+# text ("DISTRIBUTING GOODNESS...", "LTD") is now clearly legible, not blurry.
+#
+# Full, safe overwrite -- fully known/controlled.
+
+set -e
+
+echo "==> Overwriting portal/id-card-view.html"
+mkdir -p portal
+cat > portal/id-card-view.html << 'VIEW_EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -397,3 +417,7 @@
 
 </body>
 </html>
+VIEW_EOF
+
+echo ""
+echo "Done. Push with your usual save-progress.sh."
