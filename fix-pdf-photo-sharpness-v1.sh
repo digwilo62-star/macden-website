@@ -1,3 +1,31 @@
+bash fix-pdf-photo-sharpness-v1.sh#!/bin/bash
+# fix-pdf-photo-sharpness-v1.sh
+#
+# Fixes photo blurriness in the PDF that the crop fix accidentally
+# introduced. Root cause, confirmed with a head-to-head test: switching
+# the photo to CSS background-image fixed the crop mismatch, but
+# html2canvas rasterizes background-images at noticeably lower quality
+# than it does for other content -- verified side by side with a
+# fine-detail test image.
+#
+# Fix: the live page keeps using background-image (displays fine on
+# screen, that was never the problem). Only PDF generation now builds a
+# sharp pre-cropped <canvas> for the photo right before capture (using
+# the same object-fit:cover + object-position:center 15% math), since
+# html2canvas captures plain canvas elements natively and sharply. The
+# temporary canvas is removed again after the PDF is generated, so the
+# live page is unaffected.
+#
+# Verified: fine-detail test image came out crisp in the actual generated
+# PDF, not blurry. Ghost photo tint/fade also confirmed correct.
+#
+# Full, safe overwrite -- fully known/controlled.
+
+set -e
+
+echo "==> Overwriting portal/id-card-view.html"
+mkdir -p portal
+cat > portal/id-card-view.html << 'VIEW_EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -372,3 +400,7 @@
 
 </body>
 </html>
+VIEW_EOF
+
+echo ""
+echo "Done. Push with your usual save-progress.sh."
