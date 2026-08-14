@@ -30,24 +30,27 @@ function isAdmin(req) {
 
 // Nigerian phone numbers show up in several formats depending on who typed
 // them in (080..., 0803..., +234..., 234..., or just the 10 digits). This
-// normalizes any of those to a consistent +234XXXXXXXXXX for display on
-// the card. Falls back to returning the original string unchanged if it
-// can't confidently parse it, rather than guessing wrong.
+// normalizes any of those to a consistent "+234 XXX XXX XXXX" for display,
+// matching the spacing of the company contact number on the card. Falls
+// back to returning the original string unchanged if it can't confidently
+// parse it, rather than guessing wrong.
 function normalizeNigerianPhone(raw) {
   if (!raw) return null;
   const digits = raw.replace(/\D/g, '');
   if (!digits) return null;
 
+  let local;
   if (digits.startsWith('234') && digits.length === 13) {
-    return '+' + digits;
+    local = digits.slice(3);
+  } else if (digits.startsWith('0') && digits.length === 11) {
+    local = digits.slice(1);
+  } else if (digits.length === 10) {
+    local = digits;
+  } else {
+    return raw;
   }
-  if (digits.startsWith('0') && digits.length === 11) {
-    return '+234' + digits.slice(1);
-  }
-  if (digits.length === 10) {
-    return '+234' + digits;
-  }
-  return raw;
+
+  return '+234 ' + local.slice(0, 3) + ' ' + local.slice(3, 6) + ' ' + local.slice(6);
 }
 
 // Generates a random, collision-checked staff_id like MAC-2026-4831.

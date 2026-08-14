@@ -35,22 +35,24 @@ function isAdmin(req) {
 
 // Same normalizer as idCardRequests.js -- Nigerian phone numbers show up
 // in several formats (080..., +234..., etc), this makes them consistent
-// for display on the card.
+// "+234 XXX XXX XXXX" for display on the card, matching the company number.
 function normalizeNigerianPhone(raw) {
   if (!raw) return null;
   const digits = raw.replace(/\D/g, '');
   if (!digits) return null;
 
+  let local;
   if (digits.startsWith('234') && digits.length === 13) {
-    return '+' + digits;
+    local = digits.slice(3);
+  } else if (digits.startsWith('0') && digits.length === 11) {
+    local = digits.slice(1);
+  } else if (digits.length === 10) {
+    local = digits;
+  } else {
+    return raw;
   }
-  if (digits.startsWith('0') && digits.length === 11) {
-    return '+234' + digits.slice(1);
-  }
-  if (digits.length === 10) {
-    return '+234' + digits;
-  }
-  return raw;
+
+  return '+234 ' + local.slice(0, 3) + ' ' + local.slice(3, 6) + ' ' + local.slice(6);
 }
 
 async function generateUniqueStaffId(fieldStaffId) {
