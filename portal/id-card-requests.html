@@ -86,7 +86,6 @@
     list.innerHTML = requests.map(r => {
       const staff = r.staff || {};
       const dept = staff.departments ? staff.departments.name : '—';
-      const hasStaffId = !!staff.staff_id;
       const avatarContent = staff.photo_url
         ? '<img src="' + staff.photo_url + '" alt="">'
         : initials(staff.full_name);
@@ -96,18 +95,17 @@
         '<div class="req-info">' +
           '<div class="req-name">' + (staff.full_name || 'Unknown') + '</div>' +
           '<div class="req-meta">' + (staff.role || '') + ' · ' + dept + '</div>' +
-          (hasStaffId ? '' : '<div class="req-warn">No staff ID assigned yet — assign one via Edit Staff before approving.</div>') +
         '</div>' +
         '<div class="actions">' +
           '<button class="reject-btn" data-action="reject" data-id="' + r.id + '">Reject</button>' +
-          '<button class="approve-btn" data-action="approve" data-id="' + r.id + '"' + (hasStaffId ? '' : ' disabled') + '>Approve</button>' +
+          '<button class="approve-btn" data-action="approve" data-id="' + r.id + '">Approve</button>' +
         '</div>' +
       '</div>';
     }).join('');
   }
 
   function loadRequests(){
-    fetch('/api/id-card/requests')
+    fetch('/api/id-card/requests', { credentials: 'include' })
       .then(r => r.json().then(data => ({ ok: r.ok, data })))
       .then(({ ok, data }) => {
         if (!ok) {
@@ -132,7 +130,7 @@
     allButtons.forEach(b => b.disabled = true);
 
     const url = '/api/id-card/requests/' + id + '/' + action;
-    fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'} })
+    fetch(url, { method: 'POST', credentials: 'include', headers: {'Content-Type': 'application/json'} })
       .then(r => r.json().then(data => ({ ok: r.ok, data })))
       .then(({ ok, data }) => {
         if (!ok) {
