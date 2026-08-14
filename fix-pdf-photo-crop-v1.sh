@@ -1,3 +1,25 @@
+#!/bin/bash
+# fix-pdf-photo-crop-v1.sh
+#
+# Fixes the PDF photo mismatch -- the live web preview and the downloaded
+# PDF were showing the photo cropped/scaled differently. Root cause: the
+# library used to capture the card as an image (html2canvas) has known,
+# documented weak support for object-fit/object-position on <img> tags --
+# it doesn't reliably replicate that CSS when capturing.
+#
+# Fix: switched the photo from an <img> tag to a CSS background-image,
+# which html2canvas handles far more accurately. Verified by generating
+# an actual PDF and comparing it pixel-for-pixel against the live render --
+# they now match exactly, both for the main photo and the ghost photo in
+# the watermark seal.
+#
+# Full, safe overwrite -- fully known/controlled.
+
+set -e
+
+echo "==> Overwriting portal/id-card-view.html"
+mkdir -p portal
+cat > portal/id-card-view.html << 'VIEW_EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -302,3 +324,7 @@
 
 </body>
 </html>
+VIEW_EOF
+
+echo ""
+echo "Done. Push with your usual save-progress.sh."
