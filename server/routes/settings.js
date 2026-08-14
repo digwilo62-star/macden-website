@@ -295,6 +295,29 @@ router.post('/photo', (req, res) => {
 
       // Update the session too, so the new photo shows up immediately on
       // every page without needing to log out and back in.
+      // Security: changing your photo resets any already-approved ID card
+      // back to pending, so an admin has to review and re-approve the new
+      // photo before the card becomes accessible again.
+      try {
+        const { data: existingRequest } = await supabase
+          .from('id_card_requests')
+          .select('id, status')
+          .eq('staff_ref_id', req.session.staff.id)
+          .order('requested_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (existingRequest && existingRequest.status === 'approved') {
+          await supabase
+            .from('id_card_requests')
+            .update({ status: 'pending', reviewed_at: null, reviewed_by: null })
+            .eq('id', existingRequest.id);
+        }
+      } catch (resetErr) {
+        // Non-fatal -- don't fail the photo upload itself over this side effect
+        console.error('[ID-CARD-RESET-ON-PHOTO-ERROR]', resetErr);
+      }
+
       req.session.staff.photoUrl = publicUrlData.publicUrl;
 
       res.json({ success: true, photoUrl: publicUrlData.publicUrl });
