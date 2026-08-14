@@ -1,3 +1,26 @@
+#!/bin/bash
+# fix-ghost-photo-doubleexposure-v1.sh
+#
+# Fixes the ghost photo (small circle in the seal) showing wrong color
+# and looking blurry in the PDF. Root cause: the sharp canvas built for
+# PDF capture was being layered ON TOP of the old blurry background-image,
+# which was still present underneath -- since the ghost photo is
+# semi-transparent by design (that's what creates the tinted seal look),
+# both layers showed through and blended together.
+#
+# Fix: the underlying background-image is now hidden right before the
+# sharp canvas is added, and properly restored afterward so the live
+# page still displays normally. Verified with a colored test image
+# (not just line patterns) to specifically catch color-blending issues,
+# not just blur.
+#
+# Full, safe overwrite -- fully known/controlled.
+
+set -e
+
+echo "==> Overwriting portal/id-card-view.html"
+mkdir -p portal
+cat > portal/id-card-view.html << 'VIEW_EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -377,3 +400,7 @@
 
 </body>
 </html>
+VIEW_EOF
+
+echo ""
+echo "Done. Push with your usual save-progress.sh."
