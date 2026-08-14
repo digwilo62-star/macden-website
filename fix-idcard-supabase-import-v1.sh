@@ -1,3 +1,21 @@
+#!/bin/bash
+# fix-idcard-supabase-import-v1.sh
+#
+# Fixes "Cannot read properties of undefined (reading 'from')" on ID card
+# requests -- server/routes/idCardRequests.js had regressed back to a
+# broken supabaseClient import (destructured { supabase } instead of the
+# correct default import). This exact bug was fixed live on your server
+# once before, but got silently reintroduced by later full-file updates
+# built from an outdated local copy on my end. Fixed permanently this
+# time, and confirmed the same mistake isn't present in fieldStaff.js.
+#
+# Full, safe overwrite -- fully known/controlled.
+
+set -e
+
+echo "==> Overwriting server/routes/idCardRequests.js"
+mkdir -p server/routes
+cat > server/routes/idCardRequests.js << 'ROUTE_EOF'
 // server/routes/idCardRequests.js
 //
 // Staff ID card request + approval flow, same shape as your existing
@@ -321,3 +339,7 @@ router.post('/api/id-card/admin-generate/:staffRefId', async (req, res) => {
 });
 
 module.exports = router;
+ROUTE_EOF
+
+echo ""
+echo "Done. Push with your usual save-progress.sh."
