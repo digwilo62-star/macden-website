@@ -36,7 +36,7 @@ router.get('/api/verify/:token', verifyLimiter, async (req, res) => {
     // relationship Postgres can embed automatically.
     const { data: staffMember, error } = await supabase
       .from('staff')
-      .select('full_name, staff_id, department_id, departments(name), role, branch, photo_url, is_active')
+      .select('full_name, staff_id, department_id, departments(name), role, job_title, branch, photo_url, is_active')
       .eq('verification_token', token)
       .maybeSingle();
 
@@ -47,7 +47,7 @@ router.get('/api/verify/:token', verifyLimiter, async (req, res) => {
         full_name: staffMember.full_name,
         staff_id: staffMember.staff_id,
         department: staffMember.departments ? staffMember.departments.name : null,
-        role: staffMember.role,
+        role: staffMember.job_title || '',
         branch: staffMember.branch || null,
         photo_url: staffMember.photo_url || null
       });
