@@ -1,3 +1,28 @@
+#!/bin/bash
+# fix-verify-redesign-v1.sh
+#
+# Full redesign of portal/verify.html (the QR verification page):
+#   - Large, instant-read verdict banner (checkmark/X icon, full-color background)
+#   - Live "Verified: [date] — [time]" timestamp
+#   - Single, prominent tap-to-call button (removed the duplicate phone
+#     number that used to also appear in the footer)
+#   - Faint watermark seal visible on every state, not just loading
+#   - A genuine fourth state: "NOT RECOGNIZED" (amber) for a fake/invalid
+#     code, distinct from "NOT ACTIVE" (red) for a real-but-deactivated
+#     staff member -- these mean different things and now look different
+#   - Real animated loading spinner (not static dots)
+#   - Mobile-first, large tap targets
+#
+# Tested against all four real states (loading, active, inactive,
+# unrecognized) with actual rendered screenshots before shipping.
+#
+# Full, safe overwrite -- fully known/controlled.
+
+set -e
+
+echo "==> Overwriting portal/verify.html"
+mkdir -p portal
+cat > portal/verify.html << 'VIEW_EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -388,3 +413,7 @@
 
 </body>
 </html>
+VIEW_EOF
+
+echo ""
+echo "Done. Push with your usual save-progress.sh."
