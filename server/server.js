@@ -136,6 +136,11 @@ const fieldStaffRoutes = require('./routes/fieldStaff');
 app.use(fieldStaffRoutes);
 // --- end field staff block ---
 
+// --- MACDEN Attendance (auth required, checked inside the route file) ---
+const attendanceRoutes = require('./routes/attendance');
+app.use(attendanceRoutes);
+// --- end attendance block ---
+
 app.use('/api/accounting', requireAuth);
 app.use('/api/accounting/admin', adminRoutes);
 app.use('/api/accounting/prices', priceRoutes);
