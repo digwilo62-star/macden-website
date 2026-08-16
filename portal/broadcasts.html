@@ -109,6 +109,16 @@
                     </label>
                   </div>
                   <input type="datetime-local" id="bcScheduledAt" style="display:none; padding:9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body); font-size:13px;">
+                <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border);">
+                  <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+                    <input type="checkbox" id="bcDashboardAnnouncement">
+                    Also feature this on the Dashboard as an Announcement
+                  </label>
+                  <div id="bcVanishWrap" style="display:none; margin-top:10px;">
+                    <label style="display:block; font-size:12px; color:var(--text-secondary); margin-bottom:6px;">Vanish from Dashboard at (optional -- leave blank to stay featured indefinitely)</label>
+                    <input type="datetime-local" id="bcVanishAt" style="padding:9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body); font-size:13px;">
+                  </div>
+                </div>
                 </div>
                 <div class="compose-body-area">
                   <textarea id="bcBody" placeholder="Write your announcement…"></textarea>
@@ -280,6 +290,9 @@
       btn.disabled = true;
       btn.textContent = 'Sending…';
 
+      document.getElementById('bcDashboardAnnouncement').addEventListener('change', function(){
+        document.getElementById('bcVanishWrap').style.display = this.checked ? 'block' : 'none';
+      });
       const isScheduled = document.getElementById('sendTimingLater').checked;
       const scheduledAtValue = document.getElementById('bcScheduledAt').value;
 
@@ -295,7 +308,9 @@
           method: 'POST',
           body: {
             subject, body,
-            scheduledAt: isScheduled ? new Date(scheduledAtValue).toISOString() : undefined
+            scheduledAt: isScheduled ? new Date(scheduledAtValue).toISOString() : undefined,
+            isDashboardAnnouncement: document.getElementById('bcDashboardAnnouncement').checked,
+            vanishAt: document.getElementById('bcVanishAt').value ? new Date(document.getElementById('bcVanishAt').value).toISOString() : undefined
           }
         });
         document.getElementById('bcSubject').value = '';
@@ -303,6 +318,9 @@
         document.getElementById('sendTimingNow').checked = true;
         document.getElementById('bcScheduledAt').style.display = 'none';
         document.getElementById('bcScheduledAt').value = '';
+        document.getElementById('bcDashboardAnnouncement').checked = false;
+        document.getElementById('bcVanishWrap').style.display = 'none';
+        document.getElementById('bcVanishAt').value = '';
         document.getElementById('composeView').style.display = 'none';
         document.getElementById('listView').style.display = 'block';
 
