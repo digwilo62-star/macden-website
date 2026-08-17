@@ -126,3 +126,21 @@ async function loadUnreadBadge() {
   setTimeout(macdenPollForUpdates, 4000);
   setInterval(macdenPollForUpdates, 20000);
 })();
+
+// ---- Point the sidebar's Attendance link straight at the right page ----
+// Runs on every portal page load. Rewrites the link's destination based
+// on role (admin -> full report, everyone else -> personal history)
+// before it's ever clicked, so it's one direct navigation like any other
+// sidebar link -- not a page that loads just to redirect again.
+(async function macdenFixAttendanceLink(){
+  const link = document.querySelector('a[href="attendance.html"]');
+  if (!link) return; // this page has no sidebar, or no Attendance link -- nothing to do
+
+  try {
+    const result = await apiRequest('/dashboard-check');
+    link.href = result.staff.role === 'admin' ? 'attendance-report.html' : 'my-attendance.html';
+  } catch (err) {
+    // Not logged in / check failed -- leave the link as-is, the router
+    // page it points to still works correctly as a fallback
+  }
+})();
