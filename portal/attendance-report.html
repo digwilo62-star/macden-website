@@ -21,6 +21,9 @@
   .att-time.missing{ color:var(--text-muted); font-weight:400; }
   .att-time-cell{ display:flex; align-items:center; gap:8px; }
   .att-photo-thumb{ width:26px; height:26px; border-radius:50%; object-fit:cover; border:1px solid var(--border); cursor:pointer; flex-shrink:0; }
+  .att-photo-wrap{ position:relative; display:inline-flex; flex-shrink:0; }
+  .att-photo-badge{ position:absolute; bottom:-2px; right:-2px; width:12px; height:12px; border-radius:50%; background:var(--primary); border:1.5px solid var(--surface); display:flex; align-items:center; justify-content:center; }
+  .att-photo-badge svg{ width:7px; height:7px; }
   .att-photo-modal-backdrop{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center; }
   .att-photo-modal-backdrop.visible{ display:flex; }
   .att-photo-modal-backdrop img{ max-width:90vw; max-height:85vh; border-radius:10px; }
@@ -111,11 +114,12 @@
           const checkIn = formatTime(log.check_in_time);
           const checkOut = formatTime(log.check_out_time);
 
+          const cameraBadge = '<span class="att-photo-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 8h4l2-3h6l2 3h4v12H3z"/><circle cx="12" cy="14" r="3"/></svg></span>';
           const checkInThumb = log.check_in_photo_url
-            ? '<img class="att-photo-thumb" src="' + log.check_in_photo_url + '" onclick="showAttPhoto(\'' + log.check_in_photo_url + '\')">'
+            ? '<span class="att-photo-wrap"><img class="att-photo-thumb" src="' + log.check_in_photo_url + '" onclick="showAttPhoto(\'' + log.check_in_photo_url + '\')">' + cameraBadge + '</span>'
             : '';
           const checkOutThumb = log.check_out_photo_url
-            ? '<img class="att-photo-thumb" src="' + log.check_out_photo_url + '" onclick="showAttPhoto(\'' + log.check_out_photo_url + '\')">'
+            ? '<span class="att-photo-wrap"><img class="att-photo-thumb" src="' + log.check_out_photo_url + '" onclick="showAttPhoto(\'' + log.check_out_photo_url + '\')">' + cameraBadge + '</span>'
             : '';
 
           return '<div class="att-row">' +

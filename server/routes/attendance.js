@@ -193,4 +193,73 @@ router.get('/api/attendance/logs', async (req, res) => {
   }
 });
 
+// GET /api/attendance/my-today -- for the STAFF dashboard card. Only
+// meaningful for regular staff (field staff have no login/session at all).
+router.get('/api/attendance/my-today', async (req, res) => {
+  try {
+    const today = todayDateString();
+    const { data, error } = await supabase
+      .from('attendance_logs')
+      .select('check_in_time, check_out_time')
+      .eq('staff_ref_id', req.session.staff.id)
+      .eq('log_date', today)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    return res.json({
+      checkedIn: !!(data && data.check_in_time),
+      checkInTime: data ? data.check_in_time : null,
+      checkOutTime: data ? data.check_out_time : null
+    });
+  } catch (err) {
+    console.error('[ATTENDANCE-MY-TODAY-ERROR]', err);
+    return res.status(500).json({ error: 'Could not load your attendance status.' });
+  }
+});
+
+// GET /api/attendance/summary-today -- for the ADMIN dashboard card.
+router.get('/api/attendance/summary-today', async (req, res) => {
+  if (!isAdmin(req)) return res.status(403).json({ error: 'Admin access required.' });
+
+  try {
+    const today = todayDateString();
+
+    const [{ count: totalActive }, { data: checkedInRows }] = await Promise.all([
+      supabase.from('staff').select('*', { count: 'exact', head: true }).eq('is_active', true),
+      supabase.from('attendance_logs').select('id').eq('log_date', today).not('check_in_time', 'is', null)
+    ]);
+
+    return res.json({
+      checkedInCount: (checkedInRows || []).length,
+      totalActiveStaff: totalActive || 0
+    });
+  } catch (err) {
+    console.error('[ATTENDANCE-SUMMARY-ERROR]', err);
+    return res.status(500).json({ error: 'Could not load attendance summary.' });
+  }
+});
+
+// GET /api/attendance/my-history?limit=N -- personal attendance history,
+// regular staff only (field staff have no account to view this from).
+router.get('/api/attendance/my-history', async (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit) || 14, 90);
+
+  try {
+    const { data, error } = await supabase
+      .from('attendance_logs')
+      .select('log_date, check_in_time, check_out_time')
+      .eq('staff_ref_id', req.session.staff.id)
+      .order('log_date', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+
+    return res.json({ history: data || [] });
+  } catch (err) {
+    console.error('[ATTENDANCE-MY-HISTORY-ERROR]', err);
+    return res.status(500).json({ error: 'Could not load your attendance history.' });
+  }
+});
+
 module.exports = router;

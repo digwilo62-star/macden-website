@@ -59,6 +59,12 @@
             <a href="leave.html" class="quick-action"><i class="ti ti-calendar-event"></i> Request Leave</a>
             <a href="directory.html" class="quick-action"><i class="ti ti-users"></i> Staff Directory</a>
           </div>
+          <div class="panel" id="attendanceCardPanel">
+            <div class="panel-header"><h2>Attendance Today</h2></div>
+            <div id="attendanceCardBody" style="padding:8px 0;">
+              <div class="empty-note">Loading…</div>
+            </div>
+          </div>
         </div>
 
         
@@ -124,6 +130,41 @@
           } catch (err) {
             document.getElementById('announcementsContainer').innerHTML =
               '<div class="empty-note">Could not load announcements.</div>';
+          }
+        })(),
+        (async () => {
+          const body = document.getElementById('attendanceCardBody');
+          try {
+            if (staff.role === 'admin') {
+              const res = await fetch('/api/attendance/summary-today', { credentials: 'include' });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.error || 'Could not load.');
+              body.innerHTML =
+                '<div style="font-family:\'Manrope\',sans-serif; font-weight:800; font-size:28px; color:var(--primary); margin-bottom:2px;">' +
+                  data.checkedInCount + ' <span style="font-size:16px; font-weight:600; color:var(--text-secondary);">of ' + data.totalActiveStaff + '</span>' +
+                '</div>' +
+                '<div style="font-size:12.5px; color:var(--text-secondary); margin-bottom:12px;">staff checked in today</div>' +
+                '<a href="attendance-report.html" style="font-size:12.5px; font-weight:600; color:var(--primary); text-decoration:none;">View full report &rarr;</a>';
+            } else {
+              const res = await fetch('/api/attendance/my-today', { credentials: 'include' });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.error || 'Could not load.');
+              if (data.checkedIn) {
+                const time = new Date(data.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                body.innerHTML =
+                  '<div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">' +
+                    '<span style="width:32px; height:32px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><i class="ti ti-check" style="color:#fff; font-size:18px;"></i></span>' +
+                    '<div><div style="font-size:13px; color:var(--text-primary);">You checked in today</div><div style="font-weight:700; color:var(--primary);">at ' + time + '</div></div>' +
+                  '</div>' +
+                  '<a href="my-attendance.html" style="font-size:12.5px; font-weight:600; color:var(--primary); text-decoration:none;">View my attendance history &rarr;</a>';
+              } else {
+                body.innerHTML =
+                  '<div style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">You have not checked in yet today.</div>' +
+                  '<a href="my-attendance.html" style="font-size:12.5px; font-weight:600; color:var(--primary); text-decoration:none;">View my attendance history &rarr;</a>';
+              }
+            }
+          } catch (err) {
+            body.innerHTML = '<div class="empty-note">Could not load attendance.</div>';
           }
         })(),
         (async () => {
