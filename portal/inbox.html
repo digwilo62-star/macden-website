@@ -183,7 +183,12 @@
           let attachmentHtml = '';
           if (m.attachment_url) {
             const icon = m.attachment_type === 'pdf' ? 'ti-file-type-pdf' : 'ti-file-spreadsheet';
-            attachmentHtml = '<a href="' + m.attachment_url + '" target="_blank" rel="noopener" class="email-attachment"><i class="ti ' + icon + '"></i> Download attachment</a>';
+            const fileName = attachmentDisplayName(m.attachment_url);
+            const iconBg = m.attachment_type === 'pdf' ? '#c0392b' : '#1d6f42';
+            attachmentHtml = '<a href="' + m.attachment_url + '" target="_blank" rel="noopener" class="email-attachment">' +
+              '<span class="email-attachment-icon" style="background:' + iconBg + ';"><i class="ti ' + icon + '"></i></span>' +
+              '<span class="email-attachment-name">' + fileName + '</span>' +
+              '</a>';
           }
           return '<div class="email-meta-row">' +
             '<div class="email-meta-avatar">' + initials(m.senderName) + '</div>' +
@@ -305,6 +310,17 @@
     });
 
     init();
+    function attachmentDisplayName(url) {
+      try {
+        const rawName = decodeURIComponent(url.split('/').pop().split('?')[0]);
+        // Storage filenames are "uuid-timestamp-originalname.ext" -- strip
+        // that prefix to recover the real name the person uploaded.
+        const stripped = rawName.replace(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}-\d+-/i, '');
+        return stripped || rawName;
+      } catch (e) {
+        return 'Attachment';
+      }
+    }
   </script>
 </body>
 </html>
