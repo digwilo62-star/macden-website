@@ -111,9 +111,43 @@
 </div>
 
 <input type="text" id="scan-input" autofocus autocomplete="off">
+<video id="camera-feed" autoplay playsinline muted style="display:none;"></video>
+<canvas id="camera-canvas" style="display:none;"></canvas>
 
 <script>
 (function(){
+  // Camera capture -- kept running continuously in the background (not
+  // requested fresh on every scan) so a photo can be grabbed instantly
+  // the moment a scan happens, with no visible delay or repeated
+  // permission prompts. If the camera isn't available for any reason,
+  // scanning still works fine -- the photo is just skipped, matching
+  // the same non-fatal approach used on the backend.
+  const cameraVideo = document.getElementById('camera-feed');
+  const cameraCanvas = document.getElementById('camera-canvas');
+  let cameraReady = false;
+
+  async function initCamera(){
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } });
+      cameraVideo.srcObject = stream;
+      cameraReady = true;
+    } catch (err) {
+      console.error('Camera not available:', err);
+      cameraReady = false;
+    }
+  }
+  initCamera();
+
+  function captureAttendancePhoto(){
+    if (!cameraReady || !cameraVideo.videoWidth) return null;
+    cameraCanvas.width = cameraVideo.videoWidth;
+    cameraCanvas.height = cameraVideo.videoHeight;
+    cameraCanvas.getContext('2d').drawImage(cameraVideo, 0, 0, cameraCanvas.width, cameraCanvas.height);
+    // Compressed JPEG -- keeps each photo small (roughly 30-80KB at this
+    // size/quality), since this runs for every single scan, every day.
+    return cameraCanvas.toDataURL('image/jpeg', 0.6);
+  }
+
   // Connection watchdog -- checks the server every 20 seconds. Doesn't
   // block scanning (a real scan attempt is its own connectivity test),
   // this is purely so an outage is visible on screen instead of the
@@ -207,12 +241,14 @@
     const token = extractToken(rawValue);
     if (!token) return;
 
+    const photo = captureAttendancePhoto();
+
     try {
       const res = await fetch('/api/attendance/scan', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token })
+        body: JSON.stringify({ token, photo })
       });
       const data = await res.json();
 

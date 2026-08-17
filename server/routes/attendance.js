@@ -25,9 +25,39 @@ function todayDateString() {
   return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 }
 
+// Uploads a base64 photo (from the kiosk's camera) to Supabase Storage.
+// Non-fatal on failure -- a photo upload problem should never block the
+// actual attendance record from being saved, since the scan itself
+// matters more than the photo.
+async function uploadAttendancePhoto(photoDataUrl, filenamePrefix) {
+  if (!photoDataUrl || !photoDataUrl.startsWith('data:image/')) return null;
+  try {
+    const matches = photoDataUrl.match(/^data:image\/(\w+);base64,(.+)$/);
+    if (!matches) return null;
+    const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+    const buffer = Buffer.from(matches[2], 'base64');
+    const fileName = `${filenamePrefix}-${Date.now()}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('attendance-photos')
+      .upload(fileName, buffer, { contentType: `image/${matches[1]}`, upsert: true });
+
+    if (uploadError) {
+      console.error('[ATTENDANCE-PHOTO-UPLOAD-ERROR]', uploadError);
+      return null;
+    }
+
+    const { data: publicUrlData } = supabase.storage.from('attendance-photos').getPublicUrl(fileName);
+    return publicUrlData.publicUrl;
+  } catch (err) {
+    console.error('[ATTENDANCE-PHOTO-UPLOAD-UNEXPECTED-ERROR]', err);
+    return null;
+  }
+}
+
 // POST /api/attendance/scan -- called by the kiosk on every card scan
 router.post('/api/attendance/scan', async (req, res) => {
-  const { token } = req.body;
+  const { token, photo } = req.body;
   if (!token) return res.status(400).json({ error: 'No token provided.' });
 
   try {
@@ -74,9 +104,11 @@ router.post('/api/attendance/scan', async (req, res) => {
 
     if (!existing) {
       // First scan today -- check in
+      const photoUrl = await uploadAttendancePhoto(photo, `${person.id}-${today}-checkin`);
+
       const { error: insertErr } = await supabase
         .from('attendance_logs')
-        .insert({ [refColumn]: person.id, log_date: today, check_in_time: now });
+        .insert({ [refColumn]: person.id, log_date: today, check_in_time: now, check_in_photo_url: photoUrl });
       if (insertErr) throw insertErr;
 
       return res.json({
@@ -89,9 +121,11 @@ router.post('/api/attendance/scan', async (req, res) => {
 
     if (existing.check_in_time && !existing.check_out_time) {
       // Second scan today -- check out
+      const photoUrl = await uploadAttendancePhoto(photo, `${person.id}-${today}-checkout`);
+
       const { error: updateErr } = await supabase
         .from('attendance_logs')
-        .update({ check_out_time: now })
+        .update({ check_out_time: now, check_out_photo_url: photoUrl })
         .eq('id', existing.id);
       if (updateErr) throw updateErr;
 
@@ -128,7 +162,7 @@ router.get('/api/attendance/logs', async (req, res) => {
     const { data, error } = await supabase
       .from('attendance_logs')
       .select(`
-        id, log_date, check_in_time, check_out_time,
+        id, log_date, check_in_time, check_out_time, check_in_photo_url, check_out_photo_url,
         staff:staff_ref_id (full_name, staff_id, departments(name)),
         field_staff:field_staff_ref_id (full_name, staff_id, departments(name))
       `)
@@ -146,7 +180,9 @@ router.get('/api/attendance/logs', async (req, res) => {
         department: person && person.departments ? person.departments.name : null,
         source: row.staff ? 'Staff' : 'Field Staff',
         check_in_time: row.check_in_time,
-        check_out_time: row.check_out_time
+        check_out_time: row.check_out_time,
+        check_in_photo_url: row.check_in_photo_url,
+        check_out_photo_url: row.check_out_photo_url
       };
     });
 

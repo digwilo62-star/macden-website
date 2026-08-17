@@ -19,6 +19,11 @@
   .att-badge.field{ background:var(--gold-dim); color:#8a6d00; }
   .att-time{ font-weight:600; }
   .att-time.missing{ color:var(--text-muted); font-weight:400; }
+  .att-time-cell{ display:flex; align-items:center; gap:8px; }
+  .att-photo-thumb{ width:26px; height:26px; border-radius:50%; object-fit:cover; border:1px solid var(--border); cursor:pointer; flex-shrink:0; }
+  .att-photo-modal-backdrop{ display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center; }
+  .att-photo-modal-backdrop.visible{ display:flex; }
+  .att-photo-modal-backdrop img{ max-width:90vw; max-height:85vh; border-radius:10px; }
 </style>
 </head>
 <body>
@@ -50,6 +55,10 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="att-photo-modal-backdrop" id="attPhotoModal" onclick="this.classList.remove('visible')">
+    <img id="attPhotoModalImg" src="" alt="Attendance photo">
   </div>
 
   <script src="assets/api.js"></script>
@@ -102,17 +111,29 @@
           const checkIn = formatTime(log.check_in_time);
           const checkOut = formatTime(log.check_out_time);
 
+          const checkInThumb = log.check_in_photo_url
+            ? '<img class="att-photo-thumb" src="' + log.check_in_photo_url + '" onclick="showAttPhoto(\'' + log.check_in_photo_url + '\')">'
+            : '';
+          const checkOutThumb = log.check_out_photo_url
+            ? '<img class="att-photo-thumb" src="' + log.check_out_photo_url + '" onclick="showAttPhoto(\'' + log.check_out_photo_url + '\')">'
+            : '';
+
           return '<div class="att-row">' +
             '<div>' + log.full_name + '</div>' +
             '<div>' + typeBadge + '</div>' +
             '<div>' + (log.department || '—') + '</div>' +
-            '<div class="att-time' + (checkIn ? '' : ' missing') + '">' + (checkIn || 'Not checked in') + '</div>' +
-            '<div class="att-time' + (checkOut ? '' : ' missing') + '">' + (checkOut || '—') + '</div>' +
+            '<div class="att-time-cell">' + checkInThumb + '<span class="att-time' + (checkIn ? '' : ' missing') + '">' + (checkIn || 'Not checked in') + '</span></div>' +
+            '<div class="att-time-cell">' + checkOutThumb + '<span class="att-time' + (checkOut ? '' : ' missing') + '">' + (checkOut || '—') + '</span></div>' +
             '</div>';
         }).join('');
       } catch (err) {
         rows.innerHTML = '<div class="att-empty">' + err.message + '</div>';
       }
+    }
+
+    function showAttPhoto(url){
+      document.getElementById('attPhotoModalImg').src = url;
+      document.getElementById('attPhotoModal').classList.add('visible');
     }
 
     init();
