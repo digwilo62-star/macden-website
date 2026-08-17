@@ -49,7 +49,6 @@
           <div class="panel">
             <div class="panel-header">
               <h2>Announcements</h2>
-              <a href="broadcasts.html">View all</a>
             </div>
             <div id="announcementsContainer"><div class="empty-note">Loading announcements…</div></div>
           </div>
@@ -115,26 +114,7 @@
 
       try {
         const result = await apiRequest('/messages/announcements/active');
-        const container = document.getElementById('announcementsContainer');
-        const items = result.announcements || [];
-
-        if (items.length === 0) {
-          container.innerHTML = '<div class="empty-note">No announcements right now.</div>';
-        } else {
-          container.innerHTML = items.map(a => {
-            const posted = new Date(a.sentAt);
-            const postedStr = posted.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
-              ' — ' + posted.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-            const snippet = (a.body || '').length > 140 ? a.body.slice(0, 140) + '…' : (a.body || '');
-            return '<a href="inbox.html?id=' + a.conversationId + '" style="text-decoration:none; display:block; ' +
-              'border-left:4px solid var(--primary); background:var(--primary-dim); border-radius:8px; ' +
-              'padding:12px 14px; margin-bottom:10px;">' +
-              '<div style="font-weight:700; font-size:13.5px; color:var(--text-primary); margin-bottom:3px;">' + a.subject + '</div>' +
-              '<div style="font-size:12.5px; color:var(--text-secondary); margin-bottom:6px; line-height:1.4;">' + snippet + '</div>' +
-              '<div style="font-size:10.5px; color:var(--text-muted);">Posted ' + postedStr + '</div>' +
-              '</a>';
-          }).join('');
-        }
+        renderAnnouncements(result.announcements || []);
       } catch (err) {
         document.getElementById('announcementsContainer').innerHTML =
           '<div class="empty-note">Could not load announcements.</div>';
@@ -205,6 +185,54 @@
       await apiRequest('/auth/logout', { method: 'POST' });
       window.location.href = 'login.html';
     });
+
+    function announcementCardHtml(a){
+      const posted = new Date(a.sentAt);
+      const postedStr = posted.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) +
+        ' — ' + posted.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      const snippet = (a.body || '').length > 140 ? a.body.slice(0, 140) + '…' : (a.body || '');
+      return '<a href="inbox.html?id=' + a.conversationId + '" style="text-decoration:none; display:block; ' +
+        'border-left:4px solid var(--primary); background:var(--primary-dim); border-radius:8px; ' +
+        'padding:12px 14px; margin-bottom:10px;">' +
+        '<div style="font-weight:700; font-size:13.5px; color:var(--text-primary); margin-bottom:3px;">' + a.subject + '</div>' +
+        '<div style="font-size:12.5px; color:var(--text-secondary); margin-bottom:6px; line-height:1.4;">' + snippet + '</div>' +
+        '<div style="font-size:10.5px; color:var(--text-muted);">Posted ' + postedStr + '</div>' +
+        '</a>';
+    }
+
+    function renderAnnouncements(items){
+      const container = document.getElementById('announcementsContainer');
+      const VISIBLE_COUNT = 2;
+
+      if (items.length === 0) {
+        container.innerHTML = '<div class="empty-note">No announcements right now.</div>';
+        return;
+      }
+
+      const visible = items.slice(0, VISIBLE_COUNT);
+      const rest = items.slice(VISIBLE_COUNT);
+
+      let html = visible.map(announcementCardHtml).join('');
+
+      if (rest.length > 0) {
+        html += '<div id="announcementsRest" style="display:none;">' + rest.map(announcementCardHtml).join('') + '</div>';
+        html += '<button id="announcementsToggle" style="width:100%; padding:8px; border:1px solid var(--border); ' +
+          'background:var(--surface); border-radius:8px; font-size:12.5px; font-weight:600; color:var(--primary); ' +
+          'cursor:pointer; font-family:var(--font-body);">View all (' + items.length + ')</button>';
+      }
+
+      container.innerHTML = html;
+
+      const toggleBtn = document.getElementById('announcementsToggle');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', function(){
+          const restEl = document.getElementById('announcementsRest');
+          const expanded = restEl.style.display === 'block';
+          restEl.style.display = expanded ? 'none' : 'block';
+          this.textContent = expanded ? 'View all (' + items.length + ')' : 'Show less';
+        });
+      }
+    }
 
     init();
   </script>
