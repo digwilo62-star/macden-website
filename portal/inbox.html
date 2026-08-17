@@ -182,9 +182,10 @@
         container.innerHTML = result.messages.map(m => {
           let attachmentHtml = '';
           if (m.attachment_url) {
-            const icon = m.attachment_type === 'pdf' ? 'ti-file-type-pdf' : 'ti-file-spreadsheet';
             const fileName = attachmentDisplayName(m.attachment_url);
-            const iconBg = m.attachment_type === 'pdf' ? '#c0392b' : '#1d6f42';
+            const iconInfo = { pdf: { icon: 'ti-file-type-pdf', bg: '#c0392b' }, xlsx: { icon: 'ti-file-spreadsheet', bg: '#1d6f42' }, docx: { icon: 'ti-file-type-doc', bg: '#2b579a' } }[m.attachment_type] || { icon: 'ti-file', bg: '#666' };
+            const icon = iconInfo.icon;
+            const iconBg = iconInfo.bg;
             attachmentHtml = '<a href="' + m.attachment_url + '" target="_blank" rel="noopener" class="email-attachment">' +
               '<span class="email-attachment-icon" style="background:' + iconBg + ';"><i class="ti ' + icon + '"></i></span>' +
               '<span class="email-attachment-name">' + fileName + '</span>' +

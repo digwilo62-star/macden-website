@@ -12,12 +12,13 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     const allowed = {
       'application/pdf': 'pdf',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx'
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx'
     };
     if (allowed[file.mimetype]) {
       cb(null, true);
     } else {
-      cb(new Error('Only PDF and Excel (.xlsx) files are allowed.'));
+      cb(new Error('Only PDF, Excel (.xlsx), and Word (.docx) files are allowed.'));
     }
   }
 });
@@ -36,7 +37,8 @@ router.post('/upload', (req, res) => {
     try {
       const typeMap = {
         'application/pdf': 'pdf',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx'
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx'
       };
       const attachmentType = typeMap[req.file.mimetype];
       const fileName = `${req.session.staff.id}-${Date.now()}-${req.file.originalname}`;
