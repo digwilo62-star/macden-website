@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Attendance — MACDEN Portal</title>
+</head>
+<body>
+  <script src="assets/api.js"></script>
+  <script>
+    // Single sidebar link works for everyone -- this just sends each
+    // person to the page that's actually meant for their role, so a
+    // regular staff member never lands on the admin-only report.
+    (async () => {
+      try {
+        const result = await apiRequest('/dashboard-check');
+        window.location.replace(result.staff.role === 'admin' ? 'attendance-report.html' : 'my-attendance.html');
+      } catch (err) {
+        window.location.replace('login.html');
+      }
+    })();
+  </script>
+</body>
+</html>
+
