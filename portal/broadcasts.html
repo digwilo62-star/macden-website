@@ -207,26 +207,7 @@
       }
     }
 
-    document.getElementById('bcList').addEventListener('click', async (e) => {
-      const btn = e.target.closest('.unfeature-btn');
-      if (!btn) return;
-      e.stopPropagation();
-      const ok = await confirmModal(
-        'The broadcast itself will stay in everyone\'s Inbox -- this only stops featuring it on the Dashboard.',
-        { title: 'Remove from Dashboard?', confirmLabel: 'Remove', danger: true }
-      );
-      if (!ok) return;
-      btn.disabled = true;
-      btn.textContent = 'Removing…';
-      try {
-        await apiRequest('/messages/broadcasts/' + btn.dataset.conversationId + '/unfeature-from-dashboard', { method: 'POST' });
-        loadBroadcasts();
-      } catch (err) {
-        alert(err.message);
-        btn.disabled = false;
-        btn.textContent = 'Remove from Dashboard';
-      }
-    });
+
 
     async function loadBroadcasts() {
       const list = document.getElementById('bcList');
@@ -269,6 +250,27 @@
           btn.addEventListener('click', (e) => {
             e.stopPropagation();
             viewReadStatus(btn.dataset.conversationId, btn.dataset.subject);
+          });
+        });
+
+        list.querySelectorAll('.unfeature-btn').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const ok = await confirmModal(
+              'The broadcast stays in the Inbox for every staff member regardless -- this only stops featuring it on the Dashboard.',
+              { title: 'Remove from Dashboard?', confirmLabel: 'Remove', danger: true }
+            );
+            if (!ok) return;
+            btn.disabled = true;
+            btn.textContent = 'Removing…';
+            try {
+              await apiRequest('/messages/broadcasts/' + btn.dataset.conversationId + '/unfeature-from-dashboard', { method: 'POST' });
+              loadBroadcasts();
+            } catch (err) {
+              alert(err.message);
+              btn.disabled = false;
+              btn.textContent = 'Remove from Dashboard';
+            }
           });
         });
       } catch (err) {
