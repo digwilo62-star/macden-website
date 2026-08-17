@@ -1,3 +1,25 @@
+#!/bin/bash
+# fix-kiosk-connection-watchdog-v1.sh
+#
+# Adds a connection watchdog to the attendance kiosk page. Checks the
+# server every 20 seconds; if it fails, a clear red banner pins to the
+# top of the screen ("Connection lost -- contact IT") so an outage is
+# visible immediately instead of the kiosk silently sitting there
+# looking normal while broken underneath. Doesn't block scanning --
+# a real scan attempt is its own test of connectivity anyway.
+#
+# Note: this cannot make the phone switch WiFi networks itself -- no
+# website can touch device WiFi settings, that's a browser security
+# restriction, not a limitation of this script. For that, check the
+# phone's own "Wi-Fi Assistant" setting, or add a SIM card as backup.
+#
+# Full, safe overwrite -- fully known/controlled.
+
+set -e
+
+echo "==> Overwriting portal/attendance-kiosk.html"
+mkdir -p portal
+cat > portal/attendance-kiosk.html << 'KIOSK_EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -248,3 +270,7 @@
 
 </body>
 </html>
+KIOSK_EOF
+
+echo ""
+echo "Done. Push with your usual save-progress.sh."
