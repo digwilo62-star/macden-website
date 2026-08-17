@@ -1,3 +1,34 @@
+#!/bin/bash
+# fix-kiosk-native-camera-v1.sh
+#
+# Switches the primary photo-capture method to Fully Kiosk Browser's own
+# built-in camera feature -- takes a photo through the app's already-
+# granted Android permission, sidestepping the webpage-level permission
+# prompt entirely. Falls back automatically to the browser's own camera
+# (already tested working) if the Fully Kiosk method isn't available for
+# any reason -- verified with a real test simulating exactly that failure
+# condition, confirming the scan still completes normally either way.
+#
+# IMPORTANT MANUAL STEP after running this script: open
+# portal/attendance-kiosk.html and find this line near the top of the
+# script:
+#
+#     const FULLY_KIOSK_PASSWORD = '\''CHANGE_ME_TO_MATCH_FULLY_KIOSK_SETTINGS'\'';
+#
+# Replace that placeholder with the actual Remote Admin password you set
+# in Fully Kiosk Browser (Settings -> Remote Administration -> Remote
+# Admin Password). Also make sure Remote Administration is turned ON in
+# those same settings, or this primary method will never succeed (it
+# will just always fall back, which still works, just not the more
+# robust method).
+#
+# Full, safe overwrite -- fully known/controlled.
+
+set -e
+
+echo "==> Overwriting portal/attendance-kiosk.html"
+mkdir -p portal
+cat > portal/attendance-kiosk.html << 'KIOSK_EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -322,3 +353,13 @@
 
 </body>
 </html>
+KIOSK_EOF
+
+echo ""
+echo "=================================================================="
+echo "IMPORTANT: open portal/attendance-kiosk.html and set"
+echo "FULLY_KIOSK_PASSWORD to match your Fully Kiosk Browser Remote Admin"
+echo "password (Settings -> Remote Administration in that app)."
+echo ""
+echo "Then push with your usual save-progress.sh."
+echo "=================================================================="
