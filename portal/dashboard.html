@@ -242,6 +242,12 @@
       }
     }
 
+    window.addEventListener('macden:newActivity', () => {
+      apiRequest('/messages/announcements/active')
+        .then(result => renderAnnouncements(result.announcements || []))
+        .catch(() => {});
+    });
+
     init();
   </script>
 </body>

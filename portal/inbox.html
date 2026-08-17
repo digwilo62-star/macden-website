@@ -143,6 +143,14 @@
         loadList();
       }
       loadUnreadBadge();
+
+      window.addEventListener('macden:newActivity', () => {
+        if (currentConversationId) {
+          openMessage(currentConversationId);
+        } else {
+          loadList();
+        }
+      });
     }
 
     async function loadList() {
