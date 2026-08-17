@@ -305,6 +305,7 @@
       hideAlert(alertEl);
       try {
         await apiRequest('/settings/profile', { method: 'PUT', body: { bio: document.getElementById('bioInput').value.trim() } });
+        showAlert(alertEl, 'Saved.', 'success');
       } catch (err) {
         showAlert(alertEl, err.message);
       }
