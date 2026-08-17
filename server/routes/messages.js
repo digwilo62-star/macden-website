@@ -747,7 +747,7 @@ router.get('/broadcasts', async (req, res) => {
     const enriched = await Promise.all(conversations.map(async (conv) => {
       const { data: message } = await supabase
         .from('messages')
-        .select('id, body, sent_at')
+        .select('id, body, sent_at, is_dashboard_announcement, vanish_at')
         .eq('conversation_id', conv.id)
         .eq('status', 'sent')
         .limit(1)
@@ -774,7 +774,9 @@ router.get('/broadcasts', async (req, res) => {
         subject: conv.subject,
         sentAt: message ? message.sent_at : conv.created_at,
         recipientCount,
-        openedCount
+        openedCount,
+        isDashboardAnnouncement: message ? !!message.is_dashboard_announcement : false,
+        vanishAt: message ? message.vanish_at : null
       };
     }));
 
@@ -782,6 +784,33 @@ router.get('/broadcasts', async (req, res) => {
   } catch (err) {
     console.error('Broadcast history error:', err);
     res.status(500).json({ error: 'Something went wrong loading broadcast history.' });
+  }
+});
+
+// POST /api/accounting/messages/broadcasts/:id/unfeature-from-dashboard --
+// admin-only. Removes a broadcast from the Dashboard's featured
+// Announcements card immediately, regardless of its scheduled vanish
+// time. Does NOT touch the underlying message -- it stays in Inbox
+// history exactly as before, this only controls Dashboard featuring.
+router.post('/broadcasts/:id/unfeature-from-dashboard', async (req, res) => {
+  if (req.session.staff.role !== 'admin') {
+    return res.status(403).json({ error: 'Only admins can do this.' });
+  }
+  try {
+    const { error } = await supabase
+      .from('messages')
+      .update({ is_dashboard_announcement: false, vanish_at: null })
+      .eq('conversation_id', req.params.id)
+      .eq('status', 'sent');
+
+    if (error) {
+      console.error('Unfeature from dashboard error:', error);
+      return res.status(500).json({ error: 'Could not remove this from the Dashboard.' });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Unfeature from dashboard unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong.' });
   }
 });
 

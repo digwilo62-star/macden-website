@@ -206,6 +206,22 @@
       }
     }
 
+    document.getElementById('bcList').addEventListener('click', async (e) => {
+      const btn = e.target.closest('.unfeature-btn');
+      if (!btn) return;
+      if (!confirm('Remove this from the Dashboard? The broadcast itself will stay in everyone\'s Inbox -- this only stops featuring it on the Dashboard.')) return;
+      btn.disabled = true;
+      btn.textContent = 'Removing…';
+      try {
+        await apiRequest('/messages/broadcasts/' + btn.dataset.conversationId + '/unfeature-from-dashboard', { method: 'POST' });
+        loadBroadcasts();
+      } catch (err) {
+        alert(err.message);
+        btn.disabled = false;
+        btn.textContent = 'Remove from Dashboard';
+      }
+    });
+
     async function loadBroadcasts() {
       const list = document.getElementById('bcList');
       try {
@@ -220,12 +236,15 @@
           '</div>' +
           result.broadcasts.map(b => {
             const pct = b.recipientCount > 0 ? Math.round((b.openedCount / b.recipientCount) * 100) : 0;
+            const unfeatureBtn = b.isDashboardAnnouncement
+              ? '<button class="unfeature-btn" data-conversation-id="' + b.id + '" style="border:1px solid var(--error); border-radius:var(--radius-sm); padding:6px 10px; font-size:11px; font-weight:600; color:var(--error); background:none; cursor:pointer; font-family:var(--font-body); margin-left:6px;">Remove from Dashboard</button>'
+              : '';
             return '<div class="bc-row" data-conversation-id="' + b.id + '">' +
               '<div class="bc-subject">' + b.subject + '</div>' +
               '<div class="bc-date">' + new Date(b.sentAt).toLocaleString() + '</div>' +
               '<div class="bc-count">' + b.recipientCount + ' sent</div>' +
               '<div class="bc-opened">' + b.openedCount + ' opened (' + pct + '%)</div>' +
-              '<div><button class="who-read-btn" data-conversation-id="' + b.id + '" data-subject="' + b.subject.replace(/"/g, '&quot;') + '" style="border:1px solid var(--border); border-radius:var(--radius-sm); padding:6px 12px; font-size:11.5px; font-weight:600; color:var(--text-primary); background:none; cursor:pointer; font-family:var(--font-body);">Who\u2019s read this?</button></div>' +
+              '<div><button class="who-read-btn" data-conversation-id="' + b.id + '" data-subject="' + b.subject.replace(/"/g, '&quot;') + '" style="border:1px solid var(--border); border-radius:var(--radius-sm); padding:6px 12px; font-size:11.5px; font-weight:600; color:var(--text-primary); background:none; cursor:pointer; font-family:var(--font-body);">Who\u2019s read this?</button>' + unfeatureBtn + '</div>' +
               '</div>';
           }).join('');
 
