@@ -152,6 +152,7 @@
   </div>
 
   <script src="assets/api.js"></script>
+  <script src="assets/confirm-modal.js"></script>
   <script src="assets/notifications.js"></script>
   <script src="assets/search.js"></script>
   <script src="assets/presence.js"></script>
@@ -209,7 +210,12 @@
     document.getElementById('bcList').addEventListener('click', async (e) => {
       const btn = e.target.closest('.unfeature-btn');
       if (!btn) return;
-      if (!confirm('Remove this from the Dashboard? The broadcast itself will stay in everyone\'s Inbox -- this only stops featuring it on the Dashboard.')) return;
+      e.stopPropagation();
+      const ok = await confirmModal(
+        'The broadcast itself will stay in everyone\'s Inbox -- this only stops featuring it on the Dashboard.',
+        { title: 'Remove from Dashboard?', confirmLabel: 'Remove', danger: true }
+      );
+      if (!ok) return;
       btn.disabled = true;
       btn.textContent = 'Removing…';
       try {
