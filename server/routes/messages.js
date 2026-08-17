@@ -588,7 +588,7 @@ router.post('/broadcast', async (req, res) => {
       return res.status(403).json({ error: 'Only admins can send broadcasts.' });
     }
 
-    const { subject, body, scheduledAt } = req.body;
+    const { subject, body, scheduledAt, isDashboardAnnouncement, vanishAt } = req.body;
     const staffId = req.session.staff.id;
 
     if (!subject || !subject.trim()) {
@@ -652,7 +652,9 @@ router.post('/broadcast', async (req, res) => {
         body: body.trim(),
         status: isScheduled ? 'scheduled' : 'sent',
         sent_at: isScheduled ? null : new Date().toISOString(),
-        scheduled_at: isScheduled ? scheduledDate.toISOString() : null
+        scheduled_at: isScheduled ? scheduledDate.toISOString() : null,
+        is_dashboard_announcement: !!isDashboardAnnouncement,
+        vanish_at: (isDashboardAnnouncement && vanishAt) ? new Date(vanishAt).toISOString() : null
       })
       .select()
       .single();
@@ -687,6 +689,43 @@ router.post('/broadcast', async (req, res) => {
 });
 
 // GET /api/accounting/messages/broadcasts — admin-only, sent history with open rates
+// GET /api/accounting/messages/announcements/active -- any logged-in
+// staff member, for the Dashboard Announcements card. Vanishing only
+// affects this list -- the underlying broadcast stays in Inbox history
+// regardless.
+router.get('/announcements/active', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('messages')
+      .select('id, conversation_id, body, sent_at, vanish_at, conversations(subject)')
+      .eq('status', 'sent')
+      .eq('is_dashboard_announcement', true)
+      .order('sent_at', { ascending: false });
+
+    if (error) {
+      console.error('Active announcements fetch error:', error);
+      return res.status(500).json({ error: 'Could not load announcements.' });
+    }
+
+    const now = Date.now();
+    const active = (data || []).filter(m => !m.vanish_at || new Date(m.vanish_at).getTime() > now);
+
+    res.json({
+      announcements: active.map(m => ({
+        id: m.id,
+        conversationId: m.conversation_id,
+        subject: m.conversations ? m.conversations.subject : 'Announcement',
+        body: m.body,
+        sentAt: m.sent_at,
+        vanishAt: m.vanish_at
+      }))
+    });
+  } catch (err) {
+    console.error('Active announcements unexpected error:', err);
+    res.status(500).json({ error: 'Something went wrong loading announcements.' });
+  }
+});
+
 router.get('/broadcasts', async (req, res) => {
   try {
     if (req.session.staff.role !== 'admin') {

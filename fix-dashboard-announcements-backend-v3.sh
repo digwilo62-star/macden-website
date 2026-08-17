@@ -1,3 +1,23 @@
+#!/bin/bash
+# fix-dashboard-announcements-backend-v1.sh
+#
+# Extends the existing broadcast system to support Dashboard Announcements:
+#   - POST /broadcast now accepts isDashboardAnnouncement + vanishAt
+#   - New GET /announcements/active -- returns currently-featured
+#     announcements (published, and not yet vanished), for any logged-in
+#     staff member to see on their Dashboard
+#
+# Precise anchor-based patch (messages.js is large, this is NOT a full
+# overwrite). Safe to re-run.
+
+set -e
+
+if grep -q "is_dashboard_announcement" server/routes/messages.js; then
+  echo "==> Already applied -- skipping (safe to re-run)."
+  exit 0
+fi
+
+cat > .tmp-patch-announcements.js << 'NODE_EOF'
 const fs = require('fs');
 
 function readNormalized(filePath) {
@@ -45,8 +65,10 @@ content = content.replace(oldInsert, newInsert);
 // 3. Add the new GET /announcements/active endpoint, right before the
 //    existing GET /broadcasts route (any logged-in staff can view this --
 //    unlike creating a broadcast, viewing the dashboard isn't admin-only)
-const anchor = `// GET /api/accounting/messages/broadcasts — admin-only, sent history with open rates
-router.get('/broadcasts', async (req, res) =>{`;
+// Anchor on the code line only, not the comment above it -- avoids any
+// risk of the em-dash character being encoded slightly differently
+// between systems (an invisible mismatch that's bitten us before).
+const anchor = `router.get('/broadcasts', async (req, res) => {`;
 
 const newEndpoint = `// GET /api/accounting/messages/announcements/active -- any logged-in
 // staff member, for the Dashboard Announcements card. Vanishing only
@@ -85,8 +107,7 @@ router.get('/announcements/active', async (req, res) => {
   }
 });
 
-// GET /api/accounting/messages/broadcasts — admin-only, sent history with open rates
-router.get('/broadcasts', async (req, res) =>{`;
+router.get('/broadcasts', async (req, res) => {`;
 
 if (!content.includes(anchor)) {
   console.error('ERROR: could not find the GET /broadcasts anchor in messages.js.');
@@ -96,3 +117,10 @@ content = content.replace(anchor, newEndpoint);
 
 writeRestoringLineEndings(filePath, content, usesCRLF);
 console.log('    Patched server/routes/messages.js (broadcast fields + new active-announcements endpoint).');
+NODE_EOF
+
+node .tmp-patch-announcements.js
+rm .tmp-patch-announcements.js
+
+echo ""
+echo "Done. Push with your usual save-progress.sh."
