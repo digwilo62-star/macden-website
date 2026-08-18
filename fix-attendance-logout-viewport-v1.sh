@@ -1,3 +1,157 @@
+#!/bin/bash
+# fix-attendance-logout-viewport-v1.sh
+#
+# Two fixes to both attendance pages:
+#   1. Added the missing Help/Logout block to the sidebar (was never
+#      there at all on these two pages)
+#   2. Removed an inconsistent mobile viewport tag that was causing a
+#      broken, squeezed layout on phones -- your app intentionally has
+#      no mobile-specific CSS, so every other page renders as a shrunk
+#      desktop layout on mobile; these two pages now match that same
+#      (consistent, if unpolished) behavior instead of trying to
+#      actually fit a phone screen with desktop-only CSS underneath.
+#
+# Full, safe overwrite of both files -- fully known/controlled.
+
+set -e
+
+echo "==> Overwriting portal/my-attendance.html"
+mkdir -p portal
+cat > portal/my-attendance.html << 'MYATT_EOF'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Attendance — MACDEN Portal</title>
+<link rel="stylesheet" href="assets/portal-style.css">
+<link rel="stylesheet" href="assets/portal-shell.css">
+<style>
+  .my-att-list{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); overflow:hidden; }
+  .my-att-header-row{ display:grid; grid-template-columns: minmax(120px,1fr) minmax(90px,120px) minmax(90px,120px) minmax(70px,90px); gap:12px; padding:12px 18px; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted); border-bottom:1px solid var(--border); }
+  .my-att-row{ display:grid; grid-template-columns: minmax(120px,1fr) minmax(90px,120px) minmax(90px,120px) minmax(70px,90px); gap:12px; align-items:center; padding:12px 18px; border-bottom:1px solid var(--border); font-size:12.5px; }
+  .my-att-row:last-child{ border-bottom:none; }
+  .my-att-empty{ padding:50px 18px; text-align:center; color:var(--text-muted); font-size:13px; }
+  .my-att-date .day{ font-weight:600; color:var(--text-primary); }
+  .my-att-date .sub{ font-size:11px; color:var(--text-muted); }
+  .my-att-time{ font-weight:600; }
+  .my-att-time.missing{ color:var(--text-muted); font-weight:400; }
+  .my-att-status{ display:inline-block; padding:2px 9px; border-radius:999px; font-size:10.5px; font-weight:700; }
+  .my-att-status.present{ background:var(--primary-dim); color:var(--primary); }
+  .my-att-status.partial{ background:#f5e6c8; color:#8a6d00; }
+</style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-brand"><img src="assets/logo.jpeg" alt="MACDEN"><span>MACDEN</span></div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="inbox.html" class="sidebar-link"><i class="ti ti-mail"></i> Inbox</a>
+        <a href="my-attendance.html" class="sidebar-link active"><i class="ti ti-clock"></i> Attendance</a>
+        <a href="directory.html" class="sidebar-link"><i class="ti ti-users"></i> Directory</a>
+        <a href="settings.html" class="sidebar-link"><i class="ti ti-settings"></i> Settings</a>
+      </nav>
+      <div class="sidebar-logout">
+        <a href="help.html" class="sidebar-link" style="margin-bottom:6px;"><i class="ti ti-help-circle"></i> Help</a>
+        <button id="logoutBtn"><i class="ti ti-logout"></i> Logout</button>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="page-body">
+        <h1 class="page-greeting" style="font-size:22px;">My Attendance History</h1>
+        <p class="page-greeting-sub" style="margin:0 0 18px;">Your recent check-in and check-out records.</p>
+
+        <div class="my-att-list">
+          <div class="my-att-header-row"><div>Date</div><div>Check In</div><div>Check Out</div><div>Status</div></div>
+          <div id="myAttRows"><div class="my-att-empty">Loading…</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script>
+    function formatTime(iso){
+      if (!iso) return null;
+      return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function formatDate(dateStr){
+      const d = new Date(dateStr + 'T00:00:00');
+      const today = new Date();
+      const yesterday = new Date();
+      yesterday.setDate(today.getDate() - 1);
+
+      const isToday = d.toDateString() === today.toDateString();
+      const isYesterday = d.toDateString() === yesterday.toDateString();
+
+      const dayLabel = d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+      const subLabel = isToday ? 'Today' : isYesterday ? 'Yesterday' : '';
+      return { dayLabel, subLabel };
+    }
+
+    async function init() {
+      try {
+        await apiRequest('/dashboard-check');
+      } catch (err) {
+        window.location.href = 'login.html';
+        return;
+      }
+      loadHistory();
+    }
+
+    async function loadHistory() {
+      const rows = document.getElementById('myAttRows');
+      try {
+        const res = await fetch('/api/attendance/my-history?limit=30', { credentials: 'include' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not load your attendance history.');
+
+        if (!data.history.length) {
+          rows.innerHTML = '<div class="my-att-empty">No attendance recorded yet. Scan your ID card at the entrance kiosk to get started.</div>';
+          return;
+        }
+
+        rows.innerHTML = data.history.map(row => {
+          const { dayLabel, subLabel } = formatDate(row.log_date);
+          const checkIn = formatTime(row.check_in_time);
+          const checkOut = formatTime(row.check_out_time);
+
+          let statusHtml;
+          if (checkIn && checkOut) {
+            statusHtml = '<span class="my-att-status present">Present</span>';
+          } else if (checkIn) {
+            statusHtml = '<span class="my-att-status partial">In progress</span>';
+          } else {
+            statusHtml = '';
+          }
+
+          return '<div class="my-att-row">' +
+            '<div class="my-att-date"><div class="day">' + dayLabel + '</div>' + (subLabel ? '<div class="sub">' + subLabel + '</div>' : '') + '</div>' +
+            '<div class="my-att-time' + (checkIn ? '' : ' missing') + '">' + (checkIn || 'Not checked in') + '</div>' +
+            '<div class="my-att-time' + (checkOut ? '' : ' missing') + '">' + (checkOut || '—') + '</div>' +
+            '<div>' + statusHtml + '</div>' +
+            '</div>';
+        }).join('');
+      } catch (err) {
+        rows.innerHTML = '<div class="my-att-empty">' + err.message + '</div>';
+      }
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await apiRequest('/auth/logout', { method: 'POST' });
+      window.location.href = 'login.html';
+    });
+
+    init();
+  </script>
+</body>
+</html>
+MYATT_EOF
+
+echo "==> Overwriting portal/attendance-report.html"
+cat > portal/attendance-report.html << 'REPORT_EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -152,3 +306,7 @@
   </script>
 </body>
 </html>
+REPORT_EOF
+
+echo ""
+echo "Done. Push with your usual save-progress.sh."
