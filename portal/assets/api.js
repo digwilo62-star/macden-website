@@ -144,3 +144,21 @@ async function loadUnreadBadge() {
     // page it points to still works correctly as a fallback
   }
 })();
+
+// ---- Hide the Announcement sidebar link for non-admins ----
+// Regular staff can't post/manage announcements, so there's nothing
+// useful behind this link for them -- hide it entirely rather than
+// showing a dead end.
+(async function macdenHideAnnouncementLink(){
+  const link = document.querySelector('a[href="announcement.html"]');
+  if (!link) return;
+
+  try {
+    const result = await apiRequest('/dashboard-check');
+    if (result.staff.role !== 'admin') {
+      link.style.display = 'none';
+    }
+  } catch (err) {
+    // Not logged in / check failed -- leave it as-is
+  }
+})();
