@@ -169,7 +169,11 @@ app.listen(PORT, () => {
   console.log(`Accounting backend running on port ${PORT}`);
 });
 
+const announcementRoutes = require('./routes/announcements');
+app.use('/api/accounting/announcements', requireAuth, announcementRoutes);
+
 cron.schedule('* * * * *', () => {
   messageRoutes.publishDueScheduledBroadcasts();
+  announcementRoutes.publishDueScheduledAnnouncements();
 });
 
