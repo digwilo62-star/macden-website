@@ -1,3 +1,20 @@
+#!/bin/bash
+# fix-dashboard-announcements-v2-v1.sh
+#
+# Points the Dashboard's Announcements card at the new, standalone
+# system instead of the old broadcast-through-messages one, and changes
+# clicking an item to open the popup card instead of navigating into
+# Inbox. Requires fix-announcements-backend-v1.sh (or the corrected
+# version) to already be applied.
+
+set -e
+
+if grep -q "showAnnouncementCard" portal/dashboard.html; then
+  echo "==> Already applied -- skipping (safe to re-run)."
+  exit 0
+fi
+
+cat > .tmp-patch-dashv2.js << 'NODE_EOF'
 const fs = require('fs');
 
 function readNormalized(filePath) {
@@ -66,17 +83,15 @@ if (!content.includes(oldCardFn)) {
 content = content.replace(oldCardFn, newCardFn);
 
 // 3. Attach click listeners after rendering, instead of relying on <a> navigation
-const oldRenderEnd = `      container.innerHTML = html;
-      const toggleBtn = document.getElementById('announcementsToggle');`;
+const oldRenderEnd = `      container.innerHTML = html;`;
 
 const newRenderEnd = `      container.innerHTML = html;
       container.querySelectorAll('.ann-dash-card').forEach(el => {
         el.addEventListener('click', () => showAnnouncementCard(el.dataset.id));
-      });
-      const toggleBtn = document.getElementById('announcementsToggle');`;
+      });`;
 
 if (!content.includes(oldRenderEnd)) {
-  console.error('ERROR: could not find the renderAnnouncements container.innerHTML line.');
+  console.error('ERROR: could not find container.innerHTML = html; in dashboard.html.');
   process.exit(1);
 }
 content = content.replace(oldRenderEnd, newRenderEnd);
@@ -89,3 +104,10 @@ if (scriptAnchor.test(content) && !content.includes('announcement-card.js')) {
 
 writeRestoringLineEndings(filePath, content, usesCRLF);
 console.log('    Patched portal/dashboard.html (points to new Announcements system, opens popup card).');
+NODE_EOF
+
+node .tmp-patch-dashv2.js
+rm .tmp-patch-dashv2.js
+
+echo ""
+echo "Done. Push with your usual save-progress.sh."
