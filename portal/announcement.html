@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Announcement — MACDEN Portal</title>
+<link rel="stylesheet" href="assets/portal-style.css">
+<link rel="stylesheet" href="assets/portal-shell.css">
+<style>
+  .ann-toolbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+  .ann-list{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); overflow:hidden; }
+  .ann-row{ display:grid; grid-template-columns: 1fr auto auto; gap:16px; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border); }
+  .ann-row:last-child{ border-bottom:none; }
+  .ann-subject{ font-weight:600; cursor:pointer; color:var(--text-primary); }
+  .ann-subject:hover{ color:var(--primary); }
+  .ann-date{ font-size:12px; color:var(--text-muted); white-space:nowrap; }
+  .ann-empty{ padding:50px 20px; text-align:center; color:var(--text-muted); font-size:13px; }
+  .ann-delete-btn{ border:1px solid var(--error); border-radius:var(--radius-sm); padding:6px 12px; font-size:11.5px; font-weight:600; color:var(--error); background:none; cursor:pointer; white-space:nowrap; }
+  .ann-section-label{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted); padding:14px 20px 6px; }
+  .ann-badge-scheduled{ display:inline-block; padding:2px 8px; border-radius:999px; font-size:10.5px; font-weight:700; background:#f5e6c8; color:#8a6d00; margin-left:8px; }
+
+  #composeView{ display:none; }
+  .ann-field{ margin-bottom:16px; }
+  .ann-field label{ display:block; font-size:12.5px; font-weight:600; margin-bottom:6px; color:var(--text-secondary); }
+  .ann-field input[type="text"], .ann-field textarea{ width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body); font-size:13.5px; box-sizing:border-box; }
+  .ann-field textarea{ min-height:140px; resize:vertical; }
+  .ann-timing{ display:flex; gap:16px; align-items:center; margin-bottom:16px; }
+  .ann-timing label{ display:flex; align-items:center; gap:6px; font-size:13px; cursor:pointer; }
+</style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-brand"><img src="assets/logo.jpeg" alt="MACDEN"><span>MACDEN</span></div>
+      <nav class="sidebar-nav">
+        <a href="dashboard.html" class="sidebar-link"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="inbox.html" class="sidebar-link"><i class="ti ti-mail"></i> Inbox</a>
+        <a href="compose.html" class="sidebar-link"><i class="ti ti-pencil"></i> Compose</a>
+        <a href="announcement.html" class="sidebar-link active"><i class="ti ti-speakerphone"></i> Announcement</a>
+        <a href="directory.html" class="sidebar-link"><i class="ti ti-users"></i> Directory</a>
+        <a href="attendance.html" class="sidebar-link"><i class="ti ti-clock"></i> Attendance</a>
+        <a href="leave.html" class="sidebar-link"><i class="ti ti-calendar-event"></i> Leave &amp; Requests</a>
+        <a href="documents.html" class="sidebar-link"><i class="ti ti-file-text"></i> Documents</a>
+        <a href="policies.html" class="sidebar-link"><i class="ti ti-book"></i> Policies</a>
+        <a href="settings.html" class="sidebar-link"><i class="ti ti-settings"></i> Settings</a>
+      </nav>
+      <div class="sidebar-logout">
+        <a href="help.html" class="sidebar-link" style="margin-bottom:6px;"><i class="ti ti-help-circle"></i> Help</a>
+        <button id="logoutBtn"><i class="ti ti-logout"></i> Logout</button>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="page-body">
+
+        <div id="notAdminView" style="display:none;">
+          <h1 class="page-greeting" style="font-size:22px;">Announcement</h1>
+          <div class="ann-empty">Only admins can send or view announcements.</div>
+        </div>
+
+        <div id="adminView" style="display:none;">
+          <div id="listView">
+            <div class="ann-toolbar">
+              <div>
+                <h1 class="page-greeting" style="font-size:22px; margin-bottom:2px;">Announcement</h1>
+                <p class="page-greeting-sub" style="margin:0;">Post updates that reach every staff member.</p>
+              </div>
+              <button class="btn btn-primary" id="newAnnouncementBtn" style="width:auto; padding:10px 20px; display:inline-flex; align-items:center; gap:8px;"><i class="ti ti-speakerphone"></i> New Announcement</button>
+            </div>
+
+            <div class="ann-list" id="annList">
+              <div class="ann-empty">Loading…</div>
+            </div>
+          </div>
+
+          <div id="composeView">
+            <h1 class="page-greeting" style="font-size:22px;">New Announcement</h1>
+            <p class="page-greeting-sub" style="margin:0 0 20px;">This goes out to every staff member.</p>
+
+            <div id="annAlert" class="alert"></div>
+
+            <div class="ann-field">
+              <label>Subject</label>
+              <input type="text" id="annSubject" placeholder="e.g. Office closed Monday for public holiday">
+            </div>
+            <div class="ann-field">
+              <label>Message</label>
+              <textarea id="annBody" placeholder="Write the announcement…"></textarea>
+            </div>
+
+            <div class="ann-timing">
+              <label><input type="radio" name="annTiming" id="annTimingNow" checked> Send now</label>
+              <label><input type="radio" name="annTiming" id="annTimingLater"> Schedule for later</label>
+            </div>
+            <input type="datetime-local" id="annScheduledAt" style="display:none; margin-bottom:16px; padding:9px 12px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font-body); font-size:13px;">
+
+            <div style="display:flex; gap:10px;">
+              <button class="btn btn-primary" id="sendAnnouncementBtn" style="width:auto; padding:10px 24px;">Post Announcement</button>
+              <button class="btn" id="cancelComposeBtn" style="width:auto; padding:10px 24px; background:none; border:1px solid var(--border);">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/api.js"></script>
+  <script src="assets/confirm-modal.js"></script>
+  <script src="assets/announcement-card.js"></script>
+  <script>
+    async function init() {
+      let staff;
+      try {
+        const result = await apiRequest('/dashboard-check');
+        staff = result.staff;
+      } catch (err) {
+        window.location.href = 'login.html';
+        return;
+      }
+      if (staff.role !== 'admin') {
+        document.getElementById('notAdminView').style.display = 'block';
+        return;
+      }
+      document.getElementById('adminView').style.display = 'block';
+      loadList();
+    }
+
+    async function loadList() {
+      const listEl = document.getElementById('annList');
+      try {
+        const res = await fetch('/api/accounting/announcements', { credentials: 'include' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not load announcements.');
+
+        if (data.sent.length === 0 && data.scheduled.length === 0) {
+          listEl.innerHTML = '<div class="ann-empty">No announcements yet. Click New Announcement to post your first one.</div>';
+          return;
+        }
+
+        let html = '';
+        if (data.scheduled.length > 0) {
+          html += '<div class="ann-section-label">Scheduled</div>';
+          html += data.scheduled.map(a => rowHtml(a, true)).join('');
+        }
+        if (data.sent.length > 0) {
+          html += '<div class="ann-section-label">Sent</div>';
+          html += data.sent.map(a => rowHtml(a, false)).join('');
+        }
+        listEl.innerHTML = html;
+
+        listEl.querySelectorAll('.ann-subject').forEach(el => {
+          el.addEventListener('click', () => showAnnouncementCard(el.dataset.id));
+        });
+        listEl.querySelectorAll('.ann-delete-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const ok = await confirmModal('This removes the announcement permanently. It cannot be undone.', { title: 'Delete this announcement?', confirmLabel: 'Delete', danger: true });
+            if (!ok) return;
+            btn.disabled = true;
+            btn.textContent = 'Deleting…';
+            try {
+              const res = await fetch('/api/accounting/announcements/' + btn.dataset.id, { method: 'DELETE', credentials: 'include' });
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.error);
+              loadList();
+            } catch (err) {
+              alert(err.message);
+              btn.disabled = false;
+              btn.textContent = 'Delete';
+            }
+          });
+        });
+      } catch (err) {
+        listEl.innerHTML = '<div class="ann-empty">' + err.message + '</div>';
+      }
+    }
+
+    function rowHtml(a, isScheduled) {
+      const dateLabel = isScheduled
+        ? 'Scheduled: ' + new Date(a.scheduled_at).toLocaleString()
+        : new Date(a.sent_at).toLocaleString();
+      const subjectHtml = isScheduled
+        ? a.subject + '<span class="ann-badge-scheduled">Pending</span>'
+        : '<span class="ann-subject" data-id="' + a.id + '">' + a.subject + '</span>';
+      return '<div class="ann-row">' +
+        '<div>' + subjectHtml + '</div>' +
+        '<div class="ann-date">' + dateLabel + '</div>' +
+        '<div><button class="ann-delete-btn" data-id="' + a.id + '">Delete</button></div>' +
+        '</div>';
+    }
+
+    document.getElementById('newAnnouncementBtn').addEventListener('click', () => {
+      document.getElementById('listView').style.display = 'none';
+      document.getElementById('composeView').style.display = 'block';
+    });
+    document.getElementById('cancelComposeBtn').addEventListener('click', () => {
+      document.getElementById('composeView').style.display = 'none';
+      document.getElementById('listView').style.display = 'block';
+    });
+    document.getElementById('annTimingNow').addEventListener('change', () => {
+      document.getElementById('annScheduledAt').style.display = 'none';
+    });
+    document.getElementById('annTimingLater').addEventListener('change', () => {
+      document.getElementById('annScheduledAt').style.display = 'block';
+    });
+
+    document.getElementById('sendAnnouncementBtn').addEventListener('click', async () => {
+      const alertEl = document.getElementById('annAlert');
+      hideAlert(alertEl);
+      const subject = document.getElementById('annSubject').value.trim();
+      const body = document.getElementById('annBody').value.trim();
+      if (!subject) { showAlert(alertEl, 'Add a subject.'); return; }
+      if (!body) { showAlert(alertEl, 'Write a message.'); return; }
+
+      const isScheduled = document.getElementById('annTimingLater').checked;
+      const scheduledAtValue = document.getElementById('annScheduledAt').value;
+      if (isScheduled && !scheduledAtValue) {
+        showAlert(alertEl, 'Pick a date and time to schedule this for.');
+        return;
+      }
+
+      const btn = document.getElementById('sendAnnouncementBtn');
+      btn.disabled = true;
+      btn.textContent = 'Posting…';
+      try {
+        const res = await fetch('/api/accounting/announcements', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subject, body,
+            scheduledAt: isScheduled ? new Date(scheduledAtValue).toISOString() : undefined
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+
+        document.getElementById('annSubject').value = '';
+        document.getElementById('annBody').value = '';
+        document.getElementById('annTimingNow').checked = true;
+        document.getElementById('annScheduledAt').style.display = 'none';
+        document.getElementById('annScheduledAt').value = '';
+        document.getElementById('composeView').style.display = 'none';
+        document.getElementById('listView').style.display = 'block';
+        loadList();
+      } catch (err) {
+        showAlert(alertEl, err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Post Announcement';
+      }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await apiRequest('/auth/logout', { method: 'POST' });
+      window.location.href = 'login.html';
+    });
+
+    init();
+  </script>
+</body>
+</html>

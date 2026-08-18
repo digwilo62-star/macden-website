@@ -132,7 +132,14 @@ router.get('/active', async (req, res) => {
 
     if (error) throw error;
 
-    res.json({ announcements: data });
+    res.json({
+      announcements: data.map(a => ({
+        id: a.id,
+        subject: a.subject,
+        body: a.body,
+        sentAt: a.sent_at
+      }))
+    });
   } catch (err) {
     console.error('[ANNOUNCEMENT-ACTIVE-ERROR]', err);
     res.status(500).json({ error: 'Could not load announcements.' });
@@ -219,4 +226,3 @@ async function publishDueScheduledAnnouncements() {
 
 module.exports = router;
 module.exports.publishDueScheduledAnnouncements = publishDueScheduledAnnouncements;
-
