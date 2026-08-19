@@ -38,6 +38,35 @@ echo "=================================================================="
 PASS=0
 FAIL=0
 
+# Extraction + syntax check both done in Node.js -- avoids depending on
+# python3 being available/aliased correctly, since only node has been
+# confirmed working reliably in this environment tonight.
+cat > /tmp/verify_extract_and_check.js << 'NODEEOF'
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+
+const target = process.argv[2];
+const html = fs.readFileSync(target, 'utf8');
+const matches = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
+
+if (matches.length === 0) {
+  console.log('SKIP');
+  process.exit(0);
+}
+
+const lastScript = matches[matches.length - 1][1];
+
+try {
+  new Function(lastScript); // throws SyntaxError if invalid, without executing it
+  console.log('OK');
+} catch (err) {
+  console.log('FAIL');
+  console.error(err.message);
+  process.exit(1);
+}
+NODEEOF
+
 for FILE in $CHANGED; do
   if [ ! -f "$FILE" ]; then
     continue  # deleted file, nothing to check
@@ -55,32 +84,24 @@ for FILE in $CHANGED; do
       fi
       ;;
     *.html)
-      # Extract inline <script> blocks and check the last one, matching
-      # the same technique used to verify these files all night
-      python3 -c "
-import re, sys
-with open('$FILE', encoding='utf-8', errors='ignore') as f:
-    html = f.read()
-scripts = re.findall(r'<script>(.*?)</script>', html, re.DOTALL)
-if scripts:
-    with open('/tmp/verify_extract.js', 'w', encoding='utf-8') as out:
-        out.write(scripts[-1])
-    sys.exit(0)
-sys.exit(1)
-" 2>/dev/null
-      if [ -f /tmp/verify_extract.js ]; then
-        if node -c /tmp/verify_extract.js 2>/tmp/verify_err.log; then
+      RESULT=$(node /tmp/verify_extract_and_check.js "$FILE" 2>/tmp/verify_err.log)
+      case "$RESULT" in
+        OK*)
           echo "OK    $FILE"
           PASS=$((PASS+1))
-        else
+          ;;
+        SKIP*)
+          echo "SKIP  $FILE (no inline <script> found, nothing to check)"
+          ;;
+        FAIL*)
           echo "FAIL  $FILE"
           cat /tmp/verify_err.log
           FAIL=$((FAIL+1))
-        fi
-        rm -f /tmp/verify_extract.js
-      else
-        echo "SKIP  $FILE (no inline <script> found, nothing to check)"
-      fi
+          ;;
+        *)
+          echo "SKIP  $FILE (could not check -- $RESULT)"
+          ;;
+      esac
       ;;
     *)
       echo "SKIP  $FILE (not a .js or .html file)"
