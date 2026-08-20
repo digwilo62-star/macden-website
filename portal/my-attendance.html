@@ -59,6 +59,9 @@
 
   <script src="assets/api.js"></script>
   <script>
+    /* BOOST-WRAPPED */
+    (function(){
+
     function formatTime(iso){
       if (!iso) return null;
       return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -132,6 +135,7 @@
     });
 
     init();
+      })();
   </script>
 </body>
 </html>

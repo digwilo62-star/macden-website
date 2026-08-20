@@ -120,6 +120,9 @@
   <script src="assets/notifications.js"></script>
   <script src="assets/search.js"></script>
   <script>
+    /* BOOST-WRAPPED */
+    (function(){
+
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       await apiRequest('/auth/logout', { method: 'POST' });
       window.location.href = 'login.html';
@@ -136,6 +139,7 @@
     }
 
     init();
+      })();
   </script>
 </body>
 </html>

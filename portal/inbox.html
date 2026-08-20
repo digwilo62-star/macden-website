@@ -116,6 +116,9 @@
   <script src="assets/search.js"></script>
   <script src="assets/presence.js"></script>
   <script>
+    /* BOOST-WRAPPED */
+    (function(){
+
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       await apiRequest('/auth/logout', { method: 'POST' });
       window.location.href = 'login.html';
@@ -333,6 +336,12 @@
         return 'Attachment';
       }
     }
+  
+      // Re-exposed for onclick="" attributes on this page (auto-detected)
+      window.clearAttachment = clearAttachment;
+      window.deleteConversation = deleteConversation;
+      Object.defineProperty(window, 'currentConversationId', { get: () => currentConversationId, configurable: true });
+    })();
   </script>
 </body>
 </html>

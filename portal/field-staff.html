@@ -130,6 +130,9 @@
 
   <script src="assets/api.js"></script>
   <script>
+    /* BOOST-WRAPPED */
+    (function(){
+
     let editingId = null;
     let editingName = '';
     let departmentsList = [];
@@ -374,6 +377,13 @@
     }
 
     init();
+  
+      // Re-exposed for onclick="" attributes on this page (auto-detected)
+      window.editFS = editFS;
+      window.deactivateFS = deactivateFS;
+      window.reactivateFS = reactivateFS;
+      window.generateCard = generateCard;
+    })();
   </script>
 </body>
 </html>

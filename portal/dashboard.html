@@ -95,6 +95,9 @@
   <script src="assets/notifications.js"></script>
   <script src="assets/search.js"></script>
   <script>
+    /* BOOST-WRAPPED */
+    (function(){
+
     async function init() {
       let staff;
       try {
@@ -297,6 +300,10 @@
     });
 
     init();
+  
+      // Re-exposed for onclick="" attributes on this page (auto-detected)
+      window.approveStaff = approveStaff;
+    })();
   </script>
 </body>
 </html>

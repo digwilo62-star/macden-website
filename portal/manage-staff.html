@@ -82,6 +82,9 @@
   <script src="assets/search.js"></script>
   <script src="assets/presence.js"></script>
   <script>
+    /* BOOST-WRAPPED */
+    (function(){
+
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       await apiRequest('/auth/logout', { method: 'POST' });
       window.location.href = 'login.html';
@@ -149,6 +152,11 @@
     }
 
     init();
+  
+      // Re-exposed for onclick="" attributes on this page (auto-detected)
+      window.deactivate = deactivate;
+      window.reactivate = reactivate;
+    })();
   </script>
 </body>
 </html>
