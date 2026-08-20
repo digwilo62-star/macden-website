@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>Announcement — MACDEN Portal</title>
-<link rel="stylesheet" href="assets/portal-style.css">
+<script src="assets/htmx.min.js"></script>
+  <link rel="stylesheet" href="assets/portal-style.css">
 <link rel="stylesheet" href="assets/portal-shell.css">
 <style>
   .ann-toolbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
@@ -32,7 +33,7 @@
     <div class="sidebar">
       <div class="sidebar-brand"><img src="assets/logo.jpeg" alt="MACDEN"><span>MACDEN</span></div>
       <!-- SIDEBAR:START -->
-      <nav class="sidebar-nav">
+      <nav class="sidebar-nav" hx-boost="true" hx-select="#main-content" hx-target="#main-content" hx-swap="outerHTML">
         <a href="dashboard.html" class="sidebar-link"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
         <a href="inbox.html" class="sidebar-link"><i class="ti ti-mail"></i> Inbox <span class="badge" id="unreadBadge" style="display:none;">0</span></a>
         <a href="compose.html" class="sidebar-link"><i class="ti ti-pencil"></i> Compose</a>
@@ -51,7 +52,7 @@
       <!-- SIDEBAR:END -->
     </div>
 
-    <div class="main-content">
+    <div class="main-content" id="main-content">
       <div class="page-body">
 
         <div id="notAdminView" style="display:none;">

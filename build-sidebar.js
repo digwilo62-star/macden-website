@@ -43,7 +43,7 @@ function renderSidebarNav(currentPage) {
     return `        <a href="${item.href}" class="sidebar-link${isActive ? ' active' : ''}"><i class="ti ${item.icon}"></i> ${item.label}${extra}</a>`;
   }).join('\n');
 
-  return `      <nav class="sidebar-nav">\n${links}\n      </nav>\n      <div class="sidebar-logout">\n        <a href="help.html" class="sidebar-link" style="margin-bottom:6px;"><i class="ti ti-help-circle"></i> Help</a>\n        <button id="logoutBtn"><i class="ti ti-logout"></i> Logout</button>\n      </div>`;
+  return `      <nav class="sidebar-nav" hx-boost="true" hx-select="#main-content" hx-target="#main-content" hx-swap="outerHTML">\n${links}\n      </nav>\n      <div class="sidebar-logout">\n        <a href="help.html" class="sidebar-link" style="margin-bottom:6px;"><i class="ti ti-help-circle"></i> Help</a>\n        <button id="logoutBtn"><i class="ti ti-logout"></i> Logout</button>\n      </div>`;
 }
 
 function readNormalized(filePath) {
