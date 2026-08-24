@@ -30,6 +30,11 @@ function logAdminAction(req, action, targetId, details) {
     })
     .then(({ error }) => {
       if (error) console.error('Audit log insert failed:', error);
+    })
+    .catch((err) => {
+      // Covers genuine network-level failures, on top of the error-field
+      // check above -- same "never let this crash the server" principle.
+      console.error('Audit log insert failed (network):', err.message);
     });
 }
 

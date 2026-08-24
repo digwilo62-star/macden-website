@@ -26,6 +26,16 @@ const requireAuth = require('./middleware/requireAuth');
 
 const app = express();
 
+// Last-resort safety net: an unhandled promise rejection anywhere in the
+// app (a forgotten .catch(), a background update that fails) used to
+// crash the ENTIRE server for every single user. This logs it clearly
+// instead, so one bad request can never take the whole site down again.
+// It does not fix the underlying bug -- it just stops it from being
+// catastrophic while each one gets found and fixed properly.
+process.on('unhandledRejection', (reason) => {
+  console.error('[UNHANDLED REJECTION - server stayed up]', reason);
+});
+
 // TEMPORARY diagnostic: logs every single request that reaches this
 // server, before any routing. Remove once the approve-staff mystery is solved.
 app.use((req, res, next) => {

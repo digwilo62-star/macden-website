@@ -216,12 +216,19 @@ router.post('/login', authLimiter, async (req, res) => {
         photoUrl: staffMember.photo_url
       };
 
+      // Respond right away -- the session is set, login is genuinely
+      // complete. Updating last_seen is non-essential; the user should
+      // not have to wait for it. This previously had no .catch() at all
+      // -- a failure here became an unhandled rejection that crashed the
+      // entire server. It now fails safely in the background instead.
+      res.json({ success: true, staff: req.session.staff });
       supabase
         .from('staff')
         .update({ last_seen: new Date().toISOString() })
         .eq('id', staffMember.id)
-        .then(() => {
-          res.json({ success: true, staff: req.session.staff });
+        .then(() => {})
+        .catch((err) => {
+          console.error('last_seen update failed (non-fatal):', err.message);
         });
     });
   } catch (err) {
@@ -279,12 +286,17 @@ router.post('/login-mfa', authLimiter, async (req, res) => {
         photoUrl: staffMember.photo_url
       };
 
+      // Same fix as /login: respond immediately, don't make the user
+      // wait on a non-essential update, and never let it crash the
+      // server if it fails.
+      res.json({ success: true, staff: req.session.staff });
       supabase
         .from('staff')
         .update({ last_seen: new Date().toISOString() })
         .eq('id', staffMember.id)
-        .then(() => {
-          res.json({ success: true, staff: req.session.staff });
+        .then(() => {})
+        .catch((err) => {
+          console.error('last_seen update failed (non-fatal):', err.message);
         });
     });
   } catch (err) {
