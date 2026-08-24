@@ -49,7 +49,7 @@ app.use(helmet({ contentSecurityPolicy: false }));
 // connection, an unresolved promise, etc.) now fails with a real, visible
 // JSON error instead of hanging forever with no error at all -- which is
 // exactly what a frozen button with zero console errors looks like.
-const REQUEST_TIMEOUT_MS = 15000;
+const REQUEST_TIMEOUT_MS = 30000;
 app.use((req, res, next) => {
   res.setTimeout(REQUEST_TIMEOUT_MS, () => {
     if (!res.headersSent) {

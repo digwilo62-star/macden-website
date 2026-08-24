@@ -15,7 +15,7 @@ let heartbeatInterval = null;
 function startHeartbeat() {
   if (heartbeatInterval) return; // already running
   sendHeartbeat();
-  heartbeatInterval = setInterval(sendHeartbeat, 20000);
+  heartbeatInterval = setInterval(sendHeartbeat, 60000);
 }
 
 function stopHeartbeat() {

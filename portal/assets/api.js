@@ -124,7 +124,7 @@ async function loadUnreadBadge() {
   }
 
   setTimeout(macdenPollForUpdates, 4000);
-  setInterval(macdenPollForUpdates, 20000);
+  setInterval(macdenPollForUpdates, 60000);
 })();
 
 // ---- Point the sidebar's Attendance link straight at the right page ----
