@@ -154,6 +154,7 @@ router.post('/verify-email', authLimiter, async (req, res) => {
 
 // POST /api/accounting/auth/login
 router.post('/login', authLimiter, async (req, res) => {
+  const __t0 = Date.now();
   try {
     const { username, password } = req.body;
 
@@ -168,12 +169,15 @@ router.post('/login', authLimiter, async (req, res) => {
       .eq(isEmail ? 'email' : 'username', username)
       .single();
 
+    console.log('[LOGIN TIMING] staff lookup took ' + (Date.now() - __t0) + 'ms');
     if (error || !staffMember) {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
 
-    const passwordMatches = await bcrypt.compare(password, staffMember.password_hash);
+        const __t1 = Date.now();
+const passwordMatches = await bcrypt.compare(password, staffMember.password_hash);
 
+    console.log('[LOGIN TIMING] bcrypt compare took ' + (Date.now() - __t1) + 'ms');
     if (!passwordMatches) {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
@@ -199,7 +203,9 @@ router.post('/login', authLimiter, async (req, res) => {
     // Regenerate the session ID on login (not just reuse whatever session
     // existed before authentication) — prevents session fixation attacks,
     // where an attacker tricks someone into using a known session ID.
+    const __t2 = Date.now();
     req.session.regenerate((regenErr) => {
+      console.log('[LOGIN TIMING] session.regenerate took ' + (Date.now() - __t2) + 'ms');
       if (regenErr) {
         console.error('Session regenerate error:', regenErr);
         return res.status(500).json({ error: 'Something went wrong logging you in.' });
