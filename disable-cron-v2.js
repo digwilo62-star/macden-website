@@ -1,0 +1,34 @@
+const fs = require('fs');
+const filePath = 'server/server.js';
+
+const raw = fs.readFileSync(filePath, 'utf8');
+const usesCRLF = raw.includes('\r\n');
+let content = raw.replace(/\r\n/g, '\n');
+
+const oldBlock = `cron.schedule('* * * * *', () => {
+  messageRoutes.publishDueScheduledBroadcasts();
+  announcementRoutes.publishDueScheduledAnnouncements();
+});`;
+
+const newBlock = `// TEMPORARILY DISABLED for testing whether this is causing the login
+// connection issues -- to re-enable, delete the /* and */ below.
+/*
+cron.schedule('* * * * *', () => {
+  messageRoutes.publishDueScheduledBroadcasts();
+  announcementRoutes.publishDueScheduledAnnouncements();
+});
+*/`;
+
+if (content.includes(newBlock)) {
+  console.log('Already disabled.');
+  process.exit(0);
+}
+if (!content.includes(oldBlock)) {
+  console.error('ERROR: exact block still not found even after normalizing line endings.');
+  process.exit(1);
+}
+
+content = content.replace(oldBlock, newBlock);
+const out = usesCRLF ? content.replace(/\n/g, '\r\n') : content;
+fs.writeFileSync(filePath, out);
+console.log('Cron jobs disabled for testing.');

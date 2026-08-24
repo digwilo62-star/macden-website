@@ -182,8 +182,12 @@ app.listen(PORT, () => {
 const announcementRoutes = require('./routes/announcements');
 app.use('/api/accounting/announcements', requireAuth, announcementRoutes);
 
+// TEMPORARILY DISABLED for testing whether this is causing the login
+// connection issues -- to re-enable, delete the /* and */ below.
+/*
 cron.schedule('* * * * *', () => {
   messageRoutes.publishDueScheduledBroadcasts();
   announcementRoutes.publishDueScheduledAnnouncements();
 });
+*/
 
