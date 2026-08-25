@@ -170,6 +170,7 @@ router.post('/login', authLimiter, async (req, res) => {
       .single();
 
     console.log('[LOGIN TIMING] staff lookup took ' + (Date.now() - __t0) + 'ms');
+    console.log('[LOGIN DEBUG] searched for: "' + username + '" (as ' + (isEmail ? 'email' : 'username') + ') -- found: ' + (staffMember ? staffMember.username : 'NOTHING'));
     if (error || !staffMember) {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
@@ -178,6 +179,7 @@ router.post('/login', authLimiter, async (req, res) => {
 const passwordMatches = await bcrypt.compare(password, staffMember.password_hash);
 
     console.log('[LOGIN TIMING] bcrypt compare took ' + (Date.now() - __t1) + 'ms');
+    console.log('[LOGIN DEBUG] password match result: ' + passwordMatches);
     if (!passwordMatches) {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
