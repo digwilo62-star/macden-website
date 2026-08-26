@@ -197,7 +197,7 @@
           let attachmentHtml = '';
           if (m.attachment_url) {
             const fileName = attachmentDisplayName(m.attachment_url);
-            const iconInfo = { pdf: { icon: 'ti-file-type-pdf', bg: '#c0392b' }, xlsx: { icon: 'ti-file-spreadsheet', bg: '#1d6f42' }, docx: { icon: 'ti-file-type-doc', bg: '#2b579a' } }[m.attachment_type] || { icon: 'ti-file', bg: '#666' };
+            const iconInfo = { pdf: { icon: 'ti-file-type-pdf', bg: '#c0392b' }, xlsx: { icon: 'ti-file-spreadsheet', bg: '#1d6f42' }, docx: { icon: 'ti-file-type-doc', bg: '#2b579a' }, zip: { icon: 'ti-file-zip', bg: '#c9770a' }, image: { icon: 'ti-photo', bg: '#8e44ad' } }[m.attachment_type] || { icon: 'ti-file', bg: '#666' };
             const icon = iconInfo.icon;
             const iconBg = iconInfo.bg;
             attachmentHtml = '<a href="' + m.attachment_url + '" target="_blank" rel="noopener" class="email-attachment">' +

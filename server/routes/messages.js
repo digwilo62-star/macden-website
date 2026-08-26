@@ -13,12 +13,18 @@ const upload = multer({
     const allowed = {
       'application/pdf': 'pdf',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx'
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+      'application/zip': 'zip',
+      'application/x-zip-compressed': 'zip',
+      'image/jpeg': 'image',
+      'image/png': 'image',
+      'image/gif': 'image',
+      'image/webp': 'image'
     };
     if (allowed[file.mimetype]) {
       cb(null, true);
     } else {
-      cb(new Error('Only PDF, Excel (.xlsx), and Word (.docx) files are allowed.'));
+      cb(new Error('Only PDF, Excel (.xlsx), Word (.docx), zip, and image files are allowed.'));
     }
   }
 });
@@ -38,7 +44,13 @@ router.post('/upload', (req, res) => {
       const typeMap = {
         'application/pdf': 'pdf',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx'
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+        'application/zip': 'zip',
+        'application/x-zip-compressed': 'zip',
+        'image/jpeg': 'image',
+        'image/png': 'image',
+        'image/gif': 'image',
+        'image/webp': 'image'
       };
       const attachmentType = typeMap[req.file.mimetype];
       const fileName = `${req.session.staff.id}-${Date.now()}-${req.file.originalname}`;
